@@ -1,4 +1,5 @@
 import argparse
+import config
 import os
 
 import influxdb_client
@@ -9,10 +10,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--metric", required=True)
 args = parser.parse_args()
 
-token = "z7q718_iZMU2WeCebcrnIJsCp2nCMBufdqvLskp4OaKKpB5-gC6OzYoUYBUC13u0gISa5Z6IDzAIc3FLEL4ZmA=="
 org = "MG"
 bucket = "network"
-client = influxdb_client.InfluxDBClient(url="http://localhost:8086", token=token, org=org)
+client = influxdb_client.InfluxDBClient(url="http://localhost:8086", token=config.INFLUX.get("API_TOKEN"), org=org)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
 
