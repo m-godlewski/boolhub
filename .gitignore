@@ -305,4 +305,7 @@ pip-selfcheck.json
 # Ignore code-workspaces
 *.code-workspace
 
+# devices list file
+*/known_devices.json
+
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,linux,django,venv
