@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  portainer:
+    image: portainer/portainer-ce:2.9.3
+    restart: always
+    ports:
+      - 8000:8000
+      - 9443:9443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /data/portainer_data:/data
+    networks:
+      - boolnet
+  influxdb:
+    image: influxdb:2.2.0
+    ports:
+      - 8086:8086
+    volumes:
+      - /data/influxdb:/var/lib/influxdb2
+    networks:
+      - boolnet
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - /data/grafana:/var/lib/grafana
+    user: "104"
+    networks:
+      - boolnet
+
+networks:
+  boolnet:
+    driver: bridge
