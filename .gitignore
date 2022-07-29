@@ -276,7 +276,7 @@ cython_debug/
 [Ll]ib
 [Ll]ib64
 [Ll]ocal
-[Ss]cripts
+# [Ss]cripts
 pyvenv.cfg
 pip-selfcheck.json
 
@@ -304,8 +304,5 @@ pip-selfcheck.json
 
 # Ignore code-workspaces
 *.code-workspace
-
-# Ignore environmental credential file
-*.env
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,linux,django,venv
