@@ -55,32 +55,29 @@ database_api = database_client.write_api(write_options=SYNCHRONOUS)
 # performing arp scan of local network
 arp_scan_results = arp_scan()
 
-# value that will be inserted to database
-value = None
-
 # if not available metric was given
 if arguments.metric not in METRICS:
     print("Incorrect metric!")
 # number of devices metric
 # inserts number of active devices to database
 elif arguments.metric == "number_of_devices":
-    value = len(arp_scan_results)
-    point = influxdb_client.Point("devices").tag("metric", "number").field("quantity", value)
+    number_of_devices = len(arp_scan_results)
+    point = influxdb_client.Point("devices").tag("metric", "number").field("quantity", number_of_devices)
     database_api.write(
         bucket = BUCKET,
         org = config.DB["INFLUX"]["ORGANIZATION"],
         record = point
     )
+    print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {number_of_devices}")
 # active devices metric
 # inserts mac addresses of active devices to database
 elif arguments.metric == "active_devices":
-    value = copy.deepcopy(arp_scan_results)
-    for mac_address in value:
+    mac_addresses = copy.deepcopy(arp_scan_results)
+    for mac_address in mac_addresses:
         point = influxdb_client.Point("devices").tag("metric", "availability").field("mac_address", mac_address)
         database_api.write(
             bucket  = BUCKET,
             org = config.DB["INFLUX"]["ORGANIZATION"],
             record = point
         )
-
-print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {value}")
+    print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {mac_addresses}")
