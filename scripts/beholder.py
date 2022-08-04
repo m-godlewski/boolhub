@@ -57,7 +57,7 @@ arp_scan_results = arp_scan()
 
 # if not available metric was given
 if arguments.metric not in METRICS:
-    print("Incorrect metric!")
+    print(f"{datetime.now()} Incorrect metric! '{arguments.metric}'")
 # number of devices metric
 # inserts number of active devices to database
 elif arguments.metric == "number_of_devices":
