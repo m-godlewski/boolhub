@@ -45,7 +45,7 @@ arguments = parser.parse_args()
 # initializing database connection
 database_client = influxdb_client.InfluxDBClient(
     url = config.DB["INFLUX"]["URL"],
-    token = config.DB["INFLUX"]["API_TOKEN"]
+    token = config.DB["INFLUX"]["API_TOKEN"],
     org = config.DB["INFLUX"]["ORGANIZATION"]
 )
 
