@@ -55,7 +55,10 @@ database_api = database_client.write_api(write_options=SYNCHRONOUS)
 # performing arp scan of local network
 arp_scan_results = arp_scan()
 
-# inserting new data to database base on metric given by argument
+# value that will be inserted to database
+value = None
+
+# if not available metric was given
 if arguments.metric not in METRICS:
     print("Incorrect metric!")
 # number of devices metric
