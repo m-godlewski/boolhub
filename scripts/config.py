@@ -9,11 +9,13 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 # loading envinronmental variables
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# influxdb configuration
-INFLUX = {
-    "URL": "http://localhost:8086",
-    "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
-    "ORGANIZATION": "BH"
+# database configuration
+DB = {
+    "INFLUX" : {
+        "URL": "http://localhost:8086",
+        "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
+        "ORGANIZATION": "BH"
+    }
 }
 
 # devices configuration
