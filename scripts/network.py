@@ -10,6 +10,7 @@ from datetime import datetime
 
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
+from scapy.all import arping
 
 import config
 
@@ -24,12 +25,19 @@ BUCKET = "network"
 def arp_scan() -> set:
     """Performs arp scan of local network and returns list of mac addresses."""
     try:
+        # previous version of arp-scan, that using bash command
+        """
         # performs arp scan
         arp_scan_results = os.popen("sudo arp-scan -l").read()
         arp_scan_results = arp_scan_results.split("\n")
         arp_scan_results = arp_scan_results[2:-4]
-        # set of mac addresses
         mac_addresses = set(row.split("\t")[1] for row in arp_scan_results)
+        """
+        # performs arp scan
+        answered, unanswered = arping("192.168.0.0/24", verbose=0)
+        # set of mac addresses
+        mac_addresses = set(m["Ether"] for _, m in answered)
+        print(mac_address)
     except Exception:
         print("Exception ocurred during arp_scan!")
         print(traceback.format_exc())
