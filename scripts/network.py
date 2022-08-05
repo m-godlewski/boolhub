@@ -36,8 +36,7 @@ def arp_scan() -> set:
         # performs arp scan
         answered, unanswered = arping("192.168.0.0/24", verbose=0)
         # set of mac addresses
-        mac_addresses = set(m["Ether"] for _, m in answered)
-        print(mac_address)
+        mac_addresses = set(destination["Ether"].src for source, destination in answered)
     except Exception:
         print("Exception ocurred during arp_scan!")
         print(traceback.format_exc())
