@@ -26,8 +26,17 @@
     <!-- Navbar -->
     {% include "navbar.html" %}
 
-    <!-- Page content -->
-    <h1>Home Page!</h1>
+    <!-- Content -->
+    <div>
+
+      {% block content %}
+        <center>
+          <h1>Strona główna</h1>
+          <h4>Tutaj należałoby umieścić interaktywną mapę pomieszczenia z najnowszymi danymi z danego pomieszczenia</h4>
+        </center>
+      {% endblock %}
+      
+    </div>
 
   </BODY>
 
