@@ -14,7 +14,7 @@ DB = {
     "INFLUX" : {
         "URL": "http://localhost:8086",
         "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
-        "ORGANIZATION": "BH"
+        "ORGANIZATION": "boolhub"
     }
 }
 
