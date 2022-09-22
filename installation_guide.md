@@ -9,12 +9,13 @@ Ubuntu Server 20.04
 1. Install Ubuntu Server 20.04.
 2. Install OpenSSH and net-tools.
 3. Install Python, PIP and venv.
-4. Install docker engine and docker-compose.
-5. Run command
+4. Install and configure git.
+5. Install docker engine and docker-compose.
+6. Run command
 ```
 docker-compose up -d
 ```
-6. Create user and password for each application.
+7. Create user and password for each application.
 
 
 ## Troubleshooting
