@@ -10,13 +10,13 @@ Ubuntu Server 20.04
 2. Install OpenSSH and net-tools.
 3. Install Python, PIP and venv.
 4. Install and configure git.
-5. Install docker engine and docker-compose.
-6. Run command
-```
-docker-compose up -d
-```
-7. Create user and password for each application.
-8. Configure cronjobs to run scripts.
+5. Configure environment variable "SERVER_IP".
+6. Install docker engine and docker-compose.
+7. Deploy docker-compose.yml file.
+8. Create user and password for each application.
+9. Configure "gatherer" script in cronjob.
+10. Configure connection between Grafana and Influx.
+11. Deploy "central" application and create superuser.
 
 
 ## Troubleshooting

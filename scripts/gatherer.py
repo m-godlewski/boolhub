@@ -6,6 +6,7 @@ import argparse
 import os
 import traceback
 from datetime import datetime
+from typing import *
 
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -51,7 +52,7 @@ class Network(Gatherer):
     BUCKET = "network"
 
     def __init__(self, metric: str):
-        """Scan local network and insert data to influx database depends on given metric."""
+        """Constructor and main class method."""
 
         # calling base class constructor
         super().__init__()
@@ -107,25 +108,53 @@ class Network(Gatherer):
 
 
 class Air(Gatherer):
-    """"""
+    """Gathering information about air devices connected to local network."""
 
     # influx database bucket name
     BUCKET = "air"
 
     def __init__(self):
-        """"""
+        """Constructor and main class method."""
 
         # calling base class constructor
         super().__init__()
 
-    def __air_scan(self):
-        """"""
+        # performing air scan
+        air_scan_results = self.__air_scan()
+
+        # air data
+        aqi = air_scan_results[0]
+        humidity = air_scan_results[1]
+        temperature = air_scan_results[2]
+
+        # preparing data for inserting to influx database
+        point = influxdb_client.Point("air").tag("room", "bedroom").field("aqi", aqi).field("humidity", humidity).field("temperature", temperature)
+
+        # inserting data to influx database
+        self.database_api.write(
+            bucket = self.BUCKET,
+            org = config.DB["INFLUX"]["ORGANIZATION"],
+            record = point
+        )
+        print(f"{datetime.now()} \t\t METRIC: bedroom \t\t VALUES: {aqi}, {humidity}, {temperature}")
+
+
+    def __air_scan(self) -> Union[int, int, float]:
+        """Gathers air data from all devices tagged as "air" in local network."""
         try:
-            results = os.popen()
-        except:
-            pass
+            # retrieving air status from device
+            air_status = os.popen(
+                f"miiocli airpurifiermiot --ip 192.168.0.101 --token {config.DEVICES['TOKENS']['Mi Air Purifier 3H']} status"
+            ).read()
+            air_status = air_status.split("\n")
+            # variables that stores air status
+            aqi = int(air_status[2].split(":")[1].strip().split(" ")[0])
+            humidity = int(air_status[5].split(":")[1].strip().split(" ")[0])
+            temperature = float(air_status[6].split(":")[1].strip().split(" ")[0])
+        except Exception:
+            print(traceback.format_exc())
         else:
-            pass
+            return (aqi, humidity, temperature)
 
 
 # main section of script
