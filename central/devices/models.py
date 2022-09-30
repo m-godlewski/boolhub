@@ -15,7 +15,8 @@ class Device(models.Model):
         ("printer", "Drukarka"),
         ("tv", "TV/Odtwarzacz multimedialny"),
         ("light", "Oświetlenie"),
-        ("air", "Oczyszczacz/Nawilżacz powietrza")
+        ("air", "Oczyszczacz/Nawilżacz powietrza"),
+        ("console", "Konsola")
     ]
 
     # device name
@@ -31,4 +32,4 @@ class Device(models.Model):
 
     def __str__(self) -> str:
         """Returns representation of object in form of string."""
-        return f"{self.location}_{self.name}_{self.brand}" if self.location else f"{self.name}_{self.brand}"
+        return f"{self.brand}_{self.name}_{self.location}" if self.location else f"{self.brand}_{self.name}"

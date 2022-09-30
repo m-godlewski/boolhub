@@ -15,9 +15,10 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from scapy.all import arping
 
 import config
+from sentry import Sentry
 
 
-# parsing script arguments
+# parses script arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--data")
 parser.add_argument("-m", "--metric", required=False)
@@ -45,7 +46,10 @@ class Gatherer:
 
 
 class Network(Gatherer):
-    """Gathering information about devices connected to local network."""
+    """Gathers information about devices connected to local network.
+    If "active_devices metric is used, sentry.py script also verifies if there
+    are a unknown devices connected to local network.
+    """
 
     # set of available network metrics
     METRICS = ("number_of_devices", "active_devices")
@@ -56,10 +60,10 @@ class Network(Gatherer):
     def __init__(self, metric: str):
         """Constructor and main class method."""
 
-        # calling base class constructor
+        # calls base class constructor
         super().__init__()
 
-        # performing arp scan of local network
+        # performs arp scan of local network
         arp_scan_results = self.__arp_scan()
 
         # if not available metric was given
@@ -68,25 +72,28 @@ class Network(Gatherer):
 
         # number of active devices
         elif metric == "number_of_devices":
-            number_of_devices = len(arp_scan_results)
-            point = influxdb_client.Point("devices").tag("metric", "number").field("quantity", number_of_devices)
+            self.__number_of_devices(data=arp_scan_results)
+        # active devices mac addresses
+        elif metric == "active_devices":
+            self.__active_devices(data=arp_scan_results)
+
+    def __active_devices(self, data: set) -> None:
+        """Writes mac addresses of active devices to database.
+        Before data are written to database, sentry.py script is used to verify
+        if there are unknown mac_addresses in received data argument.
+        """
+        # verifies if there is a new mac address in received list
+        Sentry(mac_addresses_list=data)
+        # iterates over mac addresses
+        for mac_address in data:
+            # writes single data entity to database
+            point = influxdb_client.Point("devices").tag("metric", "availability").field("mac_address", mac_address)
             self.database_api.write(
-                bucket = self.BUCKET,
+                bucket  = self.BUCKET,
                 org = config.DB["INFLUX"]["ORGANIZATION"],
                 record = point
             )
-            print(f"{datetime.now()} \t\t METRIC: {metric} \t\t VALUES: {number_of_devices}")
-
-        # active devices mac addresses
-        elif metric == "active_devices":
-            for mac_address in arp_scan_results:
-                point = influxdb_client.Point("devices").tag("metric", "availability").field("mac_address", mac_address)
-                self.database_api.write(
-                    bucket  = self.BUCKET,
-                    org = config.DB["INFLUX"]["ORGANIZATION"],
-                    record = point
-                )
-            print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {arp_scan_results}")
+        print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {data}")
 
     def __arp_scan(self) -> set:
         """Performs arp scan of local network and returns list of mac addresses."""
@@ -108,9 +115,22 @@ class Network(Gatherer):
         else:
             return mac_addresses
 
+    def __number_of_devices(self, data: set) -> None:
+        """Write number of active devices to database."""
+        # number of active devices in network
+        number_of_devices = len(data)
+        # wri
+        point = influxdb_client.Point("devices").tag("metric", "number").field("quantity", number_of_devices)
+        self.database_api.write(
+            bucket = self.BUCKET,
+            org = config.DB["INFLUX"]["ORGANIZATION"],
+            record = point
+        )
+        print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {number_of_devices}")
+
 
 class Air(Gatherer):
-    """Gathering information about air devices connected to local network."""
+    """Gathers information about air devices connected to local network."""
 
     # influx database bucket name
     BUCKET = "air"
@@ -118,10 +138,10 @@ class Air(Gatherer):
     def __init__(self):
         """Constructor and main class method."""
 
-        # calling base class constructor
+        # calls base class constructor
         super().__init__()
 
-        # performing air scan
+        # performs air scan
         air_scan_results = self.__air_scan()
 
         # air data
@@ -129,10 +149,10 @@ class Air(Gatherer):
         humidity = air_scan_results[1]
         temperature = air_scan_results[2]
 
-        # preparing data for inserting to influx database
+        # prepares data for inserts to influx database
         point = influxdb_client.Point("air").tag("room", "bedroom").field("aqi", aqi).field("humidity", humidity).field("temperature", temperature)
 
-        # inserting data to influx database
+        # inserts data to influx database
         self.database_api.write(
             bucket = self.BUCKET,
             org = config.DB["INFLUX"]["ORGANIZATION"],
@@ -143,7 +163,7 @@ class Air(Gatherer):
     def __air_scan(self) -> Union[int, int, float]:
         """Gathers air data from all devices tagged as "air" in local network."""
         try:
-            # retrieving air status from device
+            # retrives air status from device
             air_status = os.popen(
                 f"miiocli airpurifiermiot --ip 192.168.0.101 --token {config.DEVICES['TOKENS']['Mi Air Purifier 3H']} status"
             ).read()
@@ -161,7 +181,7 @@ class Air(Gatherer):
 # main section of script
 if __name__ == "__main__":
 
-    # gathering data, depends on given argument
+    # gathers data, depends on given argument
     if arguments.data == "network":
         Network(metric=arguments.metric)
     if arguments.data == "air":
