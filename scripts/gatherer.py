@@ -4,9 +4,11 @@ Script responsible for gathering data from local network.
 
 import argparse
 import os
+import sys
 import traceback
 from datetime import datetime
 from typing import *
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -137,7 +139,6 @@ class Air(Gatherer):
             record = point
         )
         print(f"{datetime.now()} \t\t METRIC: bedroom \t\t VALUES: {aqi}, {humidity}, {temperature}")
-
 
     def __air_scan(self) -> Union[int, int, float]:
         """Gathers air data from all devices tagged as "air" in local network."""
