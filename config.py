@@ -15,6 +15,9 @@ DB = {
         "URL": "http://localhost:8086",
         "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
         "ORGANIZATION": "boolhub"
+    },
+    "SQLITE": {
+        "PATH": os.path.join(BASE_DIR, "central", "db.sqlite3")
     }
 }
 
