@@ -36,7 +36,7 @@ class Sentry:
         self.database_client.close()
 
     def __get_devices_mac_addresses(self) -> Set[str]:
-        """Return list of mac addresses of registered devices."""
+        """Returns list of mac addresses of registered devices."""
         return {
             mac_address[0]
             for mac_address
