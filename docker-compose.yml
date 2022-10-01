@@ -2,6 +2,7 @@ version: "3.7"
 
 services:
   portainer:
+    container_name: portainer
     image: portainer/portainer-ce:2.9.3
     restart: always
     ports:
@@ -13,6 +14,7 @@ services:
     networks:
       - boolnet
   influxdb:
+    container_name: influxdb
     image: influxdb:2.2.0
     restart: always
     ports:
@@ -22,6 +24,7 @@ services:
     networks:
       - boolnet
   grafana:
+    container_name: grafana
     image: grafana/grafana
     restart: always
     ports:
@@ -31,6 +34,19 @@ services:
     user: "472"
     networks:
       - boolnet
+  ntfy:
+    container_name: ntfy
+    image: binwiederhier/ntfy
+    command:
+      - serve
+    environment:
+      - TZ=CEST
+    volumes:
+      - /var/cache/ntfy:/var/cache/ntfy
+      - /etc/ntfy:/etc/ntfy
+    ports:
+      - 80:80
+    restart: unless-stopped
 
 networks:
   boolnet:
