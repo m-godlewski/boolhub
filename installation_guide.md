@@ -5,7 +5,7 @@
 Ubuntu Server 20.04
 
 
-## Step by step installation guide
+## Step by step installation guide (divide into section later)
 1. Install Ubuntu Server 20.04.
 2. Install OpenSSH and net-tools.
 3. Install Python, PIP and venv.
