@@ -9,6 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from typing import *
 
 import config
+from messenger import Messenger
 
 
 class Sentry:
@@ -20,16 +21,16 @@ class Sentry:
         """Creates connection to sqlite3 database and
         verifies received list of mac addresses."""
         # create connection with local sqlite3 database
-        self.database_client = sqlite3.connect(config.DB["SQLITE"]["PATH"])
+        self.database_client = sqlite3.connect(config.DB["sqlite"]["path"])
         self.database_api = self.database_client.cursor()
         # retrieves mac addresses of known devices from database
         known_devices = self.__get_devices_mac_addresses()
         # checks if there are unknown addresses in received set
         unknown_devices = mac_addresses_list - known_devices
         # in case of unknown device
-        if unknown_devices:
+        if unknown_devices and config.MESSENGER["notifies"]["unknown_devices"]:
             # TODO add some if statement to avoid spamming
-            print("unknown device found, messaging placeholder log!")
+            Messenger.send_notification(text="Nieznane urządzenie połączyło się z siecią lokalną!")
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """Closes connection to sqlite3 database"""

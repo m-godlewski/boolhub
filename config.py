@@ -11,23 +11,26 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # database configuration
 DB = {
-    "INFLUX" : {
-        "URL": "http://localhost:8086",
-        "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
-        "ORGANIZATION": "boolhub"
+    "influx" : {
+        "url": "http://localhost:8086",
+        "api_token": os.environ.get("INFLUXDB_TOKEN"),
+        "organization": "boolhub"
     },
-    "SQLITE": {
-        "PATH": os.path.join(BASE_DIR, "central", "db.sqlite3")
+    "sqlite": {
+        "path": os.path.join(BASE_DIR, "central", "db.sqlite3")
     }
 }
 
 # devices configuration
 DEVICES = {
-    "TOKENS":{
-        "Mi Air Purifier 3H": os.environ.get("XIAOMI_PURIFIER_TOKEN")
+    "tokens":{
+        "purifier": os.environ.get("XIAOMI_PURIFIER_TOKEN")
     }
 }
 
-# loading known devices mac addresses from json
-with open(os.path.join(BASE_DIR, "known_devices.json")) as known_devices_file:
-    DEVICES["KNOWN_LIST"] = json.load(known_devices_file)
+# messanger script configuration
+MESSENGER = {
+    "notifies": {
+        "unknown_devices": True
+    }
+}

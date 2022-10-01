@@ -33,9 +33,9 @@ class Gatherer:
     def __init__(self):
         """Constructor of this class creates influx database and api instances."""
         self.database_client = influxdb_client.InfluxDBClient(
-            url = config.DB["INFLUX"]["URL"],
-            token = config.DB["INFLUX"]["API_TOKEN"],
-            org = config.DB["INFLUX"]["ORGANIZATION"]
+            url = config.DB["influx"]["url"],
+            token = config.DB["influx"]["api_token"],
+            org = config.DB["influx"]["organization"]
         )
         self.database_api = self.database_client.write_api(write_options=SYNCHRONOUS)
 
@@ -89,7 +89,7 @@ class Network(Gatherer):
             point = influxdb_client.Point("devices").tag("metric", "availability").field("mac_address", mac_address)
             self.database_api.write(
                 bucket  = self.BUCKET,
-                org = config.DB["INFLUX"]["ORGANIZATION"],
+                org = config.DB["influx"]["organization"],
                 record = point
             )
         print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {data}")
@@ -114,7 +114,7 @@ class Network(Gatherer):
         point = influxdb_client.Point("devices").tag("metric", "number").field("quantity", number_of_devices)
         self.database_api.write(
             bucket = self.BUCKET,
-            org = config.DB["INFLUX"]["ORGANIZATION"],
+            org = config.DB["influx"]["organization"],
             record = point
         )
         print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {number_of_devices}")
@@ -146,7 +146,7 @@ class Air(Gatherer):
         # inserts data to influx database
         self.database_api.write(
             bucket = self.BUCKET,
-            org = config.DB["INFLUX"]["ORGANIZATION"],
+            org = config.DB["influx"]["organization"],
             record = point
         )
         print(f"{datetime.now()} \t\t METRIC: bedroom \t\t VALUES: {aqi}, {humidity}, {temperature}")
@@ -156,7 +156,7 @@ class Air(Gatherer):
         try:
             # retrives air status from device
             air_status = os.popen(
-                f"miiocli airpurifiermiot --ip 192.168.0.101 --token {config.DEVICES['TOKENS']['Mi Air Purifier 3H']} status"
+                f"miiocli airpurifiermiot --ip 192.168.0.101 --token {config.DEVICES['tokens']['purifier']} status"
             ).read()
             air_status = air_status.split("\n")
             # variables that stores air status
