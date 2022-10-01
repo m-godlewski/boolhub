@@ -69,7 +69,6 @@ class Network(Gatherer):
         # if not available metric was given
         if metric not in self.METRICS:
             print(f"{datetime.now()} Incorrect metric! '{metric}'")
-
         # number of active devices
         elif metric == "number_of_devices":
             self.__number_of_devices(data=arp_scan_results)
@@ -98,14 +97,6 @@ class Network(Gatherer):
     def __arp_scan(self) -> set:
         """Performs arp scan of local network and returns list of mac addresses."""
         try:
-            # previous version of arp-scan, that using bash command
-            """
-            # performs arp scan
-            arp_scan_results = os.popen("sudo arp-scan -l").read()
-            arp_scan_results = arp_scan_results.split("\n")
-            arp_scan_results = arp_scan_results[2:-4]
-            mac_addresses = set(row.split("\t")[1] for row in arp_scan_results)
-            """
             # performs arp scan
             answered, unanswered = arping("192.168.0.0/24", verbose=0)
             # set of mac addresses
@@ -119,7 +110,7 @@ class Network(Gatherer):
         """Write number of active devices to database."""
         # number of active devices in network
         number_of_devices = len(data)
-        # wri
+        # writes data to database
         point = influxdb_client.Point("devices").tag("metric", "number").field("quantity", number_of_devices)
         self.database_api.write(
             bucket = self.BUCKET,
