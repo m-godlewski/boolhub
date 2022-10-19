@@ -22,15 +22,14 @@ DB = {
 }
 
 # devices configuration
-DEVICES = {
-    "tokens":{
-        "purifier": os.environ.get("XIAOMI_PURIFIER_TOKEN")
-    }
+TOKENS = {
+    "69:90:c1:7f:e2:0c": os.environ.get("XIAOMI_PURIFIER_TOKEN")
 }
 
 # messanger script configuration
 MESSENGER = {
     "notifies": {
-        "unknown_devices": True
-    }
+        "unknown_devices": True,
+        "temperatures": True
+    },
 }

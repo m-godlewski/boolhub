@@ -11,6 +11,7 @@ from typing import *
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import influxdb_client
+import sqlite3
 from influxdb_client.client.write_api import SYNCHRONOUS
 from scapy.all import arping
 
@@ -26,30 +27,34 @@ arguments = parser.parse_args()
 
 
 class Gatherer:
-    """Base script class.
-    Initializes and closes database connection.
+    """Base class of each class in this script.
+    Initializes and closes influx database connection.
     """
 
     def __init__(self):
-        """Constructor of this class creates influx database and api instances."""
-        self.database_client = influxdb_client.InfluxDBClient(
+        """Creates influx and sqlite databases and api's connections."""
+        # influx database
+        self.influx_database_client = influxdb_client.InfluxDBClient(
             url = config.DB["influx"]["url"],
             token = config.DB["influx"]["api_token"],
             org = config.DB["influx"]["organization"]
         )
-        self.database_api = self.database_client.write_api(write_options=SYNCHRONOUS)
+        self.influx_database_api = self.influx_database_client.write_api(write_options=SYNCHRONOUS)
+        # sqlite database
+        self.sqlite_database_client = sqlite3.connect(config.DB["sqlite"]["path"])
+        self.sqlite_database_api = self.sqlite_database_client.cursor()
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        """Closes connection to influx database"""
-        self.database_api.close()
-        self.database_client.close()
+        """Closes connection to influx and sqlite databases."""
+        # influx database
+        self.influx_database_api.close()
+        self.influx_database_client.close()
+        # sqlite database
+        self.sqlite_database_client.close()
 
 
 class Network(Gatherer):
-    """Gathers information about devices connected to local network.
-    If "active_devices metric is used, sentry.py script also verifies if there
-    are a unknown devices connected to local network.
-    """
+    """Gathers information about devices connected to local network."""
 
     # set of available network metrics
     METRICS = ("number_of_devices", "active_devices")
@@ -71,48 +76,48 @@ class Network(Gatherer):
             print(f"{datetime.now()} Incorrect metric! '{metric}'")
         # number of active devices
         elif metric == "number_of_devices":
-            self.__number_of_devices(data=arp_scan_results)
-        # active devices mac addresses
+            self.__gather_number_of_devices(data=arp_scan_results)
+        # active devices MAC addresses
         elif metric == "active_devices":
-            self.__active_devices(data=arp_scan_results)
+            self.__gather_active_devices(data=arp_scan_results)
 
-    def __active_devices(self, data: set) -> None:
-        """Writes mac addresses of active devices to database.
-        Before data are written to database, sentry.py script is used to verify
-        if there are unknown mac_addresses in received data argument.
-        """
-        # verifies if there is a new mac address in received list
-        Sentry(mac_addresses_list=data)
-        # iterates over mac addresses
-        for mac_address in data:
-            # writes single data entity to database
-            point = influxdb_client.Point("devices").tag("metric", "availability").field("mac_address", mac_address)
-            self.database_api.write(
-                bucket  = self.BUCKET,
-                org = config.DB["influx"]["organization"],
-                record = point
-            )
-        print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {data}")
-
-    def __arp_scan(self) -> set:
-        """Performs arp scan of local network and returns list of mac addresses."""
+    def __arp_scan(self) -> Set[str]:
+        """Performs arp scan of local network and returns list of MAC addresses."""
         try:
             # performs arp scan
             answered, unanswered = arping("192.168.0.0/24", verbose=0)
-            # set of mac addresses
+            # set of MAC addresses
             mac_addresses = set(destination["Ether"].src for source, destination in answered)
         except Exception:
             print(traceback.format_exc())
         else:
             return mac_addresses
 
-    def __number_of_devices(self, data: set) -> None:
-        """Write number of active devices to database."""
+    def __gather_active_devices(self, data: set) -> None:
+        """Saves MAC addresses of active devices to database.
+        Before data are written to database, sentry.py script is used to verify
+        if there are unknown MAC addresses in received 'data' set.
+        """
+        # verifies if there is a new MAC address in received list
+        Sentry(data="network", dataset=data)
+        # iterates over MAC addresses
+        for mac_address in data:
+            # writes single data entity to database
+            point = influxdb_client.Point("devices").tag("metric", "availability").field("mac_address", mac_address)
+            self.influx_database_api.write(
+                bucket  = self.BUCKET,
+                org = config.DB["influx"]["organization"],
+                record = point
+            )
+        print(f"{datetime.now()} \t\t METRIC: {arguments.metric} \t\t VALUES: {data}")
+
+    def __gather_number_of_devices(self, data: set) -> None:
+        """Writes number of active devices to database."""
         # number of active devices in network
         number_of_devices = len(data)
         # writes data to database
         point = influxdb_client.Point("devices").tag("metric", "number").field("quantity", number_of_devices)
-        self.database_api.write(
+        self.influx_database_api.write(
             bucket = self.BUCKET,
             org = config.DB["influx"]["organization"],
             record = point
@@ -121,7 +126,7 @@ class Network(Gatherer):
 
 
 class Air(Gatherer):
-    """Gathers information about air devices connected to local network."""
+    """Gathers information from air devices connected to local network."""
 
     # influx database bucket name
     BUCKET = "air"
@@ -132,41 +137,73 @@ class Air(Gatherer):
         # calls base class constructor
         super().__init__()
 
-        # performs air scan
-        air_scan_results = self.__air_scan()
+        # air data retrieved from each of air devices
+        air_data = self.__air_scan()
 
-        # air data
-        aqi = air_scan_results[0]
-        humidity = air_scan_results[1]
-        temperature = air_scan_results[2]
+        # iterate over air data
+        for data in air_data:
+            # air quality
+            aqi = data.get("aqi")
+            # air humidity
+            humidity = data.get("humidity")
+            # air temperature
+            temperature = data.get("temperature")
+            # prepares data for saving into influx database
+            point = influxdb_client.Point("air").tag("room", "bedroom").field("aqi", aqi).field("humidity", humidity).field("temperature", temperature)
+            # inserts data to influx database
+            self.influx_database_api.write(
+                bucket = self.BUCKET,
+                org = config.DB["influx"]["organization"],
+                record = point
+            )
+            print(f"{datetime.now()} \t\t ROOM: {data['location']} \t\t VALUES: {aqi}, {humidity}, {temperature}")
 
-        # prepares data for inserts to influx database
-        point = influxdb_client.Point("air").tag("room", "bedroom").field("aqi", aqi).field("humidity", humidity).field("temperature", temperature)
-
-        # inserts data to influx database
-        self.database_api.write(
-            bucket = self.BUCKET,
-            org = config.DB["influx"]["organization"],
-            record = point
-        )
-        print(f"{datetime.now()} \t\t METRIC: bedroom \t\t VALUES: {aqi}, {humidity}, {temperature}")
-
-    def __air_scan(self) -> Union[int, int, float]:
-        """Gathers air data from all devices tagged as "air" in local network."""
+    def __air_scan(self) -> List[dict]:
+        """Gathers air data from each device tagged as "air" in local network.
+        TODO consider finding way to use python miio library instead of cli.
+        """
         try:
-            # retrives air status from device
-            air_status = os.popen(
-                f"miiocli airpurifiermiot --ip 192.168.0.101 --token {config.DEVICES['tokens']['purifier']} status"
-            ).read()
-            air_status = air_status.split("\n")
-            # variables that stores air status
-            aqi = int(air_status[2].split(":")[1].strip().split(" ")[0])
-            humidity = int(air_status[5].split(":")[1].strip().split(" ")[0])
-            temperature = float(air_status[6].split(":")[1].strip().split(" ")[0])
+            # list that stores air data from all devices
+            air_data = []
+            # air devices addresses
+            air_devices = self.__get_air_devices()
+            # iterate over air devices ip and MAC addresses
+            for ip_address, mac_address, location in air_devices:
+                # gather air data from device
+                data = os.popen(
+                    f"miiocli airpurifiermiot --ip {ip_address} --token {config.TOKENS[mac_address]} status"
+                ).read()
+                data = data.split("\n")
+                # packing air data from device into dictionary
+                data = {
+                    "location": location,
+                    "aqi": int(data[2].split(":")[1].strip().split(" ")[0]),
+                    "humidity": int(data[5].split(":")[1].strip().split(" ")[0]),
+                    "temperature": float(data[6].split(":")[1].strip().split(" ")[0])
+                }
+                air_data.append(data)
+            # calling sentry script to verifies air data
+            Sentry(data="air", dataset=air_data)
         except Exception:
             print(traceback.format_exc())
         else:
-            return (aqi, humidity, temperature)
+            return air_data
+
+    def __get_air_devices(self) -> Set[str]:
+        """Makes query to sqlite database and returns set of air devices ip addresses."""
+        return {
+            device_info
+            for device_info
+            in self.sqlite_database_api.execute(
+                """
+                SELECT devices_device.ip_address, devices_device.mac_address, rooms_room.name
+                FROM devices_device
+                INNER JOIN rooms_room
+                ON devices_device.location_id = rooms_room.id
+                WHERE devices_device.category = "air";
+                """
+            )
+        }
 
 
 # main section of script
