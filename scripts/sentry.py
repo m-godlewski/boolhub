@@ -13,31 +13,52 @@ from messenger import Messenger
 
 
 class Sentry:
-    """Checks if there are any unknown devices in local network.
-    In case unknown device, message to system administrator are send.
+    """Checks if any of predefined alarm conditions are met.
+    If any of them are, notification are sent.
+    - unregistered device is connected to local network.
+    - temperature/aqi/humidity threshold became exceeded.
     """
 
-    def __init__(self, mac_addresses_list: Set={}):
+    def __init__(self, data: str, dataset: Any):
         """Creates connection to sqlite3 database and
-        verifies received list of mac addresses."""
+        calls proper method depends on 'data' argument.
+        """
         # create connection with local sqlite3 database
         self.database_client = sqlite3.connect(config.DB["sqlite"]["path"])
         self.database_api = self.database_client.cursor()
-        # retrieves mac addresses of known devices from database
-        known_devices = self.__get_devices_mac_addresses()
-        # checks if there are unknown addresses in received set
-        unknown_devices = mac_addresses_list - known_devices
-        # in case of unknown device
-        if unknown_devices and config.MESSENGER["notifies"]["unknown_devices"]:
-            # TODO add some if statement to avoid spamming
-            Messenger.send_notification(text="Nieznane urządzenie połączyło się z siecią lokalną!")
+        # verifies dataset base on data source
+        if data == "network":
+            self.__check_network(mac_addresses=dataset)
+        if data == "air":
+            self.__check_air(air_data=dataset)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """Closes connection to sqlite3 database"""
         self.database_client.close()
 
+    def __check_air(self, air_data: Union) -> None:
+        """Checks if air temperature, quality or humidity does not exceed defined tresholds in any of rooms."""
+        # iterate over air devices data
+        for data in air_data:
+            # checks if air temperature exceeds threshold
+            if data.get("temperature") <= 20.0 and config.MESSENGER["notifies"]["temperatures"]:
+                Messenger.send_notification(text=f"W pomieszczeniu {data.get('location')} jest {data.get('temperature')}")
+
+    def __check_network(self, mac_addresses: set={}) -> None:
+        """Verifies if there is no unregistered device MAC address
+        in set of gatherec MAC addresses by gatherer script.
+        """
+        # set of registered devices MAC addresses
+        known_devices = self.__get_devices_mac_addresses()
+        # set that contains unregistered devices MAC addresses
+        unknown_devices = mac_addresses - known_devices
+        # if above set contains any address and notification flag is set to True
+        if unknown_devices and config.MESSENGER["notifies"]["unknown_devices"]:
+            # TODO add some if statement to avoid spamming
+            Messenger.send_notification(text="Nieznane urządzenie połączyło się z siecią lokalną!")
+
     def __get_devices_mac_addresses(self) -> Set[str]:
-        """Returns list of mac addresses of registered devices."""
+        """Makes query to sqlite database and returns set of registered MAC addresses."""
         return {
             mac_address[0]
             for mac_address

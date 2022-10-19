@@ -15,7 +15,7 @@ class Device(models.Model):
         ("printer", "Drukarka"),
         ("tv", "TV/Odtwarzacz multimedialny"),
         ("light", "Oświetlenie"),
-        ("air", "Oczyszczacz/Nawilżacz powietrza"),
+        ("air", "Oczyszczacz powietrza/termometr"),
         ("console", "Konsola")
     ]
 
@@ -25,8 +25,10 @@ class Device(models.Model):
     category = models.CharField(max_length=50, choices=DEVICE_CATEGORY)
     # producer of device
     brand = models.CharField(max_length=50)
-    # mac address of physical device
+    # MAC address of physical device
     mac_address = models.CharField(max_length=17)
+    # IPv4 address of physical device
+    ip_address = models.CharField(max_length=15)
     # location of device
     location = models.ForeignKey(Room, null=True, blank=True, on_delete=models.SET_NULL)
 
