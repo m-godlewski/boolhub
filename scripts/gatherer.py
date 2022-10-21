@@ -8,6 +8,7 @@ import sys
 import traceback
 from datetime import datetime
 from typing import *
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import influxdb_client
 import sqlite3
@@ -16,9 +17,6 @@ from scapy.all import arping
 
 import config
 from sentry import Sentry
-
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 
 # parses script arguments

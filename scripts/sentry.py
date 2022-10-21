@@ -6,12 +6,10 @@ import sqlite3
 import os
 import sys
 from typing import *
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import config
 from messenger import Messenger
-
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 
 class Sentry:
