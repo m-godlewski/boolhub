@@ -15,7 +15,4 @@ class Messenger:
     def send_notification(self, text: str):
         """Send notification to ntfy server with predefined subject
         and string received by argument as notification content."""
-        requests.post(
-            url = self.NTFY_SERVER_URL,
-            data = text.encode("utf-8")
-        )
+        requests.post(url=self.NTFY_SERVER_URL, data=text.encode("utf-8"))
