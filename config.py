@@ -31,7 +31,19 @@ DEVICES = {
 # scripts configuration
 SCRIPTS = {
     "MESSENGER": {
-        "UNKNOWN_DEVICES": True,
-        "TEMPERATURES": True
+        "NOTIFIES": {
+            "UNKNOWN_DEVICE": True,
+            "TEMPERATURE": True,
+            "AQI": True,
+            "HUMIDITY": True
+        },
+        "THRESHOLDS": {
+            "TEMPERATURE": 20.0,
+            "AQI": 50,
+            "HUMIDITY": {
+                "UP": 85,
+                "BOTTOM": 20
+            }
+        }
     }
 }
