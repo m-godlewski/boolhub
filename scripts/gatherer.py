@@ -191,7 +191,8 @@ class Air(Gatherer):
                 }
                 air_data.append(data)
             # calling sentry script to verifies air data
-            Sentry(data="air", dataset=air_data)
+            if air_data:
+                Sentry(data="air", dataset=air_data)
         except Exception:
             print(traceback.format_exc())
         else:

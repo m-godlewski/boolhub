@@ -42,11 +42,30 @@ class Sentry:
         for data in air_data:
             # checks if air temperature exceeds threshold
             if (
-                data.get("temperature") <= 20.0
-                and config.SCRIPTS["MESSENGER"]["TEMPERATURES"]
+                config.SCRIPTS["MESSENGER"]["NOTIFIES"]["TEMPERATURE"]
+                and data.get("temperature") <= config.SCRIPTS["MESSENGER"]["THRESHOLDS"]["TEMPERATURE"]
             ):
                 Messenger.send_notification(
-                    text=f"W pomieszczeniu {data.get('location')} jest {data.get('temperature')}"
+                    text=f"Temperatura w pomieszczeniu {data.get('location')} wynosi {data.get('temperature')}°C"
+                )
+            # checks if air quality exceeds threshold
+            if (
+                data.get("aqi")
+                and config.SCRIPTS["MESSENGER"]["NOTIFIES"]["AQI"]
+                and data.get("aqi") >= config.SCRIPTS["MESSENGER"]["THRESHOLDS"]["AQI"]
+            ):
+                Messenger.send_notification(
+                    text=f"Jakość powietrza w pomieszczeniu {data.get('location')} wynosi {data.get('aqi')}μg/m³"
+                )
+            # checks if air humidity exceeds threshold
+            if (
+                data.get("humidity")
+                and config.SCRIPTS["MESSENGER"]["NOTIFIES"]["HUMIDITY"]
+                and (data.get("humidity") >= config.SCRIPTS["MESSENGER"]["THRESHOLDS"]["HUMIDITY"]["UP"]
+                    or data.get("humidity") <= config.SCRIPTS["MESSENGER"]["THRESHOLDS"]["HUMIDITY"]["BOTTOM"])
+            ):
+                Messenger.send_notification(
+                    text=f"Wilgotność powietrza w pomieszczeniu {data.get('location')} wynosi {data.get('humidity')}%"
                 )
 
     def __check_network(self, mac_addresses: Set = {}) -> None:
@@ -58,7 +77,7 @@ class Sentry:
         # set that contains unregistered devices MAC addresses
         unknown_devices = mac_addresses - known_devices
         # if above set contains any address and notification flag is set to True
-        if unknown_devices and config.SCRIPTS["MESSENGER"]["UNKNOWN_DEVICES"]:
+        if unknown_devices and config.SCRIPTS["MESSENGER"]["NOTIFIES"]["UNKNOWN_DEVICE"]:
             # TODO add some if statement to avoid spamming
             Messenger.send_notification(
                 text="Nieznane urządzenie połączyło się z siecią lokalną!"
