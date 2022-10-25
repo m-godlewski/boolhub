@@ -28,7 +28,7 @@ class Device(models.Model):
     # MAC address of physical device
     mac_address = models.CharField(max_length=17)
     # IPv4 address of physical device
-    ip_address = models.CharField(max_length=15)
+    ip_address = models.CharField(max_length=15, null=True, blank=True)
     # location of device
     location = models.ForeignKey(Room, null=True, blank=True, on_delete=models.SET_NULL)
 
