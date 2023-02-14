@@ -1,9 +1,10 @@
 """
-Script used for gathering data from local network.
+Gatherer script is used for gathering data from devices connected to local network.
 """
 
 import argparse
 import copy
+import logging
 import os
 import sys
 import traceback
@@ -24,7 +25,7 @@ from sentry import Sentry
 
 class Gatherer(ABC):
     """Base class of each class in this script.
-    Initializes and closes influx database connection.
+    Initializes and closes influx and sqlite databases connections.
     """
 
     def __init__(self) -> None:
@@ -69,7 +70,7 @@ class Network(Gatherer):
         arp_scan_results = self.__arp_scan()
         # if not available metric was given
         if metric not in self.METRICS:
-            print(f"{datetime.now()} Incorrect metric! '{metric}'")
+            logging.error(f"Incorrect metric '{metric}'!")
         # number of active devices
         elif metric == "number_of_devices":
             self.gather_number_of_devices(data=arp_scan_results)
@@ -82,39 +83,57 @@ class Network(Gatherer):
         Before data are written to database, sentry.py script is used to verify
         if there are unknown MAC addresses in received 'data' set.
         """
-        # copying received data
-        mac_addresses = copy.deepcopy(data)
-        # verifies if there is a new MAC address in received list
-        Sentry(data="network", dataset=mac_addresses)
-        # iterates over MAC addresses
-        for mac_address in mac_addresses:
-            # writes single data entity to database
-            point = (
-                influxdb_client.Point("devices")
-                .tag("metric", "availability")
-                .field("mac_address", mac_address)
+        try:
+            # copying received data
+            mac_addresses = copy.deepcopy(data)
+            # verifies if there is a new MAC address in received list
+            Sentry(data_type="network", dataset=mac_addresses)
+            # iterates over MAC addresses
+            for mac_address in mac_addresses:
+                # writes single data entity to database
+                point = (
+                    influxdb_client.Point("devices")
+                    .tag("metric", "availability")
+                    .field("mac_address", mac_address)
+                )
+                self.influx_database_api.write(
+                    bucket=self.BUCKET,
+                    org=config.DB["influx"]["organization"],
+                    record=point,
+                )
+        except Exception:
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+        else:
+            logging.info(
+                f"GATHERER | "
+                f"LOCATION = local | "
+                f"DATA = {self.BUCKET}.{arguments.metric} | "
+                f"VALUES = {mac_address} | "
             )
-            self.influx_database_api.write(
-                bucket=self.BUCKET,
-                org=config.DB["influx"]["organization"],
-                record=point,
-            )
-        print(f"{datetime.now()} \t\t LOCATION: local \t\t DATA: {self.BUCKET}.{arguments.metric} \t\t VALUES: {mac_addresses}")
 
     def gather_number_of_devices(self, data: set) -> None:
         """Writes number of active devices to database."""
-        # number of active devices in network
-        number_of_devices = len(data)
-        # writes data to database
-        point = (
-            influxdb_client.Point("devices")
-            .tag("metric", "number")
-            .field("quantity", number_of_devices)
-        )
-        self.influx_database_api.write(
-            bucket=self.BUCKET, org=config.DB["influx"]["organization"], record=point
-        )
-        print(f"{datetime.now()} \t\t LOCATION: local \t\t DATA: {self.BUCKET}.{arguments.metric} \t\t VALUES: {number_of_devices}")
+        try:
+            # number of active devices in network
+            number_of_devices = len(data)
+            # writes data to database
+            point = (
+                influxdb_client.Point("devices")
+                .tag("metric", "number")
+                .field("quantity", number_of_devices)
+            )
+            self.influx_database_api.write(
+                bucket=self.BUCKET, org=config.DB["influx"]["organization"], record=point
+            )
+        except Exception:
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}") 
+        else:
+            logging.info(
+                f"GATHERER | "
+                f"LOCATION = local | "
+                f"DATA = {self.BUCKET}.{arguments.metric} | "
+                f"VALUES = {number_of_devices} | "
+            )
 
     def __arp_scan(self) -> Set[str]:
         """Performs arp scan of local network and returns list of MAC addresses."""
@@ -126,7 +145,7 @@ class Network(Gatherer):
                 destination["Ether"].src for source, destination in answered
             )
         except Exception:
-            print(traceback.format_exc())
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}") 
         else:
             return mac_addresses
 
@@ -141,135 +160,154 @@ class Air(Gatherer):
         """Constructor and main class method."""
         # calls base class constructor
         super().__init__()
-        # retrieving data from each 'air' device
+        # retrieves data from each 'air' device
         air_scan_results = self.__air_scan()
-        # saving gathered data to database
+        # saves gathered data to database
         self.gather_air_data(air_scan_results)
 
     def gather_air_data(self, air_data: List[dict]) -> None:
-        # iterate over air data
-        for data in air_data:
-            # data location
-            location = data.get("location")
-            # air quality
-            aqi = data.get("aqi")
-            # air humidity
-            humidity = data.get("humidity")
-            # air temperature
-            temperature = data.get("temperature")
-            # prepares data for saving into influx database
-            point = (
-                influxdb_client.Point("air")
-                .tag("room", location)
-                .field("aqi", aqi)
-                .field("humidity", humidity)
-                .field("temperature", temperature)
-            )
-            # inserts data to influx database
-            self.influx_database_api.write(
-                bucket=self.BUCKET,
-                org=config.DB["influx"]["organization"],
-                record=point,
-            )
-            print(f"{datetime.now()} \t\t LOCATION: {data['location']} \t\t DATA: {self.BUCKET} \t\t\t VALUES: {aqi}, {humidity}, {temperature}")
+        """Saves retreived data from each air devices to database."""
+        try:
+            # iterates over datasets
+            for data in air_data:
+                # data location
+                location = data.get("location")
+                # air quality
+                aqi = data.get("aqi")
+                # air humidity
+                humidity = data.get("humidity")
+                # air temperature
+                temperature = data.get("temperature")
+                # prepares data for saving into influx database
+                point = (
+                    influxdb_client.Point("air")
+                    .tag("room", location)
+                    .field("aqi", aqi)
+                    .field("humidity", humidity)
+                    .field("temperature", temperature)
+                )
+                # inserts data to influx database
+                self.influx_database_api.write(
+                    bucket=self.BUCKET,
+                    org=config.DB["influx"]["organization"],
+                    record=point,
+                )
+                logging.info(
+                    f"GATHERER | "
+                    f"LOCATION = {data.get('location')} | "
+                    f"DATA = {self.BUCKET} | "
+                    f"VALUES = {aqi}, {humidity}, {temperature} | "
+                )
+        except Exception:
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
 
     def __air_scan(self) -> List[dict]:
         """Gathers air data from each device tagged as "air" in local network."""
         try:
             # list that stores air data from each device
             air_data = []
+            # variable that stores single device data
+            data = None
             # air devices data
             air_devices_data = self.__get_air_devices_data()
-            # iterate over devices data
+            # iterates over devices data
             for device_data in air_devices_data:
                 # name of device
                 device_name = device_data.get("name").lower()
+                # calls specific method depending on device type
                 if "purifier" in device_name:
                     data = self.__air_scan_purifier(device_data)
-                    air_data.append(data)
                 elif "monitor" in device_name:
-                    pass
-                    # data = self.__air_scan_monitor(device_data)
-                    # air_data.append(data)
+                    data = self.__air_scan_monitor(device_data)
                 else:
-                    print(f"{datetime.now()} Device '{device_name}' is not supported!")
+                    logging.error(f"Device '{device_name}' is not supported!")
+                if data:
+                    air_data.append(data)
         except Exception:
-            print(traceback.format_exc())
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
         else:
-            # calling sentry script to verifies data
-            Sentry(data="air", dataset=air_data)
+            # calls sentry script to verifies data
+            Sentry(data_type="air", dataset=air_data)
             return air_data
 
     def __air_scan_purifier(self, device_data: dict) -> dict:
-        """Gather air data from Xiaomi Purifier devices."""
-        # gather air data from device
-        data = os.popen(
-            f"miiocli airpurifiermiot \
-            --ip \{device_data.get('ip_address')} \
-            --token {config.DEVICES['TOKENS'][device_data.get('mac_address')]} \
-            status"
-        ).read()
-        data = data.split("\n")
-        # packing data from device into dictionary
-        data = {
-            "location": device_data.get("location"),
-            "aqi": int(data[2].split(":")[1].strip().split(" ")[0]),
-            "humidity": int(data[5].split(":")[1].strip().split(" ")[0]),
-            "temperature": float(data[6].split(":")[1].strip().split(" ")[0]),
-        }
-        return data
+        """Gathers data from Xiaomi Purifier device."""
+        try:
+            # reads data from device API
+            data = os.popen(
+                f"miiocli airpurifiermiot \
+                --ip \{device_data.get('ip_address')} \
+                --token {config.DEVICES['TOKENS'][device_data.get('mac_address')]} \
+                status"
+            ).read()
+            data = data.split("\n")
+            # parses retrived data and packs it to dictionary
+            data = {
+                "location": device_data.get("location"),
+                "aqi": int(data[2].split(":")[1].strip().split(" ")[0]),
+                "humidity": int(data[5].split(":")[1].strip().split(" ")[0]),
+                "temperature": float(data[6].split(":")[1].strip().split(" ")[0]),
+            }
+        except Exception:
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            return {}
+        else:
+            return data
 
     def __air_scan_monitor(self, device_data: dict) -> dict:
-        """"""
-        # success = False
-        # n = 0
-        # while n <= 5 or not success:
-        #     try:
-        #         client = Lywsd03mmcClient(mac_address)
-        #         data = client.data
-        #         data = {
-        #             "location": location,
-        #             "aqi": None,
-        #             "humidity": data.humidity,
-        #             "temperature": data.temperature,
-        #         }
-        #     except Exception:
-        #         print("failed")
-        #         n+=1
-        #         pass
-        #     else:
-        #         success = True
-        pass
+        """Gathers data from Xiaomi Monitor 2 device."""
+        try:
+            # creates connection with device using external library
+            client = Lywsd03mmcClient(device_data.get("mac_address"))
+            # retrives data from connection
+            data = client.data
+            # parses retrived data and packs it to dictionary
+            data = {
+                "location": device_data.get("location"),
+                "aqi": None,
+                "humidity": data.humidity,
+                "temperature": data.temperature,
+            }
+        except Exception:
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            return {}
+        else:
+            return data
 
     def __get_air_devices_data(self) -> List[dict]:
-        """Makes query to sqlite database and returns set of air devices ip addresses."""
-        # list that will store devices data
-        air_devices_data = []
-        # making query to sqlite database
-        query_result = {
-            device_info
-            for device_info
-            in self.sqlite_database_api.execute(
-                """
-                SELECT devices_device.name, devices_device.ip_address, devices_device.mac_address, rooms_room.name
-                FROM devices_device
-                INNER JOIN rooms_room
-                ON devices_device.location_id = rooms_room.id
-                WHERE devices_device.category = "air";
-                """
-            )
-        }
-        # transforming query result to list of dictionaries
-        for row in query_result:
-            air_devices_data.append(
-                {
-                    "name": row[0],
-                    "ip_address": row[1],
-                    "mac_address": row[2],
-                    "location": row[3]
-                }
-            )
-        return air_devices_data
+        """Makes query to sqlite database and returns list of air devices data."""
+        try:
+            # list that stores devices data
+            air_devices_data = []
+            # makes query to sqlite database
+            query_result = {
+                device_info
+                for device_info
+                in self.sqlite_database_api.execute(
+                    """
+                    SELECT devices_device.name, devices_device.ip_address, devices_device.mac_address, rooms_room.name
+                    FROM devices_device
+                    INNER JOIN rooms_room
+                    ON devices_device.location_id = rooms_room.id
+                    WHERE devices_device.category = "air";
+                    """
+                )
+            }
+            # transforms query result to list of dictionaries
+            for row in query_result:
+                air_devices_data.append(
+                    {
+                        "name": row[0],
+                        "ip_address": row[1],
+                        "mac_address": row[2],
+                        "location": row[3]
+                    }
+                )
+        except Exception:
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            return []
+        else:
+            return air_devices_data
 
 
 # main section of script
