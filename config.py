@@ -1,10 +1,17 @@
 import os
 import json
+import logging
 from dotenv import load_dotenv
 
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+# absolute path to log file
+LOG_FILE = os.path.join(BASE_DIR, "scripts.log")
+
+# logging configuration
+logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG, format="%(asctime)s | %(levelname)s | %(message)s")
 
 # loading envinronmental variables
 load_dotenv(os.path.join(BASE_DIR, ".env"))
