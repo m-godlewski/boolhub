@@ -32,6 +32,8 @@ services:
     volumes:
       - /data/grafana:/var/lib/grafana
     user: "472"
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
     networks:
       - boolnet
   ntfy:
