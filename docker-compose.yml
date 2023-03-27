@@ -49,6 +49,14 @@ services:
     ports:
       - 80:80
     restart: unless-stopped
+  central:
+    container_name: central
+    build: $BOOLHUB_CENTRAL_PATH
+    restart: always
+    ports:
+      - 8000:8000
+    networks:
+      - boolnet
 
 networks:
   boolnet:

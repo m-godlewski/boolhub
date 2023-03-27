@@ -39,7 +39,7 @@ DEVICES = {
 SCRIPTS = {
     "MESSENGER": {
         "NOTIFIES": {
-            "UNKNOWN_DEVICE": True,
+            "UNKNOWN_DEVICE": False,
             "TEMPERATURE": True,
             "AQI": True,
             "HUMIDITY": True
