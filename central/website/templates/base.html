@@ -19,20 +19,26 @@
     {% bootstrap_javascript %}
     {% bootstrap_messages %}
 
+    <!-- Loading local CSS -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" type="text/css" />
+
   </HEAD>
 
   <BODY>
 
-    <!-- Navbar -->
-    {% include "navbar.html" %}
+    <!-- Main Box -->
+    <div class="box">
 
-    <!-- Content -->
-    <div>
+      <!-- Header Row -->
+      <div class="row header">
+        {% include "navbar.html" %}
+      </div>
 
-      {% block content %}
+      <!-- Content Row -->
+      <div class="row content">
+        {% block content %}{% endblock %}
+      </div>
 
-      {% endblock %}
-      
     </div>
 
   </BODY>
