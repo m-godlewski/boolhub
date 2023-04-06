@@ -34,6 +34,7 @@ services:
     user: "472"
     environment:
       - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_PLUGINS_ENABLE_ALPHA=true
     networks:
       - boolnet
   ntfy:
