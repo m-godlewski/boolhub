@@ -4,6 +4,9 @@ import logging
 from dotenv import load_dotenv
 
 
+# current system version
+VERSION = "0.1.0"
+
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
