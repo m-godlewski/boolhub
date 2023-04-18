@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 
 # current system version
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -19,14 +19,14 @@ logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG, format="%(asctime)s 
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # database configuration
-DB = {
-    "influx" : {
-        "url": "http://localhost:8086",
-        "api_token": os.environ.get("INFLUXDB_TOKEN"),
-        "organization": "boolhub"
+DATABASE = {
+    "INFLUX" : {
+        "URL": "http://localhost:8086",
+        "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
+        "ORGANIZATION": os.environ.get("INFLUXDB_ORGANIZATION")
     },
-    "sqlite": {
-        "path": os.path.join(BASE_DIR, "central", "db.sqlite3")
+    "SQLITE": {
+        "PATH": os.path.join(BASE_DIR, "central", "db.sqlite3")
     }
 }
 
@@ -39,7 +39,7 @@ DEVICES = {
 
 # scripts configuration
 SCRIPTS = {
-    "MESSENGER": {
+    "SENTRY": {
         "NOTIFIES": {
             "UNKNOWN_DEVICE": False,
             "TEMPERATURE": True,
@@ -54,5 +54,8 @@ SCRIPTS = {
                 "BOTTOM": 20
             }
         }
+    },
+    "MESSENGER": {
+        "NTFY_SERVER_URL": "https://ntfy.sh/boolhub"
     }
 }
