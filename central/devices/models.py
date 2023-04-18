@@ -34,4 +34,4 @@ class Device(models.Model):
 
     def __str__(self) -> str:
         """Returns representation of object in form of string."""
-        return f"{self.brand}_{self.name}_{self.location}" if self.location else f"{self.brand}_{self.name}"
+        return f"{self.brand} {self.name} [{self.location}]" if self.location else f"{self.brand} {self.name}"
