@@ -1,5 +1,4 @@
 import os
-import json
 import logging
 from dotenv import load_dotenv
 
@@ -48,7 +47,7 @@ SCRIPTS = {
             "HUMIDITY": True
         },
         "THRESHOLDS": {
-            "TEMPERATURE": 20.0,
+            "TEMPERATURE": 19.0,
             "AQI": 50,
             "HUMIDITY": {
                 "UP": 85,
