@@ -32,15 +32,15 @@ class Gatherer(ABC):
         """Creates influx and sqlite databases and api's connections."""
         # influx database
         self.influx_database_client = influxdb_client.InfluxDBClient(
-            url=config.DB["influx"]["url"],
-            token=config.DB["influx"]["api_token"],
-            org=config.DB["influx"]["organization"],
+            url=config.DATABASE["INFLUX"]["URL"],
+            token=config.DATABASE["INFLUX"]["API_TOKEN"],
+            org=config.DATABASE["INFLUX"]["ORGANIZATION"],
         )
         self.influx_database_api = self.influx_database_client.write_api(
             write_options=SYNCHRONOUS
         )
         # sqlite database
-        self.sqlite_database_client = sqlite3.connect(config.DB["sqlite"]["path"])
+        self.sqlite_database_client = sqlite3.connect(config.DATABASE["SQLITE"]["PATH"])
         self.sqlite_database_api = self.sqlite_database_client.cursor()
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
@@ -98,7 +98,7 @@ class Network(Gatherer):
                 )
                 self.influx_database_api.write(
                     bucket=self.BUCKET,
-                    org=config.DB["influx"]["organization"],
+                    org=config.DATABASE["INFLUX"]["ORGANIZATION"],
                     record=point,
                 )
         except Exception:
@@ -123,7 +123,7 @@ class Network(Gatherer):
                 .field("quantity", number_of_devices)
             )
             self.influx_database_api.write(
-                bucket=self.BUCKET, org=config.DB["influx"]["organization"], record=point
+                bucket=self.BUCKET, org=config.DATABASE["INFLUX"]["ORGANIZATION"], record=point
             )
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}") 
@@ -189,7 +189,7 @@ class Air(Gatherer):
                 # inserts data to influx database
                 self.influx_database_api.write(
                     bucket=self.BUCKET,
-                    org=config.DB["influx"]["organization"],
+                    org=config.DATABASE["INFLUX"]["ORGANIZATION"],
                     record=point,
                 )
                 logging.info(
@@ -240,6 +240,7 @@ class Air(Gatherer):
                 --token {config.DEVICES['TOKENS'][device_data.get('mac_address')]} \
                 status"
             ).read()
+            # splits dataset
             data = data.split("\n")
             # parses retrived data and packs it to dictionary
             data = {
