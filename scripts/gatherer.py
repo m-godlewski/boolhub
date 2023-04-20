@@ -9,7 +9,6 @@ import os
 import sys
 import traceback
 from abc import ABC
-from datetime import datetime
 from typing import *
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
@@ -21,6 +20,7 @@ from scapy.all import arping
 
 import config
 from sentry import Sentry
+from models.device import MiAirPurifier3H
 
 
 class Gatherer(ABC):
@@ -233,22 +233,15 @@ class Air(Gatherer):
     def __air_scan_purifier(self, device_data: dict) -> dict:
         """Gathers data from Xiaomi Purifier device."""
         try:
-            # reads data from device API
-            data = os.popen(
-                f"miiocli airpurifiermiot \
-                --ip \{device_data.get('ip_address')} \
-                --token {config.DEVICES['TOKENS'][device_data.get('mac_address')]} \
-                status"
-            ).read()
-            # splits dataset
-            data = data.split("\n")
-            # parses retrived data and packs it to dictionary
-            data = {
-                "location": device_data.get("location"),
-                "aqi": int(data[2].split(":")[1].strip().split(" ")[0]),
-                "humidity": int(data[5].split(":")[1].strip().split(" ")[0]),
-                "temperature": float(data[6].split(":")[1].strip().split(" ")[0]),
-            }
+            # fetches data from device
+            device = MiAirPurifier3H(
+                ip_address=device_data.get("ip_address"),
+                mac_address=device_data.get("mac_address"),
+                token=config.DEVICES["TOKENS"][device_data.get("mac_address")]
+            )
+            # adds device location to dataset
+            data = device.data
+            data["location"] = device_data.get("location")
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
             return {}
