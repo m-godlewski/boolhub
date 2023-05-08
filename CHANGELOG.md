@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.3
+- Added MiMonitor2 device class to device.py script.
+
 ## 0.1.2
 - The functions responsible for communication with devices have been moved to the devices.py script (only for purifier device so far).
 

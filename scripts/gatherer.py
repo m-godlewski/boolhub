@@ -15,12 +15,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import influxdb_client
 import sqlite3
 from influxdb_client.client.write_api import SYNCHRONOUS
-from lywsd03mmc import Lywsd03mmcClient
 from scapy.all import arping
 
 import config
 from sentry import Sentry
-from models.device import MiAirPurifier3H
+from models.device import MiAirPurifier3H, MiMonitor2
 
 
 class Gatherer(ABC):
@@ -251,17 +250,14 @@ class Air(Gatherer):
     def __air_scan_monitor(self, device_data: dict) -> dict:
         """Gathers data from Xiaomi Monitor 2 device."""
         try:
-            # creates connection with device using external library
-            client = Lywsd03mmcClient(device_data.get("mac_address"))
-            # retrives data from connection
-            data = client.data
-            # parses retrived data and packs it to dictionary
-            data = {
-                "location": device_data.get("location"),
-                "aqi": None,
-                "humidity": data.humidity,
-                "temperature": data.temperature,
-            }
+            # fetches data from device
+            device = MiMonitor2(
+                ip_address=device_data.get("ip_address"),
+                mac_address=device_data.get("mac_address")
+            )
+            # adds device location to dataset
+            data = device.data
+            data["location"] = device_data.get("location")
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
             return {}
