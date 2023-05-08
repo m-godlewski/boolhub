@@ -8,6 +8,9 @@ import traceback
 import typing
 from abc import ABC
 
+import bluepy
+from lywsd03mmc import Lywsd03mmcClient
+
 
 class Device(ABC):
     """Base class of each device class in this script."""
@@ -40,7 +43,7 @@ class MiAirPurifier3H(Device):
 
     @property
     def data(self) -> dict:
-        """Returns processed air data from device."""
+        """Returns device core data."""
         return dict(
             [
                 (key, value)
@@ -51,7 +54,7 @@ class MiAirPurifier3H(Device):
 
     @property
     def health(self) -> dict:
-        """Returns processed health data of device."""
+        """Returns device health data."""
         return dict(
             [
                 (key, value)
@@ -127,3 +130,54 @@ class MiAirPurifier3H(Device):
             return False
         else:
             return value
+
+
+class MiMonitor2(Device):
+    """Class used for communication with Xiaomi Mi Monitor 2."""
+
+    # sets of keys for device health and air data
+    HEALTH_KEYS = ("battery")
+    AIR_DATA_KEYS = ("temperature", "humidity")
+
+    def __init__(self, ip_address: str, mac_address: str) -> None:
+        """Class constructor."""
+        super().__init__(ip_address, mac_address)
+        self.__data = self.__fetch_data()
+
+    @property
+    def data(self):
+        """Returns device core data."""
+        return dict(
+            [
+                (key, value)
+                for key, value in self.__data.items()
+                if key in self.AIR_DATA_KEYS
+            ]
+        )
+
+    @property
+    def health(self):
+        """Returns device health data."""
+        return dict(
+            [
+                (key, value)
+                for key, value in self.__data.items()
+                if key in self.HEALTH_KEYS
+            ]
+        )
+
+    def __fetch_data(self) -> dict:
+        """Connects to device and fetches data."""
+        try:
+            # fetches data from device using external library
+            client = Lywsd03mmcClient(self.mac_address)
+            # converts data to dictionary
+            data = client.data._asdict()
+        except bluepy.btle.BTLEDisconnectError:
+            logging.error("Error occured when trying connect to device!")
+            return {}
+        except Exception:
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            return {}
+        else:
+            return data
