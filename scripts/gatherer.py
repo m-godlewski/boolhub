@@ -55,39 +55,31 @@ class Gatherer(ABC):
 class Network(Gatherer):
     """Gathers information about devices connected to local network."""
 
-    # set of available network metrics
-    METRICS = ("number_of_devices", "active_devices")
-
     # influx database bucket name
     BUCKET = "network"
 
-    def __init__(self, metric: str) -> None:
+    def __init__(self) -> None:
         """Constructor and main class method."""
         # calls base class constructor
         super().__init__()
         # performs arp scan of local network
         arp_scan_results = self.__arp_scan()
-        # if not available metric was given
-        if metric not in self.METRICS:
-            logging.error(f"Incorrect metric '{metric}'!")
-        # number of active devices
-        elif metric == "number_of_devices":
-            self.gather_number_of_devices(data=arp_scan_results)
-        # active devices MAC addresses
-        elif metric == "active_devices":
-            self.gather_active_devices(data=arp_scan_results)
+        # gathers network data
+        self.gather_network_data(data=arp_scan_results)
 
-    def gather_active_devices(self, data: set) -> None:
-        """Saves MAC addresses of active devices to database.
+    def gather_network_data(self, data: Set[str]) -> None:
+        """Saves MAC addresses and number of active devices to database.
         Before data are written to database, sentry.py script is used to verify
-        if there are unknown MAC addresses in received 'data' set.
-        """
+        if there are unknown MAC addresses in received 'data' set or
+        number of connected devices exceedes threshold."""
         try:
             # copying received data
             mac_addresses = copy.deepcopy(data)
             # verifies if there is a new MAC address in received list
+            # or number of connected devices exceedes threshold
             Sentry(data_type="network", dataset=mac_addresses)
-            # iterates over MAC addresses
+            # "availability" tag
+            # iterates over mac addresses
             for mac_address in mac_addresses:
                 # writes single data entity to database
                 point = (
@@ -100,20 +92,8 @@ class Network(Gatherer):
                     org=config.DATABASE["INFLUX"]["ORGANIZATION"],
                     record=point,
                 )
-        except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
-        else:
-            logging.info(
-                f"GATHERER | "
-                f"LOCATION = local | "
-                f"DATA = {self.BUCKET}.{arguments.metric} | "
-                f"VALUES = {mac_address} | "
-            )
-
-    def gather_number_of_devices(self, data: set) -> None:
-        """Writes number of active devices to database."""
-        try:
-            # number of active devices in network
+            # "number" tag
+            # number of active devices in local network
             number_of_devices = len(data)
             # writes data to database
             point = (
@@ -125,12 +105,18 @@ class Network(Gatherer):
                 bucket=self.BUCKET, org=config.DATABASE["INFLUX"]["ORGANIZATION"], record=point
             )
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}") 
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
         else:
             logging.info(
                 f"GATHERER | "
                 f"LOCATION = local | "
-                f"DATA = {self.BUCKET}.{arguments.metric} | "
+                f"DATA = {self.BUCKET}.availability | "
+                f"VALUES = {mac_addresses} | "
+            )
+            logging.info(
+                f"GATHERER | "
+                f"LOCATION = local | "
+                f"DATA = {self.BUCKET}.number | "
                 f"VALUES = {number_of_devices} | "
             )
 
@@ -306,11 +292,10 @@ if __name__ == "__main__":
     # parses script arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--data")
-    parser.add_argument("-m", "--metric", required=False)
     arguments = parser.parse_args()
 
     # gathers data, depends on given argument
     if arguments.data == "network":
-        Network(metric=arguments.metric)
+        Network()
     if arguments.data == "air":
         Air()
