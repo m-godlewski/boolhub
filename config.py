@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 
 # current system version
-VERSION = "0.1.4"
+VERSION = "0.1.5"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -42,11 +42,13 @@ SCRIPTS = {
     "SENTRY": {
         "NOTIFIES": {
             "UNKNOWN_DEVICE": False,
+            "NETWORK_OVERLOAD": True,
             "TEMPERATURE": True,
             "AQI": True,
             "HUMIDITY": True
         },
         "THRESHOLDS": {
+            "MAX_NUMBER_OF_DEVICES": 10,
             "TEMPERATURE": 19.0,
             "AQI": 50,
             "HUMIDITY": {

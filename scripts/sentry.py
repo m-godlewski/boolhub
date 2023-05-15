@@ -49,7 +49,8 @@ class Sentry:
                 if (
                     data.get("temperature")
                     and config.SCRIPTS["SENTRY"]["NOTIFIES"]["TEMPERATURE"]
-                    and data.get("temperature") <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]
+                    and data.get("temperature")
+                    <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]
                 ):
                     Messenger.send_notification(
                         text=f"Temperatura w {data.get('location')} wynosi {data.get('temperature')}°C"
@@ -67,8 +68,12 @@ class Sentry:
                 if (
                     data.get("humidity")
                     and config.SCRIPTS["SENTRY"]["NOTIFIES"]["HUMIDITY"]
-                    and (data.get("humidity") >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["UP"]
-                        or data.get("humidity") <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["BOTTOM"])
+                    and (
+                        data.get("humidity")
+                        >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["UP"]
+                        or data.get("humidity")
+                        <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["BOTTOM"]
+                    )
                 ):
                     Messenger.send_notification(
                         text=f"Wilgotność powietrza w {data.get('location')} wynosi {data.get('humidity')}%"
@@ -81,16 +86,34 @@ class Sentry:
         in set of gatherec MAC addresses by gatherer script.
         """
         try:
+            # numer of active devices in local network
+            number_of_devices = len(mac_addresses)
             # set of registered devices MAC addresses
-            known_devices = self.__get_known_devices_mac_addresses ()
+            known_devices = self.__get_known_devices_mac_addresses()
             # set that contains unregistered devices MAC addresses
             unknown_devices = mac_addresses - known_devices
             # if above set contains any address and notification flag is set to True
-            if unknown_devices and config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]:
+            if (
+                unknown_devices
+                and config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]
+            ):
                 # TODO add some if statement to avoid spamming
-                logging.warning("SENTRY | Unknown device has connected to local network!")
+                logging.warning(
+                    "SENTRY | Unknown device has connected to local network!"
+                )
                 Messenger.send_notification(
                     text="Nieznane urządzenie połączyło się z siecią lokalną!"
+                )
+            # if number of active devices in local network is equal or higher than predefined value
+            if (
+                config.SCRIPTS["SENTRY"]["NOTIFIES"]["NETWORK_OVERLOAD"]
+                and number_of_devices >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["MAX_NUMBER_OF_DEVICES"]
+            ):
+                logging.warning(
+                    f"SENTRY | Network overload! Number of active devices = {number_of_devices}"
+                )
+                Messenger.send_notification(
+                    text=f"Przeciążenie sieci! Liczba aktywnych urządzeń = {number_of_devices}"
                 )
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")

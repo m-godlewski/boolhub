@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.5
+- Sentry will now send notification if number of active devices in network exceeds value defined in config.py
+
 ## 0.1.4
 - Both metrics of "network" gatherer process has been merged into single one process.
 
