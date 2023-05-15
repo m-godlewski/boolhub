@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 
 # current system version
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))

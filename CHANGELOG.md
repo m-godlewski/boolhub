@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.4
+- Both metrics of "network" gatherer process has been merged into single one process.
+
 ## 0.1.3
 - Added MiMonitor2 device class to device.py script.
 
