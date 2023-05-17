@@ -191,6 +191,8 @@ class Air(Gatherer):
         try:
             # list that stores air data from each device
             air_data = []
+            # list that stores diagnostical data from each device
+            diagnostical_data = []
             # variable that stores single device data
             data = None
             # air devices data
@@ -201,21 +203,24 @@ class Air(Gatherer):
                 device_name = device_data.get("name").lower()
                 # calls specific method depending on device type
                 if "purifier" in device_name:
-                    data = self.__air_scan_purifier(device_data)
+                    data, health_data = self.__air_scan_purifier(device_data)
                 elif "monitor" in device_name:
-                    data = self.__air_scan_monitor(device_data)
+                    data, health_data = self.__air_scan_monitor(device_data)
                 else:
                     logging.error(f"Device '{device_name}' is not supported!")
                 if data:
                     air_data.append(data)
+                if health_data:
+                    diagnostical_data.append(health_data)
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
         else:
             # calls sentry script to verifies data
             Sentry(data_type="air", dataset=air_data)
+            Sentry(data_type="diagnostic", dataset=diagnostical_data)
             return air_data
 
-    def __air_scan_purifier(self, device_data: dict) -> dict:
+    def __air_scan_purifier(self, device_data: dict) -> Union[dict, dict]:
         """Gathers data from Xiaomi Purifier device."""
         try:
             # fetches data from device
@@ -224,16 +229,16 @@ class Air(Gatherer):
                 mac_address=device_data.get("mac_address"),
                 token=config.DEVICES["TOKENS"][device_data.get("mac_address")]
             )
-            # adds device location to dataset
-            data = device.data
-            data["location"] = device_data.get("location")
+            # merges datasets
+            data = {**device.data, **device_data}
+            health_data = {**device.health, **device_data}
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
-            return {}
+            return {}, {}
         else:
-            return data
+            return data, health_data
 
-    def __air_scan_monitor(self, device_data: dict) -> dict:
+    def __air_scan_monitor(self, device_data: dict) -> Union[dict, dict]:
         """Gathers data from Xiaomi Monitor 2 device."""
         try:
             # fetches data from device
@@ -241,14 +246,14 @@ class Air(Gatherer):
                 ip_address=device_data.get("ip_address"),
                 mac_address=device_data.get("mac_address")
             )
-            # adds device location to dataset
-            data = device.data
-            data["location"] = device_data.get("location")
+            # merges datasets
+            data = {**device.data, **device_data}
+            health_data = {**device.health, **device_data}
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
-            return {}
+            return {}, {}
         else:
-            return data
+            return data, health_data
 
     def __get_air_devices_data(self) -> List[dict]:
         """Makes query to sqlite database and returns list of air devices data."""

@@ -3,8 +3,12 @@ import logging
 from dotenv import load_dotenv
 
 
+###
+### GENERAL CONFIGURATION
+###
+
 # current system version
-VERSION = "0.1.5"
+VERSION = "0.2.0"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -18,7 +22,11 @@ logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG, format="%(asctime)s 
 # loading envinronmental variables
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# database configuration
+###
+### SCRIPTS CONFIGURATION
+###
+
+# databases configuration
 DATABASE = {
     "INFLUX" : {
         "URL": "http://localhost:8086",
@@ -45,10 +53,12 @@ SCRIPTS = {
             "NETWORK_OVERLOAD": True,
             "TEMPERATURE": True,
             "AQI": True,
-            "HUMIDITY": True
+            "HUMIDITY": True,
+            "DIAGNOSTICS": True,
         },
         "THRESHOLDS": {
             "MAX_NUMBER_OF_DEVICES": 10,
+            "BATTERY_FILTER_LEVEL": 15,
             "TEMPERATURE": 19.0,
             "AQI": 50,
             "HUMIDITY": {
