@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.0
+- Notification for diagnostical data has been implemented.
+
 ## 0.1.5
 - Sentry will now send notification if number of active devices in network exceeds value defined in config.py
 

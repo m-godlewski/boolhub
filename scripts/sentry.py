@@ -7,6 +7,7 @@ import os
 import sys
 import traceback
 from typing import *
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import sqlite3
@@ -22,6 +23,9 @@ class Sentry:
     - temperature/aqi/humidity threshold became exceeded.
     """
 
+    DEVICE_HEALTH_KEYS = ("battery", "filter")
+    DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter": "filtra"}
+
     def __init__(self, data_type: str, dataset: Any) -> None:
         """Creates connection to sqlite database and
         calls proper method depends on 'data' argument.
@@ -34,6 +38,8 @@ class Sentry:
             self.__check_network(mac_addresses=dataset)
         if data_type == "air":
             self.__check_air(air_data=dataset)
+        if data_type == "diagnostic":
+            self.__check_diagnostic(diagnostical_data=dataset)
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
         """Closes connection to sqlite3 database"""
@@ -107,7 +113,8 @@ class Sentry:
             # if number of active devices in local network is equal or higher than predefined value
             if (
                 config.SCRIPTS["SENTRY"]["NOTIFIES"]["NETWORK_OVERLOAD"]
-                and number_of_devices >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["MAX_NUMBER_OF_DEVICES"]
+                and number_of_devices
+                >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["MAX_NUMBER_OF_DEVICES"]
             ):
                 logging.warning(
                     f"SENTRY | Network overload! Number of active devices = {number_of_devices}"
@@ -115,6 +122,31 @@ class Sentry:
                 Messenger.send_notification(
                     text=f"Przeciążenie sieci! Liczba aktywnych urządzeń = {number_of_devices}"
                 )
+        except Exception:
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+
+    def __check_diagnostic(self, diagnostical_data: List[dict]):
+        """Verifies that the battery, filter or other consumable parts of the device are not at the end of their life."""
+        try:
+            # iteration over diagnostical data
+            for data in diagnostical_data:
+                # iterate over "health keys"
+                for key in self.DEVICE_HEALTH_KEYS:
+                    # if consumable part level exceeds predefined level
+                    if key in data:
+                        if (
+                            config.SCRIPTS["SENTRY"]["NOTIFIES"]["DIAGNOSTICS"]
+                            and data[key]
+                            <= config.SCRIPTS["SENTRY"]["THRESHOLDS"][
+                                "BATTERY_FILTER_LEVEL"
+                            ]
+                        ):
+                            logging.warning(
+                                f"SENTRY | Level of {key} in device {data['name']} in location {data['location']} is {data[key]}"
+                            )
+                            Messenger.send_notification(
+                                text=f"Poziom {self.DEVICE_HEALTH_KEY_TRANSLATE_MAP[key]} w urządzeniu {data['name']} w lokacji {data['location']} wynosi {data[key]}"
+                            )
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
 
