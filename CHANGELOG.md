@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.1
+- Limited script log size to 50 megabytes.
+
 ## 0.2.0
 - Notification for diagnostical data has been implemented.
 
