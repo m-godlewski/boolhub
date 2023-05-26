@@ -11,9 +11,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
 from pathlib import Path
-
-import environ
 
 
 # Quick-start development settings - unsuitable for production
@@ -22,9 +21,8 @@ import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Initialize environment variables
-env = environ.Env()
-environ.Env.read_env()
+# Loading envinronmental variables
+load_dotenv(os.environ.get("VARIABLES_PATH"))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-(18)_0j!q93b$1+4!a2o#6s$p9and2umck##eyaaox0g-fpbku"
@@ -32,7 +30,7 @@ SECRET_KEY = "django-insecure-(18)_0j!q93b$1+4!a2o#6s$p9and2umck##eyaaox0g-fpbku
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [env("SERVER_IP")]
+ALLOWED_HOSTS = [os.environ.get("SERVER_IP")]
 
 
 # Application definition
@@ -85,8 +83,12 @@ WSGI_APPLICATION = "central.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.environ.get("POSTGRES_NAME"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
 
