@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.0
+- Central database has been migrated to PostgreSQL.
+
 ## 0.2.1
 - Limited script log size to 50 megabytes.
 
