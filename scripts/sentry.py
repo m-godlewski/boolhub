@@ -10,7 +10,7 @@ from typing import *
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-import sqlite3
+import psycopg2
 
 import config
 from messenger import Messenger
@@ -27,12 +27,17 @@ class Sentry:
     DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter": "filtra"}
 
     def __init__(self, data_type: str, dataset: Any) -> None:
-        """Creates connection to sqlite database and
+        """Creates connection to postgre database and
         calls proper method depends on 'data' argument.
         """
-        # create connection with local sqlite3 database
-        self.database_client = sqlite3.connect(config.DATABASE["SQLITE"]["PATH"])
-        self.database_api = self.database_client.cursor()
+        # create connection with local postgre database
+        self.postgre_database_client = psycopg2.connect(
+            host=config.DATABASE["POSTGRE"]["HOST"],
+            database=config.DATABASE["POSTGRE"]["NAME"],
+            user=config.DATABASE["POSTGRE"]["USER"],
+            password=config.DATABASE["POSTGRE"]["PASSWORD"],
+        )
+        self.postgre_database_api = self.postgre_database_client.cursor()
         # verifies dataset base on data source
         if data_type == "network":
             self.__check_network(mac_addresses=dataset)
@@ -42,9 +47,9 @@ class Sentry:
             self.__check_diagnostic(diagnostical_data=dataset)
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        """Closes connection to sqlite3 database"""
-        self.database_api.close()
-        self.database_client.close()
+        """Closes connection to postgre database"""
+        self.postgre_database_api.close()
+        self.postgre_database_client.close()
 
     def __check_air(self, air_data: List[dict]) -> None:
         """Checks if air temperature, quality or humidity does not exceed defined tresholds in any of datasets."""
@@ -151,10 +156,11 @@ class Sentry:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
 
     def __get_known_devices_mac_addresses(self) -> Set[str]:
-        """Makes query to sqlite database and returns set of registered MAC addresses."""
+        """Makes query to postgre database and returns set of registered MAC addresses."""
+        self.postgre_database_api.execute(
+                "SELECT mac_address FROM devices_device;"
+        )
         return {
             mac_address[0]
-            for mac_address in self.database_api.execute(
-                "SELECT mac_address FROM devices_device;"
-            )
+            for mac_address in self.postgre_database_api.fetchall()
         }

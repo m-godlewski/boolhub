@@ -45,7 +45,13 @@ DATABASE = {
         "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
         "ORGANIZATION": os.environ.get("INFLUXDB_ORGANIZATION"),
     },
-    "SQLITE": {"PATH": os.path.join(BASE_DIR, "central", "db.sqlite3")},
+    "POSTGRE": {
+        "NAME": os.environ.get("POSTGRE_NAME"),
+        "USER": os.environ.get("POSTGRE_USER"),
+        "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
+        "HOST": os.environ.get("POSTGRE_HOST"),
+        "PORT": os.environ.get("POSTGRE_PORT"),
+    }
 }
 
 # devices configuration
