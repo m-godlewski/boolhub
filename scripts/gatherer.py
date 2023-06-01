@@ -13,7 +13,7 @@ from typing import *
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import influxdb_client
-import sqlite3
+import psycopg2
 from influxdb_client.client.write_api import SYNCHRONOUS
 from scapy.all import arping
 
@@ -24,11 +24,11 @@ from models.device import MiAirPurifier3H, MiMonitor2
 
 class Gatherer(ABC):
     """Base class of each class in this script.
-    Initializes and closes influx and sqlite databases connections.
+    Initializes and closes influx and postgre databases connections.
     """
 
     def __init__(self) -> None:
-        """Creates influx and sqlite databases and api's connections."""
+        """Creates influx and postgre databases and api's connections."""
         # influx database
         self.influx_database_client = influxdb_client.InfluxDBClient(
             url=config.DATABASE["INFLUX"]["URL"],
@@ -38,18 +38,23 @@ class Gatherer(ABC):
         self.influx_database_api = self.influx_database_client.write_api(
             write_options=SYNCHRONOUS
         )
-        # sqlite database
-        self.sqlite_database_client = sqlite3.connect(config.DATABASE["SQLITE"]["PATH"])
-        self.sqlite_database_api = self.sqlite_database_client.cursor()
+        # postgre database
+        self.postgre_database_client = psycopg2.connect(
+            host=config.DATABASE["POSTGRE"]["HOST"],
+            database=config.DATABASE["POSTGRE"]["NAME"],
+            user=config.DATABASE["POSTGRE"]["USER"],
+            password=config.DATABASE["POSTGRE"]["PASSWORD"],
+        )
+        self.postgre_database_api = self.postgre_database_client.cursor()
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        """Closes connection to influx and sqlite databases."""
+        """Closes connection to influx and postgre databases."""
         # influx database
         self.influx_database_api.close()
         self.influx_database_client.close()
-        # sqlite database
-        self.sqlite_database_api.close()
-        self.sqlite_database_client.close()
+        # postgre database
+        self.postgre_database_api.close()
+        self.postgre_database_client.close()
 
 
 class Network(Gatherer):
@@ -256,24 +261,21 @@ class Air(Gatherer):
             return data, health_data
 
     def __get_air_devices_data(self) -> List[dict]:
-        """Makes query to sqlite database and returns list of air devices data."""
+        """Makes query to postgre database and returns list of air devices data."""
         try:
             # list that stores devices data
             air_devices_data = []
-            # makes query to sqlite database
-            query_result = {
-                device_info
-                for device_info
-                in self.sqlite_database_api.execute(
+            # makes query to postgre database
+            self.postgre_database_api.execute(
                     """
                     SELECT devices_device.name, devices_device.ip_address, devices_device.mac_address, rooms_room.name
                     FROM devices_device
                     INNER JOIN rooms_room
                     ON devices_device.location_id = rooms_room.id
-                    WHERE devices_device.category = "air";
+                    WHERE devices_device.category = 'air';
                     """
-                )
-            }
+            )
+            query_result = [device_info for device_info in self.postgre_database_api.fetchall()]
             # transforms query result to list of dictionaries
             for row in query_result:
                 air_devices_data.append(
