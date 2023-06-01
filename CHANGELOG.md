@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.1
+- Temperature threshold splitted into upper and lower one.
+
 ## 0.3.0
 - Central database has been migrated to PostgreSQL.
 

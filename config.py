@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 ###
 
 # current system version
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -71,7 +71,7 @@ SCRIPTS = {
         "THRESHOLDS": {
             "MAX_NUMBER_OF_DEVICES": 10,
             "BATTERY_FILTER_LEVEL": 15,
-            "TEMPERATURE": 19.0,
+            "TEMPERATURE": {"UP": 24.0, "BOTTOM": 18.0},
             "AQI": 50,
             "HUMIDITY": {"UP": 85, "BOTTOM": 20},
         },
