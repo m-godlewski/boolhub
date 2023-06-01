@@ -60,8 +60,12 @@ class Sentry:
                 if (
                     data.get("temperature")
                     and config.SCRIPTS["SENTRY"]["NOTIFIES"]["TEMPERATURE"]
-                    and data.get("temperature")
-                    <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]
+                    and (
+                        data.get("temperature")
+                        >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["UP"]
+                        or data.get("temperature")
+                        <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["BOTTOM"]
+                        )
                 ):
                     Messenger.send_notification(
                         text=f"Temperatura w {data.get('location')} wynosi {data.get('temperature')}°C"
