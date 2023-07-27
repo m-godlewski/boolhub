@@ -1,5 +1,5 @@
 """
-Gatherer script is used for gathering data from devices connected to local network.
+This script is used for gathering data from devices connected to local network.
 """
 
 import argparse
@@ -23,13 +23,14 @@ from models.device import MiAirPurifier3H, MiMonitor2
 
 
 class Gatherer(ABC):
-    """Base class of each class in this script.
-    Initializes and closes influx and postgre databases connections.
+    """Base class of each other classes in this script.
+    Initializes and closes InfluxDB and PostgreSQL databases connections.
     """
 
-    def __init__(self) -> None:
-        """Creates influx and postgre databases and api's connections."""
-        # influx database
+    def __enter__(self) -> None:
+        """Creates InfluxDB and PostgreSQL databases and API's connections."""
+        # InfluxDB database connection
+        logging.debug("Connecting to InfluxDB")
         self.influx_database_client = influxdb_client.InfluxDBClient(
             url=config.DATABASE["INFLUX"]["URL"],
             token=config.DATABASE["INFLUX"]["API_TOKEN"],
@@ -38,7 +39,9 @@ class Gatherer(ABC):
         self.influx_database_api = self.influx_database_client.write_api(
             write_options=SYNCHRONOUS
         )
-        # postgre database
+        logging.debug("Connected to InfluxDB")
+        # PostgreSQL database connection
+        logging.debug("Connecting to PostgreSQL")
         self.postgre_database_client = psycopg2.connect(
             host=config.DATABASE["POSTGRE"]["HOST"],
             database=config.DATABASE["POSTGRE"]["NAME"],
@@ -46,27 +49,35 @@ class Gatherer(ABC):
             password=config.DATABASE["POSTGRE"]["PASSWORD"],
         )
         self.postgre_database_api = self.postgre_database_client.cursor()
+        logging.debug("Connected to PostgreSQL")
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
         """Closes connection to influx and postgre databases."""
-        # influx database
+        # if any exception ocurred during context process
+        if any ((exc_type, exc_value, exc_traceback)):
+            logging.error(exc_traceback)
+        # InfluxDB database connection
+        logging.debug("Closing InfluxDB connection")
         self.influx_database_api.close()
         self.influx_database_client.close()
-        # postgre database
+        logging.debug("InfluxDB connection has been closed")
+        # PostgreSQL database connection
+        logging.debug("Closing PostgreSQL connection")
         self.postgre_database_api.close()
         self.postgre_database_client.close()
+        logging.debug("PostgreSQL connection has been closed")
 
 
 class Network(Gatherer):
-    """Gathers information about devices connected to local network."""
+    """Gathers network data from devices connected to local network."""
 
-    # influx database bucket name
+    # InfluxDB bucket name
     BUCKET = "network"
 
-    def __init__(self) -> None:
+    def __enter__(self) -> None:
         """Constructor and main class method."""
         # calls base class constructor
-        super().__init__()
+        super().__enter__()
         # performs arp scan of local network
         arp_scan_results = self.__arp_scan()
         # gathers network data
@@ -146,10 +157,10 @@ class Air(Gatherer):
     # influx database bucket name
     BUCKET = "air"
 
-    def __init__(self) -> None:
+    def __enter__(self) -> None:
         """Constructor and main class method."""
         # calls base class constructor
-        super().__init__()
+        super().__enter__()
         # retrieves data from each 'air' device
         air_scan_results = self.__air_scan()
         # saves gathered data to database
@@ -303,6 +314,8 @@ if __name__ == "__main__":
 
     # gathers data, depends on given argument
     if arguments.data == "network":
-        Network()
+        with Network():
+            pass
     if arguments.data == "air":
-        Air()
+        with Air():
+            pass

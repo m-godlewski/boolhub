@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.0
+- All system modules (except scripts) are now dockerized.
+
 ## 0.3.1
 - Temperature threshold splitted into upper and lower one.
 

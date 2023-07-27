@@ -40,24 +40,45 @@ services:
   ntfy:
     container_name: ntfy
     image: binwiederhier/ntfy
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - /var/cache/ntfy:/var/cache/ntfy
+      - /etc/ntfy:/etc/ntfy
     command:
       - serve
     environment:
       - TZ=CEST
-    volumes:
-      - /var/cache/ntfy:/var/cache/ntfy
-      - /etc/ntfy:/etc/ntfy
+  central:
+    container_name: central
+    build: ${BOOLHUB_CENTRAL_PATH}
+    restart: always
     ports:
-      - 80:80
-    restart: unless-stopped
-  # central:
-  #   container_name: central
-  #   build: $BOOLHUB_CENTRAL_PATH
-  #   restart: always
-  #   ports:
-  #     - 8000:8000
-  #   networks:
-  #     - boolnet
+      - 8000:8000
+    volumes:
+      - /data/central/:/usr/src/app/
+    env_file:
+      - .env
+    depends_on:
+      - postgresql
+    command: python manage.py runserver 0.0.0.0:8000
+    networks:
+      - boolnet
+  postgresql:
+    container_name: postgresql
+    image: postgres:15.3
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - /data/postgres/:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${POSTGRE_USER}
+      - POSTGRES_PASSWORD=${POSTGRE_PASSWORD}
+      - POSTGRES_DB=${POSTGRE_HOST}
+    networks:
+      - boolnet
 
 networks:
   boolnet:
