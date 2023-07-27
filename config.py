@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 ###
 
 # current system version
-VERSION = "0.3.1"
+VERSION = "0.4.0"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -31,7 +31,7 @@ logging.basicConfig(
 )
 
 # loading envinronmental variables
-load_dotenv(os.environ.get("VARIABLES_PATH"))
+load_dotenv(os.environ.get("VARIABLES_PATH"))   
 
 
 ###
@@ -49,7 +49,9 @@ DATABASE = {
         "NAME": os.environ.get("POSTGRE_NAME"),
         "USER": os.environ.get("POSTGRE_USER"),
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
-        "HOST": os.environ.get("POSTGRE_HOST"),
+        # untill scripts are not running inside docker container
+        # host has to be set as 'localhost'
+        "HOST": "localhost",
         "PORT": os.environ.get("POSTGRE_PORT"),
     }
 }
@@ -71,7 +73,7 @@ SCRIPTS = {
         "THRESHOLDS": {
             "MAX_NUMBER_OF_DEVICES": 10,
             "BATTERY_FILTER_LEVEL": 15,
-            "TEMPERATURE": {"UP": 24.0, "BOTTOM": 18.0},
+            "TEMPERATURE": {"UP": 28.0, "BOTTOM": 18.0},
             "AQI": 50,
             "HUMIDITY": {"UP": 85, "BOTTOM": 20},
         },
