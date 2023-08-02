@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.1
+- Saving unknown mac addresses to database added.
+
 ## 0.4.0
 - All system modules (except scripts) are now dockerized.
 

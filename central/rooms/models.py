@@ -1,11 +1,6 @@
 from django.db import models
 
 
-class Dimensions:
-    """TODO"""
-    pass
-
-
 class House(models.Model):
     """Class representation of house.
     There should be onnly one object of this house in system.
