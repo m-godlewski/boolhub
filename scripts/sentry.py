@@ -116,6 +116,13 @@ class Sentry:
                 logging.warning(
                     "SENTRY | Unknown device has connected to local network!"
                 )
+                # saves unknown address to postgresql database
+                for address in unknown_devices:
+                    self.postgre_database_api.execute(
+                        "INSERT INTO unknown_devices(mac_address) VALUES(%s);",
+                        (address,)
+                    )
+                    self.postgre_database_client.commit()
                 Messenger.send_notification(
                     text="Nieznane urządzenie połączyło się z siecią lokalną!"
                 )
