@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.2
+- Database logic moved to separated script.
+
 ## 0.4.1
 - Saving unknown mac addresses to database added.
 

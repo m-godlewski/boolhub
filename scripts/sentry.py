@@ -10,10 +10,9 @@ from typing import *
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-import psycopg2
-
 import config
 from messenger import Messenger
+from models.database import PostgreSQL
 
 
 class Sentry:
@@ -27,29 +26,13 @@ class Sentry:
     DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter": "filtra"}
 
     def __init__(self, data_type: str, dataset: Any) -> None:
-        """Creates connection to postgre database and
-        calls proper method depends on 'data' argument.
-        """
-        # create connection with local postgre database
-        self.postgre_database_client = psycopg2.connect(
-            host=config.DATABASE["POSTGRE"]["HOST"],
-            database=config.DATABASE["POSTGRE"]["NAME"],
-            user=config.DATABASE["POSTGRE"]["USER"],
-            password=config.DATABASE["POSTGRE"]["PASSWORD"],
-        )
-        self.postgre_database_api = self.postgre_database_client.cursor()
-        # verifies dataset base on data source
+        """Verifies dataset base on data source."""
         if data_type == "network":
             self.__check_network(mac_addresses=dataset)
         if data_type == "air":
             self.__check_air(air_data=dataset)
         if data_type == "diagnostic":
             self.__check_diagnostic(diagnostical_data=dataset)
-
-    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        """Closes connection to postgre database"""
-        self.postgre_database_api.close()
-        self.postgre_database_client.close()
 
     def __check_air(self, air_data: List[dict]) -> None:
         """Checks if air temperature, quality or humidity does not exceed defined tresholds in any of datasets."""
@@ -64,8 +47,10 @@ class Sentry:
                         data.get("temperature")
                         >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["UP"]
                         or data.get("temperature")
-                        <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["BOTTOM"]
-                        )
+                        <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"][
+                            "BOTTOM"
+                        ]
+                    )
                 ):
                     Messenger.send_notification(
                         text=f"Temperatura w {data.get('location')} wynosi {data.get('temperature')}°C"
@@ -108,24 +93,26 @@ class Sentry:
             # set that contains unregistered devices MAC addresses
             unknown_devices = mac_addresses - known_devices
             # if above set contains any address and notification flag is set to True
-            if (
-                unknown_devices
-                and config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]
-            ):
-                # TODO add some if statement to avoid spamming
-                logging.warning(
-                    "SENTRY | Unknown device has connected to local network!"
-                )
-                # saves unknown address to postgresql database
-                for address in unknown_devices:
-                    self.postgre_database_api.execute(
-                        "INSERT INTO unknown_devices(mac_address) VALUES(%s);",
-                        (address,)
-                    )
-                    self.postgre_database_client.commit()
-                Messenger.send_notification(
-                    text="Nieznane urządzenie połączyło się z siecią lokalną!"
-                )
+            if unknown_devices:
+                with PostgreSQL() as postgresql_database:
+                    # checks if unknown address already exists in database
+                    postgresql_database.execute("SELECT * FROM unknown_devices;")
+                    query_result = [row for row in postgresql_database.fetchall()]
+                    # if not, inserts new mac address to database
+                    if not query_result:
+                        # saves unknown address to postgresql database
+                        for address in unknown_devices:
+                            postgresql_database.execute(
+                                "INSERT INTO unknown_devices(mac_address) VALUES(%s);",
+                                (address,)
+                            )
+                        if config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]:
+                            logging.warning(
+                                "SENTRY | Unknown device has connected to local network!"
+                            )
+                            Messenger.send_notification(
+                                text="Nieznane urządzenie połączyło się z siecią lokalną!"
+                            )
             # if number of active devices in local network is equal or higher than predefined value
             if (
                 config.SCRIPTS["SENTRY"]["NOTIFIES"]["NETWORK_OVERLOAD"]
@@ -168,10 +155,6 @@ class Sentry:
 
     def __get_known_devices_mac_addresses(self) -> Set[str]:
         """Makes query to postgre database and returns set of registered MAC addresses."""
-        self.postgre_database_api.execute(
-                "SELECT mac_address FROM devices_device;"
-        )
-        return {
-            mac_address[0]
-            for mac_address in self.postgre_database_api.fetchall()
-        }
+        with PostgreSQL() as postgresql_database:
+            postgresql_database.execute("SELECT mac_address FROM devices_device;")
+            return {mac_address[0] for mac_address in postgresql_database.fetchall()}

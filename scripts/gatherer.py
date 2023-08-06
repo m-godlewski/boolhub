@@ -10,62 +10,22 @@ import sys
 import traceback
 from abc import ABC
 from typing import *
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-import influxdb_client
-import psycopg2
-from influxdb_client.client.write_api import SYNCHRONOUS
 from scapy.all import arping
+from influxdb_client import Point
 
 import config
 from sentry import Sentry
 from models.device import MiAirPurifier3H, MiMonitor2
+from models.database import PostgreSQL, InfluxDB
 
 
 class Gatherer(ABC):
-    """Base class of each other classes in this script.
-    Initializes and closes InfluxDB and PostgreSQL databases connections.
-    """
+    """Base class of each other classes in this script."""
 
-    def __enter__(self) -> None:
-        """Creates InfluxDB and PostgreSQL databases and API's connections."""
-        # InfluxDB database connection
-        logging.debug("Connecting to InfluxDB")
-        self.influx_database_client = influxdb_client.InfluxDBClient(
-            url=config.DATABASE["INFLUX"]["URL"],
-            token=config.DATABASE["INFLUX"]["API_TOKEN"],
-            org=config.DATABASE["INFLUX"]["ORGANIZATION"],
-        )
-        self.influx_database_api = self.influx_database_client.write_api(
-            write_options=SYNCHRONOUS
-        )
-        logging.debug("Connected to InfluxDB")
-        # PostgreSQL database connection
-        logging.debug("Connecting to PostgreSQL")
-        self.postgre_database_client = psycopg2.connect(
-            host=config.DATABASE["POSTGRE"]["HOST"],
-            database=config.DATABASE["POSTGRE"]["NAME"],
-            user=config.DATABASE["POSTGRE"]["USER"],
-            password=config.DATABASE["POSTGRE"]["PASSWORD"],
-        )
-        self.postgre_database_api = self.postgre_database_client.cursor()
-        logging.debug("Connected to PostgreSQL")
-
-    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        """Closes connection to influx and postgre databases."""
-        # if any exception ocurred during context process
-        if any ((exc_type, exc_value, exc_traceback)):
-            logging.error(exc_traceback)
-        # InfluxDB database connection
-        logging.debug("Closing InfluxDB connection")
-        self.influx_database_api.close()
-        self.influx_database_client.close()
-        logging.debug("InfluxDB connection has been closed")
-        # PostgreSQL database connection
-        logging.debug("Closing PostgreSQL connection")
-        self.postgre_database_api.close()
-        self.postgre_database_client.close()
-        logging.debug("PostgreSQL connection has been closed")
+    pass
 
 
 class Network(Gatherer):
@@ -74,10 +34,8 @@ class Network(Gatherer):
     # InfluxDB bucket name
     BUCKET = "network"
 
-    def __enter__(self) -> None:
+    def __init__(self) -> None:
         """Constructor and main class method."""
-        # calls base class constructor
-        super().__enter__()
         # performs arp scan of local network
         arp_scan_results = self.__arp_scan()
         # gathers network data
@@ -94,32 +52,36 @@ class Network(Gatherer):
             # verifies if there is a new MAC address in received list
             # or number of connected devices exceedes threshold
             Sentry(data_type="network", dataset=mac_addresses)
-            # "availability" tag
-            # iterates over mac addresses
-            for mac_address in mac_addresses:
-                # writes single data entity to database
+            # connects to influx database
+            with InfluxDB() as influx_database:
+                # "availability" tag
+                # iterates over mac addresses
+                for mac_address in mac_addresses:
+                    # writes single data entity to database
+                    point = (
+                        Point("devices")
+                        .tag("metric", "availability")
+                        .field("mac_address", mac_address)
+                    )
+                    influx_database.write(
+                        bucket=self.BUCKET,
+                        org=config.DATABASE["INFLUX"]["ORGANIZATION"],
+                        record=point,
+                    )
+                # "number" tag
+                # number of active devices in local network
+                number_of_devices = len(data)
+                # writes data to database
                 point = (
-                    influxdb_client.Point("devices")
-                    .tag("metric", "availability")
-                    .field("mac_address", mac_address)
+                    Point("devices")
+                    .tag("metric", "number")
+                    .field("quantity", number_of_devices)
                 )
-                self.influx_database_api.write(
+                influx_database.write(
                     bucket=self.BUCKET,
                     org=config.DATABASE["INFLUX"]["ORGANIZATION"],
                     record=point,
                 )
-            # "number" tag
-            # number of active devices in local network
-            number_of_devices = len(data)
-            # writes data to database
-            point = (
-                influxdb_client.Point("devices")
-                .tag("metric", "number")
-                .field("quantity", number_of_devices)
-            )
-            self.influx_database_api.write(
-                bucket=self.BUCKET, org=config.DATABASE["INFLUX"]["ORGANIZATION"], record=point
-            )
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
         else:
@@ -146,7 +108,7 @@ class Network(Gatherer):
                 destination["Ether"].src for source, destination in answered
             )
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}") 
+            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
         else:
             return mac_addresses
 
@@ -157,10 +119,8 @@ class Air(Gatherer):
     # influx database bucket name
     BUCKET = "air"
 
-    def __enter__(self) -> None:
+    def __init__(self) -> None:
         """Constructor and main class method."""
-        # calls base class constructor
-        super().__enter__()
         # retrieves data from each 'air' device
         air_scan_results = self.__air_scan()
         # saves gathered data to database
@@ -169,36 +129,38 @@ class Air(Gatherer):
     def gather_air_data(self, air_data: List[dict]) -> None:
         """Saves retreived data from each air devices to database."""
         try:
-            # iterates over datasets
-            for data in air_data:
-                # data location
-                location = data.get("location")
-                # air quality
-                aqi = data.get("aqi")
-                # air humidity
-                humidity = data.get("humidity")
-                # air temperature
-                temperature = data.get("temperature")
-                # prepares data for saving into influx database
-                point = (
-                    influxdb_client.Point("air")
-                    .tag("room", location)
-                    .field("aqi", aqi)
-                    .field("humidity", humidity)
-                    .field("temperature", temperature)
-                )
-                # inserts data to influx database
-                self.influx_database_api.write(
-                    bucket=self.BUCKET,
-                    org=config.DATABASE["INFLUX"]["ORGANIZATION"],
-                    record=point,
-                )
-                logging.info(
-                    f"GATHERER | "
-                    f"LOCATION = {data.get('location')} | "
-                    f"DATA = {self.BUCKET} | "
-                    f"VALUES = {aqi}, {humidity}, {temperature} | "
-                )
+            # connects to influx database
+            with InfluxDB() as influx_database:
+                # iterates over datasets
+                for data in air_data:
+                    # data location
+                    location = data.get("location")
+                    # air quality
+                    aqi = data.get("aqi")
+                    # air humidity
+                    humidity = data.get("humidity")
+                    # air temperature
+                    temperature = data.get("temperature")
+                    # prepares data for saving into influx database
+                    point = (
+                        Point("air")
+                        .tag("room", location)
+                        .field("aqi", aqi)
+                        .field("humidity", humidity)
+                        .field("temperature", temperature)
+                    )
+                    # inserts data to influx database
+                    influx_database.write(
+                        bucket=self.BUCKET,
+                        org=config.DATABASE["INFLUX"]["ORGANIZATION"],
+                        record=point,
+                    )
+                    logging.info(
+                        f"GATHERER | "
+                        f"LOCATION = {data.get('location')} | "
+                        f"DATA = {self.BUCKET} | "
+                        f"VALUES = {aqi}, {humidity}, {temperature} | "
+                    )
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
 
@@ -243,7 +205,7 @@ class Air(Gatherer):
             device = MiAirPurifier3H(
                 ip_address=device_data.get("ip_address"),
                 mac_address=device_data.get("mac_address"),
-                token=config.DEVICES["TOKENS"][device_data.get("mac_address")]
+                token=config.DEVICES["TOKENS"][device_data.get("mac_address")],
             )
             # merges datasets
             data = {**device.data, **device_data}
@@ -260,7 +222,7 @@ class Air(Gatherer):
             # fetches data from device
             device = MiMonitor2(
                 ip_address=device_data.get("ip_address"),
-                mac_address=device_data.get("mac_address")
+                mac_address=device_data.get("mac_address"),
             )
             # merges datasets
             data = {**device.data, **device_data}
@@ -276,27 +238,30 @@ class Air(Gatherer):
         try:
             # list that stores devices data
             air_devices_data = []
-            # makes query to postgre database
-            self.postgre_database_api.execute(
+            # connects to postgresql
+            with PostgreSQL() as postgresql_database:
+                postgresql_database.execute(
                     """
-                    SELECT devices_device.name, devices_device.ip_address, devices_device.mac_address, rooms_room.name
-                    FROM devices_device
-                    INNER JOIN rooms_room
-                    ON devices_device.location_id = rooms_room.id
-                    WHERE devices_device.category = 'air';
-                    """
-            )
-            query_result = [device_info for device_info in self.postgre_database_api.fetchall()]
-            # transforms query result to list of dictionaries
-            for row in query_result:
-                air_devices_data.append(
-                    {
-                        "name": row[0],
-                        "ip_address": row[1],
-                        "mac_address": row[2],
-                        "location": row[3]
-                    }
+                        SELECT devices_device.name, devices_device.ip_address, devices_device.mac_address, rooms_room.name
+                        FROM devices_device
+                        INNER JOIN rooms_room
+                        ON devices_device.location_id = rooms_room.id
+                        WHERE devices_device.category = 'air';
+                        """
                 )
+                query_result = [
+                    device_info for device_info in postgresql_database.fetchall()
+                ]
+                # transforms query result to list of dictionaries
+                for row in query_result:
+                    air_devices_data.append(
+                        {
+                            "name": row[0],
+                            "ip_address": row[1],
+                            "mac_address": row[2],
+                            "location": row[3],
+                        }
+                    )
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
             return []
@@ -306,16 +271,12 @@ class Air(Gatherer):
 
 # main section of script
 if __name__ == "__main__":
-
     # parses script arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--data")
     arguments = parser.parse_args()
-
     # gathers data, depends on given argument
     if arguments.data == "network":
-        with Network():
-            pass
+        Network()
     if arguments.data == "air":
-        with Air():
-            pass
+        Air()

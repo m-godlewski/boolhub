@@ -145,7 +145,7 @@ class MiMonitor2(Device):
         self.__data = self.__fetch_data()
 
     @property
-    def data(self):
+    def data(self) -> dict:
         """Returns device core data."""
         return dict(
             [
@@ -156,7 +156,7 @@ class MiMonitor2(Device):
         )
 
     @property
-    def health(self):
+    def health(self) -> dict:
         """Returns device health data."""
         return dict(
             [
