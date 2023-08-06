@@ -1,15 +1,16 @@
 import os
 import logging
 from logging.handlers import RotatingFileHandler
+
 from dotenv import load_dotenv
 
 
-###
-### GENERAL CONFIGURATION
-###
+#############################
+### GENERAL CONFIGURATION ###
+#############################
 
 # current system version
-VERSION = "0.4.1"
+VERSION = "0.4.2"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -21,7 +22,7 @@ LOG_FILE = os.path.join(BASE_DIR, "scripts.log")
 LOG_FILE_SIZE = 50
 
 # logging configuration
-rfh = logging.handlers.RotatingFileHandler(
+rfh = RotatingFileHandler(
     filename=LOG_FILE, mode="a", maxBytes=LOG_FILE_SIZE * 1024 * 1024
 )
 logging.basicConfig(
@@ -31,12 +32,12 @@ logging.basicConfig(
 )
 
 # loading envinronmental variables
-load_dotenv(os.environ.get("VARIABLES_PATH"))   
+load_dotenv(os.environ.get("VARIABLES_PATH"))
 
 
-###
-### SCRIPTS CONFIGURATION
-###
+#############################
+### SCRIPTS CONFIGURATION ###
+#############################
 
 # databases configuration
 DATABASE = {
@@ -53,7 +54,7 @@ DATABASE = {
         # host has to be set as 'localhost'
         "HOST": "localhost",
         "PORT": os.environ.get("POSTGRE_PORT"),
-    }
+    },
 }
 
 # devices configuration
@@ -63,7 +64,7 @@ DEVICES = {"TOKENS": {"69:90:c1:7f:e2:0c": os.environ.get("XIAOMI_PURIFIER_TOKEN
 SCRIPTS = {
     "SENTRY": {
         "NOTIFIES": {
-            "UNKNOWN_DEVICE": False,
+            "UNKNOWN_DEVICE": True,
             "NETWORK_OVERLOAD": True,
             "TEMPERATURE": True,
             "AQI": True,
