@@ -17,9 +17,9 @@ from scapy.all import arping
 from influxdb_client import Point
 
 import config
-from sentry import Sentry
-from models.device import MiAirPurifier3H, MiMonitor2
-from models.database import PostgreSQL, InfluxDB
+from scripts.sentry import Sentry
+from scripts.models.device import MiAirPurifier3H, MiMonitor2
+from scripts.models.database import PostgreSQL, InfluxDB
 
 
 class Gatherer(ABC):
@@ -51,7 +51,7 @@ class Network(Gatherer):
             mac_addresses = copy.deepcopy(data)
             # verifies if there is a new MAC address in received list
             # or number of connected devices exceedes threshold
-            Sentry(data_type="network", dataset=mac_addresses)
+            Sentry.check_network(mac_addresses=mac_addresses)
             # connects to influx database
             with InfluxDB() as influx_database:
                 # "availability" tag
@@ -194,8 +194,8 @@ class Air(Gatherer):
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
         else:
             # calls sentry script to verifies data
-            Sentry(data_type="air", dataset=air_data)
-            Sentry(data_type="diagnostic", dataset=diagnostical_data)
+            Sentry.check_air(air_data=air_data)
+            Sentry.check_diagnostic(diagnostical_data=diagnostical_data)
             return air_data
 
     def __air_scan_purifier(self, device_data: dict) -> Union[dict, dict]:
@@ -240,7 +240,7 @@ class Air(Gatherer):
             air_devices_data = []
             # connects to postgresql
             with PostgreSQL() as postgresql_database:
-                postgresql_database.execute(
+                postgresql_database.api.execute(
                     """
                         SELECT devices_device.name, devices_device.ip_address, devices_device.mac_address, rooms_room.name
                         FROM devices_device
@@ -250,7 +250,7 @@ class Air(Gatherer):
                         """
                 )
                 query_result = [
-                    device_info for device_info in postgresql_database.fetchall()
+                    device_info for device_info in postgresql_database.api.fetchall()
                 ]
                 # transforms query result to list of dictionaries
                 for row in query_result:
