@@ -20,8 +20,8 @@ class Database:
 class PostgreSQL(Database):
     """Class responsible for PostgreSQL database connection."""
 
-    def __enter__(self) -> object:
-        # initializes database connection
+    def __init__(self) -> None:
+        """Initializes database and api connection."""
         logging.debug(f"Connecting to {self.__class__.__name__}")
         self.client = psycopg2.connect(
             host=config.DATABASE["POSTGRE"]["HOST"],
@@ -32,10 +32,13 @@ class PostgreSQL(Database):
         self.client.autocommit = True
         self.api = self.client.cursor()
         logging.debug(f"Connected to {self.__class__.__name__}")
-        return self.api
+
+    def __enter__(self) -> object:
+        """Return object itself."""
+        return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        # closes database connection
+        """Closes database and api connection."""
         # if any exception ocurred during context process
         if any((exc_type, exc_value, exc_traceback)):
             logging.error(exc_traceback)
@@ -44,6 +47,16 @@ class PostgreSQL(Database):
         self.api.close()
         self.client.close()
         logging.debug(f"{self.__class__.__name__} connection has been closed")
+
+    def known_devices_mac_addresses(self) -> Set[str]:
+        """Returns mac addresses of registered devices."""
+        self.api.execute("SELECT mac_address FROM devices_device;")
+        return {mac_address[0] for mac_address in self.api.fetchall()}
+
+    def unknown_devices_mac_addresses(self) -> Set[str]:
+        """Returns mac addresses of unregistered devices."""
+        self.api.execute("SELECT mac_address FROM unknown_devices;")
+        return {mac_address[0] for mac_address in self.api.fetchall()}
 
 
 class InfluxDB(Database):

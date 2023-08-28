@@ -6,35 +6,29 @@ import logging
 import os
 import sys
 import traceback
+from datetime import datetime
 from typing import *
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import config
-from messenger import Messenger
-from models.database import PostgreSQL
+from scripts.messenger import Messenger
+from scripts.models.database import PostgreSQL
 
 
 class Sentry:
     """This class methods checks if any of predefined conditions are met.
-    If any of them are, notification are sent.
     - unregistered device is connected to local network.
     - temperature/aqi/humidity threshold became exceeded.
+    - diagnostic data of connected devies are incorrect.
+    If any of them are, notification are sent.
     """
 
     DEVICE_HEALTH_KEYS = ("battery", "filter")
     DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter": "filtra"}
 
-    def __init__(self, data_type: str, dataset: Any) -> None:
-        """Verifies dataset base on data source."""
-        if data_type == "network":
-            self.__check_network(mac_addresses=dataset)
-        if data_type == "air":
-            self.__check_air(air_data=dataset)
-        if data_type == "diagnostic":
-            self.__check_diagnostic(diagnostical_data=dataset)
-
-    def __check_air(self, air_data: List[dict]) -> None:
+    @classmethod
+    def check_air(self, air_data: List[dict]) -> None:
         """Checks if air temperature, quality or humidity does not exceed defined tresholds in any of datasets."""
         try:
             # iterate over air devices data
@@ -81,39 +75,18 @@ class Sentry:
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
 
-    def __check_network(self, mac_addresses: Set = {}) -> None:
-        """Verifies if there is no unregistered device MAC address
-        in set of gatherec MAC addresses by gatherer script.
+    @classmethod
+    def check_network(self, mac_addresses: Set = {}) -> None:
+        """Checks if following conditions are met:
+        - number of connected devices to local network is more than predefined value.
+        - unknown device has connected to local network.
         """
         try:
-            # numer of active devices in local network
+
+            # CHECKS IF NUMBER OF CONNECTED DEVICES TO LOCAL NETWORK IS MORE THAN PREDEFINED VALUE.
+            # number of active devices in local network
             number_of_devices = len(mac_addresses)
-            # set of registered devices MAC addresses
-            known_devices = self.__get_known_devices_mac_addresses()
-            # set that contains unregistered devices MAC addresses
-            unknown_devices = mac_addresses - known_devices
-            # if above set contains any address and notification flag is set to True
-            if unknown_devices:
-                with PostgreSQL() as postgresql_database:
-                    # checks if unknown address already exists in database
-                    postgresql_database.execute("SELECT * FROM unknown_devices;")
-                    query_result = [row for row in postgresql_database.fetchall()]
-                    # if not, inserts new mac address to database
-                    if not query_result:
-                        # saves unknown address to postgresql database
-                        for address in unknown_devices:
-                            postgresql_database.execute(
-                                "INSERT INTO unknown_devices(mac_address) VALUES(%s);",
-                                (address,)
-                            )
-                        if config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]:
-                            logging.warning(
-                                "SENTRY | Unknown device has connected to local network!"
-                            )
-                            Messenger.send_notification(
-                                text="Nieznane urządzenie połączyło się z siecią lokalną!"
-                            )
-            # if number of active devices in local network is equal or higher than predefined value
+            # if number of active devices is equal or higher than predefined value
             if (
                 config.SCRIPTS["SENTRY"]["NOTIFIES"]["NETWORK_OVERLOAD"]
                 and number_of_devices
@@ -125,10 +98,43 @@ class Sentry:
                 Messenger.send_notification(
                     text=f"Przeciążenie sieci! Liczba aktywnych urządzeń = {number_of_devices}"
                 )
+
+            # CHECKS IF UNKNOWN DEVICE HAS CONNECTED TO LOCAL NETWORK.
+            # set of registered devices MAC addresses
+            with PostgreSQL() as postgresql_database:
+                known_devices = postgresql_database.known_devices_mac_addresses()
+            # set that contains unregistered devices MAC addresses
+            unknown_devices = mac_addresses - known_devices
+            # if above set contains any address
+            if unknown_devices:
+                # if notification flag is set to true
+                if config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]:
+                    Messenger.send_notification(
+                        text="Nieznane urządzenie połączyło się z siecią lokalną!"
+                    )
+                logging.warning(
+                    "SENTRY | Unknown device has connected to local network!"
+                )
+                # checks if unknown addresses already exists in database
+                with PostgreSQL() as postgresql_database:
+                    unknown_devices_mac_addresses = postgresql_database.unknown_devices_mac_addresses()
+                    for address in unknown_devices:
+                        # if not, inserts new mac address to database
+                        if address not in unknown_devices_mac_addresses:
+                            postgresql_database.api.execute(
+                                "INSERT INTO unknown_devices(mac_address, last_time) VALUES(%s, %s);",
+                                (address, datetime.now(),)
+                            )
+                        # TODO
+                        # otherwise increment 'counter' value
+                        else:
+                            pass
+
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
 
-    def __check_diagnostic(self, diagnostical_data: List[dict]):
+    @classmethod
+    def check_diagnostic(self, diagnostical_data: List[dict]) -> None:
         """Verifies that the battery, filter or other consumable parts of the device are not at the end of their life."""
         try:
             # iteration over diagnostical data
@@ -152,9 +158,3 @@ class Sentry:
                             )
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
-
-    def __get_known_devices_mac_addresses(self) -> Set[str]:
-        """Makes query to postgre database and returns set of registered MAC addresses."""
-        with PostgreSQL() as postgresql_database:
-            postgresql_database.execute("SELECT mac_address FROM devices_device;")
-            return {mac_address[0] for mac_address in postgresql_database.fetchall()}

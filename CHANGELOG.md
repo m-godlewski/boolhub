@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.3
+- Unit tests classes added. Sentry script improved. Script paths logic reworked.
+
 ## 0.4.2
 - Database logic moved to separated script.
 
