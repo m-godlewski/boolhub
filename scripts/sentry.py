@@ -125,10 +125,12 @@ class Sentry:
                                 "INSERT INTO unknown_devices(mac_address, last_time) VALUES(%s, %s);",
                                 (address, datetime.now(),)
                             )
-                        # TODO
-                        # otherwise increment 'counter' value
+                        # otherwise update 'last_time' column
                         else:
-                            pass
+                            postgresql_database.api.execute(
+                                "UPDATE unknown_devices SET last_time = %s WHERE mac_address = %s;",
+                                (datetime.now(), address,)
+                            )
 
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")

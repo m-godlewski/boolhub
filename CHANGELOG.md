@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.4
+- Implemented updating of last_time column in unknown_devices table.
+
 ## 0.4.3
 - Unit tests classes added. Sentry script improved. Script paths logic reworked.
 
