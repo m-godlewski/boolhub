@@ -16,7 +16,8 @@ class Device(models.Model):
         ("tv", "TV/Odtwarzacz multimedialny"),
         ("light", "Oświetlenie"),
         ("air", "Oczyszczacz powietrza/termometr"),
-        ("console", "Konsola")
+        ("console", "Konsola"),
+        ("other", "Inne"),
     ]
 
     # device name

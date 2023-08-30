@@ -76,12 +76,17 @@ class Sentry:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
 
     @classmethod
-    def check_network(self, mac_addresses: Set = {}) -> None:
+    def check_network(self, mac_addresses: Set = {}) -> List[str]:
         """Checks if following conditions are met:
         - number of connected devices to local network is more than predefined value.
         - unknown device has connected to local network.
+        (For testing purposes only) Returns set of strings representing detected issues.
+        If there is no issues, empty set will be returned.
         """
         try:
+
+            # set of issues initialization
+            issues = set()
 
             # CHECKS IF NUMBER OF CONNECTED DEVICES TO LOCAL NETWORK IS MORE THAN PREDEFINED VALUE.
             # number of active devices in local network
@@ -98,6 +103,7 @@ class Sentry:
                 Messenger.send_notification(
                     text=f"Przeciążenie sieci! Liczba aktywnych urządzeń = {number_of_devices}"
                 )
+                issues.add("overload")
 
             # CHECKS IF UNKNOWN DEVICE HAS CONNECTED TO LOCAL NETWORK.
             # set of registered devices MAC addresses
@@ -115,6 +121,7 @@ class Sentry:
                 logging.warning(
                     "SENTRY | Unknown device has connected to local network!"
                 )
+                issues.add("unknown_device")
                 # checks if unknown addresses already exists in database
                 with PostgreSQL() as postgresql_database:
                     unknown_devices_mac_addresses = postgresql_database.unknown_devices_mac_addresses()
@@ -134,6 +141,8 @@ class Sentry:
 
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+        finally:
+            return issues
 
     @classmethod
     def check_diagnostic(self, diagnostical_data: List[dict]) -> None:
