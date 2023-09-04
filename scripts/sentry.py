@@ -28,9 +28,16 @@ class Sentry:
     DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter": "filtra"}
 
     @classmethod
-    def check_air(self, air_data: List[dict]) -> None:
-        """Checks if air temperature, quality or humidity does not exceed defined tresholds in any of datasets."""
+    def check_air(self, air_data: List[dict]) -> List[str]:
+        """Checks if air temperature, quality or humidity does not exceed defined tresholds in any of datasets.
+        (For testing purposes only) Returns set of tuples, that informs about detected issues. If there was no
+        isues, empty set will be returned.
+        """
         try:
+
+            # empty set of issues
+            issues = set()
+
             # iterate over air devices data
             for data in air_data:
                 # checks if air temperature exceeds threshold
@@ -49,6 +56,7 @@ class Sentry:
                     Messenger.send_notification(
                         text=f"Temperatura w {data.get('location')} wynosi {data.get('temperature')}°C"
                     )
+                    issues.add(("temperature", data.get("location")))
                 # checks if air quality exceeds threshold
                 if (
                     data.get("aqi")
@@ -58,6 +66,7 @@ class Sentry:
                     Messenger.send_notification(
                         text=f"Jakość powietrza w {data.get('location')} wynosi {data.get('aqi')}μg/m³"
                     )
+                    issues.add(("aqi", data.get("location")))
                 # checks if air humidity exceeds threshold
                 if (
                     data.get("humidity")
@@ -72,8 +81,12 @@ class Sentry:
                     Messenger.send_notification(
                         text=f"Wilgotność powietrza w {data.get('location')} wynosi {data.get('humidity')}%"
                     )
+                    issues.add(("humidity", data.get("location")))
+
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+        finally:
+            return issues
 
     @classmethod
     def check_network(self, mac_addresses: Set = {}) -> List[str]:
@@ -85,7 +98,7 @@ class Sentry:
         """
         try:
 
-            # set of issues initialization
+            # empty set of issues
             issues = set()
 
             # CHECKS IF NUMBER OF CONNECTED DEVICES TO LOCAL NETWORK IS MORE THAN PREDEFINED VALUE.
@@ -145,9 +158,17 @@ class Sentry:
             return issues
 
     @classmethod
-    def check_diagnostic(self, diagnostical_data: List[dict]) -> None:
-        """Verifies that the battery, filter or other consumable parts of the device are not at the end of their life."""
+    def check_diagnostic(self, diagnostical_data: List[dict]) -> List[str]:
+        """Verifies that the battery, filter or other consumable parts of the device
+        are not at the end of their life.
+        (For testing purposes only) Returns set of strings representing detected issues.
+        If there is no issues, empty set will be returned.
+        """
         try:
+
+            # empty set of issues
+            issues = set()
+
             # iteration over diagnostical data
             for data in diagnostical_data:
                 # iterate over "health keys"
@@ -167,5 +188,9 @@ class Sentry:
                             Messenger.send_notification(
                                 text=f"Poziom {self.DEVICE_HEALTH_KEY_TRANSLATE_MAP[key]} w urządzeniu {data['name']} w lokacji {data['location']} wynosi {data[key]}"
                             )
+                            issues.add((key, data.get("location")))
+
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+        finally:
+            return issues
