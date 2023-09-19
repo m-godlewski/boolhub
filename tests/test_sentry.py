@@ -13,7 +13,7 @@ from unittest import TestCase
 from randmac import RandMac
 
 import config
-from scripts.sentry import Sentry
+from scripts import sentry
 
 
 class TestSentry(TestCase):
@@ -34,7 +34,7 @@ class TestSentry(TestCase):
                 "temperature": random.randint(up, up+3)
             }
         ]
-        output_data_up = Sentry.check_air(air_data=input_data_up)
+        output_data_up = sentry.check_air(air_data=input_data_up)
         self.assertIn(("temperature", "test"), output_data_up)
         # testing exceeding bottom threshold
         input_data_bottom = [
@@ -43,7 +43,7 @@ class TestSentry(TestCase):
                 "temperature": random.randint(bottom-3, bottom)
             }
         ]
-        output_data_bottom = Sentry.check_air(air_data=input_data_bottom)
+        output_data_bottom = sentry.check_air(air_data=input_data_bottom)
         self.assertIn(("temperature", "test"), output_data_bottom)
 
     def test_air_aqi(self):
@@ -58,7 +58,7 @@ class TestSentry(TestCase):
                 "aqi": random.randint(threshold, threshold+100)
             }
         ]
-        output_data = Sentry.check_air(air_data=input_data)
+        output_data = sentry.check_air(air_data=input_data)
         self.assertIn(("aqi", "test"), output_data)
 
     def test_air_humidity(self):
@@ -74,7 +74,7 @@ class TestSentry(TestCase):
                 "humidity": random.randint(up, up+5)
             }
         ]
-        output_data_up = Sentry.check_air(air_data=input_data_up)
+        output_data_up = sentry.check_air(air_data=input_data_up)
         self.assertIn(("humidity", "test"), output_data_up)
         # testing exceeding bottom threshold
         input_data_bottom = [
@@ -83,7 +83,7 @@ class TestSentry(TestCase):
                 "humidity": random.randint(bottom-5, bottom)
             }
         ]
-        output_data_bottom = Sentry.check_air(air_data=input_data_bottom)
+        output_data_bottom = sentry.check_air(air_data=input_data_bottom)
         self.assertIn(("humidity", "test"), output_data_bottom)
 
     # endregion
@@ -95,7 +95,7 @@ class TestSentry(TestCase):
         # generate set containing ten random mac addresses
         input_data = self.__generate_random_mac_addresses(n=10)
         # test method
-        output_data = Sentry.check_network(mac_addresses=input_data)
+        output_data = sentry.check_network(mac_addresses=input_data)
         self.assertIn("overload", output_data)
 
     def test_network_unknown_device(self):
@@ -103,7 +103,7 @@ class TestSentry(TestCase):
         # generate one random (unknown for system) mac address
         input_data = self.__generate_random_mac_addresses(n=1)
         # test method
-        output_data = Sentry.check_network(mac_addresses=input_data)
+        output_data = sentry.check_network(mac_addresses=input_data)
         self.assertIn("unknown_device", output_data)
 
     # endregion
@@ -122,7 +122,7 @@ class TestSentry(TestCase):
                 "battery": random.randint(threshold-5, threshold)
             }
         ]
-        output_data_battery = Sentry.check_air(air_data=input_data_battery)
+        output_data_battery = sentry.check_air(air_data=input_data_battery)
         # TODO untill air devices not always returns data over bluetooth
         # there is need to use second condition
         assert ("battery", "test") in output_data_battery or len(output_data_battery) == 0
@@ -133,7 +133,7 @@ class TestSentry(TestCase):
                 "filter": random.randint(threshold-5, threshold)
             }
         ]
-        output_data_filter = Sentry.check_air(air_data=input_data_filter)
+        output_data_filter = sentry.check_air(air_data=input_data_filter)
         # TODO untill air devices not always returns data over bluetooth
         # there is need to use second condition
         assert ("filter", "test") in output_data_filter or len(output_data_filter) == 0

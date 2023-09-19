@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.5
+- Unit test updated, sentry and messenger module methods moved out of class.
+
 ## 0.4.4
 - Implemented updating of last_time column in unknown_devices table.
 
