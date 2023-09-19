@@ -17,7 +17,7 @@ from scapy.all import arping
 from influxdb_client import Point
 
 import config
-from scripts.sentry import Sentry
+from scripts import sentry
 from scripts.models.device import MiAirPurifier3H, MiMonitor2
 from scripts.models.database import PostgreSQL, InfluxDB
 
@@ -51,7 +51,7 @@ class Network(Gatherer):
             mac_addresses = copy.deepcopy(data)
             # verifies if there is a new MAC address in received list
             # or number of connected devices exceedes threshold
-            Sentry.check_network(mac_addresses=mac_addresses)
+            sentry.check_network(mac_addresses=mac_addresses)
             # connects to influx database
             with InfluxDB() as influx_database:
                 # "availability" tag
@@ -109,6 +109,8 @@ class Network(Gatherer):
             )
         except Exception:
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            print(f"Unknown error occured!\n{traceback.format_exc()}")
+            return set()
         else:
             return mac_addresses
 
@@ -194,8 +196,8 @@ class Air(Gatherer):
             logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
         else:
             # calls sentry script to verifies data
-            Sentry.check_air(air_data=air_data)
-            Sentry.check_diagnostic(diagnostical_data=diagnostical_data)
+            sentry.check_air(air_data=air_data)
+            sentry.check_diagnostic(diagnostical_data=diagnostical_data)
             return air_data
 
     def __air_scan_purifier(self, device_data: dict) -> Union[dict, dict]:
