@@ -1,5 +1,5 @@
 """
-This script contains dedicated classes for comunication with each IoT device connected to system.
+This script contains dedicated classes for communication with each IoT device connected to system.
 """
 
 import logging

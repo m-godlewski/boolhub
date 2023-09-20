@@ -31,7 +31,7 @@ logging.basicConfig(
     handlers=[rfh],
 )
 
-# loading envinronmental variables
+# loading environmental variables
 load_dotenv(os.environ.get("VARIABLES_PATH"))
 
 
@@ -50,7 +50,7 @@ DATABASE = {
         "NAME": os.environ.get("POSTGRE_NAME"),
         "USER": os.environ.get("POSTGRE_USER"),
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
-        # untill scripts are not running inside docker container
+        # until scripts are not running inside docker container
         # host has to be set as 'localhost'
         "HOST": "localhost",
         "PORT": os.environ.get("POSTGRE_PORT"),

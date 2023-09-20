@@ -13,9 +13,9 @@ from scripts import messenger
 
 
 class TestMessenger(TestCase):
-    """Messenger module test class."""
 
     def test_notification(self):
-        """Sends test notification and verifies HTTP response code."""
+        # calls tested method
         status_code = messenger.send_notification("PyTest message!")
+        # checks returned http code
         self.assertEqual(status_code, 200)

@@ -21,7 +21,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Loading envinronmental variables
+# Loading environmental variables
 load_dotenv(os.environ.get("VARIABLES_PATH"))
 
 # SECURITY WARNING: keep the secret key used in production secret!
