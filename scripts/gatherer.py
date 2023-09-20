@@ -41,16 +41,17 @@ class Network(Gatherer):
         # gathers network data
         self.gather_network_data(data=arp_scan_results)
 
-    def gather_network_data(self, data: Set[str]) -> None:
+    def gather_network_data(self, data: Set[str]) -> bool:
         """Saves MAC addresses and number of active devices to database.
         Before data are written to database, sentry.py script is used to verify
         if there are unknown MAC addresses in received 'data' set or
-        number of connected devices exceedes threshold."""
+        number of connected devices exceed threshold.
+        Returns True, if saving process succeed, otherwise False."""
         try:
             # copying received data
             mac_addresses = copy.deepcopy(data)
             # verifies if there is a new MAC address in received list
-            # or number of connected devices exceedes threshold
+            # or number of connected devices exceed threshold
             sentry.check_network(mac_addresses=mac_addresses)
             # connects to influx database
             with InfluxDB() as influx_database:
@@ -82,21 +83,24 @@ class Network(Gatherer):
                     org=config.DATABASE["INFLUX"]["ORGANIZATION"],
                     record=point,
                 )
+                logging.info(
+                    f"GATHERER | "
+                    f"LOCATION = local | "
+                    f"DATA = {self.BUCKET}.availability | "
+                    f"VALUES = {mac_addresses} | "
+                )
+                logging.info(
+                    f"GATHERER | "
+                    f"LOCATION = local | "
+                    f"DATA = {self.BUCKET}.number | "
+                    f"VALUES = {number_of_devices} | "
+                )
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return False
         else:
-            logging.info(
-                f"GATHERER | "
-                f"LOCATION = local | "
-                f"DATA = {self.BUCKET}.availability | "
-                f"VALUES = {mac_addresses} | "
-            )
-            logging.info(
-                f"GATHERER | "
-                f"LOCATION = local | "
-                f"DATA = {self.BUCKET}.number | "
-                f"VALUES = {number_of_devices} | "
-            )
+
+            return True
 
     def __arp_scan(self) -> Set[str]:
         """Performs arp scan of local network and returns list of MAC addresses."""
@@ -108,8 +112,7 @@ class Network(Gatherer):
                 destination["Ether"].src for source, destination in answered
             )
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
-            print(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return set()
         else:
             return mac_addresses
@@ -124,12 +127,13 @@ class Air(Gatherer):
     def __init__(self) -> None:
         """Constructor and main class method."""
         # retrieves data from each 'air' device
-        air_scan_results = self.__air_scan()
+        air_scan_results, _ = self.__air_scan()
         # saves gathered data to database
         self.gather_air_data(air_scan_results)
 
-    def gather_air_data(self, air_data: List[dict]) -> None:
-        """Saves retreived data from each air devices to database."""
+    def gather_air_data(self, air_data: List[dict]) -> bool:
+        """Saves retrieved data from each air devices to database.
+        Returns True, if saving process succeed, otherwise False."""
         try:
             # connects to influx database
             with InfluxDB() as influx_database:
@@ -164,15 +168,18 @@ class Air(Gatherer):
                         f"VALUES = {aqi}, {humidity}, {temperature} | "
                     )
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return False
+        else:
+            return True
 
-    def __air_scan(self) -> List[dict]:
+    def __air_scan(self) -> Union[list, list]:
         """Gathers air data from each device tagged as "air" in local network."""
         try:
             # list that stores air data from each device
             air_data = []
-            # list that stores diagnostical data from each device
-            diagnostical_data = []
+            # list that stores diagnostic data from each device
+            diagnostic_data = []
             # variable that stores single device data
             data = None
             # air devices data
@@ -191,14 +198,15 @@ class Air(Gatherer):
                 if data:
                     air_data.append(data)
                 if health_data:
-                    diagnostical_data.append(health_data)
+                    diagnostic_data.append(health_data)
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return [], []
         else:
             # calls sentry script to verifies data
             sentry.check_air(air_data=air_data)
-            sentry.check_diagnostic(diagnostical_data=diagnostical_data)
-            return air_data
+            sentry.check_diagnostic(diagnostic_data=diagnostic_data)
+            return air_data, diagnostic_data
 
     def __air_scan_purifier(self, device_data: dict) -> Union[dict, dict]:
         """Gathers data from Xiaomi Purifier device."""
@@ -213,7 +221,7 @@ class Air(Gatherer):
             data = {**device.data, **device_data}
             health_data = {**device.health, **device_data}
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return {}, {}
         else:
             return data, health_data
@@ -230,7 +238,7 @@ class Air(Gatherer):
             data = {**device.data, **device_data}
             health_data = {**device.health, **device_data}
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return {}, {}
         else:
             return data, health_data
@@ -265,7 +273,7 @@ class Air(Gatherer):
                         }
                     )
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return []
         else:
             return air_devices_data

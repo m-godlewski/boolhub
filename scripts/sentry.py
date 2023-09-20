@@ -3,7 +3,7 @@ Script used for monitoring data flowing over system.
 Those methods checks if any of predefined conditions are met.
 - unregistered device is connected to local network.
 - temperature/aqi/humidity threshold became exceeded.
-- diagnostic data of connected devies are incorrect.
+- diagnostic data of connected devices are incorrect.
 If any of them are, notification are sent.
 """
 
@@ -27,9 +27,9 @@ DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter": "filtra"}
 
 
 def check_air(air_data: List[dict]) -> List[str]:
-    """Checks if air temperature, quality or humidity does not exceed defined tresholds in any of datasets.
+    """Checks if air temperature, quality or humidity does not exceed defined thresholds in any of datasets.
     (For testing purposes only) Returns set of tuples, that informs about detected issues. If there was no
-    isues, empty set will be returned.
+    issues, empty set will be returned.
     """
     try:
 
@@ -156,7 +156,7 @@ def check_network(mac_addresses: Set = {}) -> List[str]:
         return issues
 
 
-def check_diagnostic(diagnostical_data: List[dict]) -> List[str]:
+def check_diagnostic(diagnostic_data: List[dict]) -> List[str]:
     """Verifies that the battery, filter or other consumable parts of the device
     are not at the end of their life.
     (For testing purposes only) Returns set of strings representing detected issues.
@@ -167,8 +167,8 @@ def check_diagnostic(diagnostical_data: List[dict]) -> List[str]:
         # empty set of issues
         issues = set()
 
-        # iteration over diagnostical data
-        for data in diagnostical_data:
+        # iteration over diagnostic data
+        for data in diagnostic_data:
             # iterate over "health keys"
             for key in DEVICE_HEALTH_KEYS:
                 # if consumable part level exceeds predefined level
@@ -189,6 +189,6 @@ def check_diagnostic(diagnostical_data: List[dict]) -> List[str]:
                         issues.add((key, data.get("location")))
 
     except Exception:
-        logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+        logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
     finally:
         return issues

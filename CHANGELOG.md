@@ -2,6 +2,7 @@
 
 ## 0.4.5
 - Unit test updated, sentry and messenger module methods moved out of class.
+- Comments spelling corrected.
 
 ## 0.4.4
 - Implemented updating of last_time column in unknown_devices table.
@@ -28,7 +29,7 @@
 - Limited script log size to 50 megabytes.
 
 ## 0.2.0
-- Notification for diagnostical data has been implemented.
+- Notification for diagnostic data has been implemented.
 
 ## 0.1.5
 - Sentry will now send notification if number of active devices in network exceeds value defined in config.py
