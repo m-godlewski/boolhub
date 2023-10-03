@@ -50,6 +50,20 @@ services:
       - serve
     environment:
       - TZ=CEST
+  postgresql:
+    container_name: postgresql
+    image: postgres:15.3
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - /data/postgres/:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${POSTGRE_USER}
+      - POSTGRES_PASSWORD=${POSTGRE_PASSWORD}
+      - POSTGRES_DB=${POSTGRE_HOST}
+    networks:
+      - boolnet
   central:
     container_name: central
     build: ${BOOLHUB_CENTRAL_PATH}
@@ -63,20 +77,6 @@ services:
     depends_on:
       - postgresql
     command: python manage.py runserver 0.0.0.0:8000
-    networks:
-      - boolnet
-  postgresql:
-    container_name: postgresql
-    image: postgres:15.3
-    restart: always
-    ports:
-      - 5432:5432
-    volumes:
-      - /data/postgres/:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=${POSTGRE_USER}
-      - POSTGRES_PASSWORD=${POSTGRE_PASSWORD}
-      - POSTGRES_DB=${POSTGRE_HOST}
     networks:
       - boolnet
 

@@ -42,7 +42,7 @@ load_dotenv(os.environ.get("VARIABLES_PATH"))
 # databases configuration
 DATABASE = {
     "INFLUX": {
-        "URL": "http://localhost:8086",
+        "URL": f"http://{os.environ.get('INFLUXDB_HOST')}:{os.environ.get('INFLUXDB_PORT')}",
         "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
         "ORGANIZATION": os.environ.get("INFLUXDB_ORGANIZATION"),
     },
@@ -50,14 +50,13 @@ DATABASE = {
         "NAME": os.environ.get("POSTGRE_NAME"),
         "USER": os.environ.get("POSTGRE_USER"),
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
-        # until scripts are not running inside docker container
-        # host has to be set as 'localhost'
-        "HOST": "localhost",
+        "HOST": os.environ.get("POSTGRE_HOST"),
         "PORT": os.environ.get("POSTGRE_PORT"),
     },
 }
 
 # devices configuration
+# TOOD - move this to database field
 DEVICES = {"TOKENS": {"69:90:c1:7f:e2:0c": os.environ.get("XIAOMI_PURIFIER_TOKEN")}}
 
 # scripts configuration
@@ -79,5 +78,5 @@ SCRIPTS = {
             "HUMIDITY": {"UP": 85, "BOTTOM": 20},
         },
     },
-    "MESSENGER": {"NTFY_SERVER_URL": "https://ntfy.sh/boolhub"},
+    "MESSENGER": {"NTFY_SERVER_URL": os.environ.get("NTFY_SERVER_URL")},
 }

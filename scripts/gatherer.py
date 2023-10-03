@@ -231,8 +231,7 @@ class Air(Gatherer):
         try:
             # fetches data from device
             device = MiMonitor2(
-                ip_address=device_data.get("ip_address"),
-                mac_address=device_data.get("mac_address"),
+                mac_address=device_data.get("mac_address")
             )
             # merges datasets
             data = {**device.data, **device_data}

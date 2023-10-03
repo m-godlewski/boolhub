@@ -20,7 +20,7 @@ def send_notification(text: str) -> int:
             data=text.encode("utf-8"),
         )
     except Exception:
-        logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+        logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
         return response.status_code
     else:
         logging.debug(

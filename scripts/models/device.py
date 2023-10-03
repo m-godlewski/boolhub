@@ -1,5 +1,6 @@
 """
-This script contains dedicated classes for communication with each IoT device connected to system.
+This script contains dedicated classes for communication with IoT device connected to system.
+Newly created device class should inherit from Device class.
 """
 
 import logging
@@ -15,7 +16,7 @@ from lywsd03mmc import Lywsd03mmcClient
 class Device(ABC):
     """Base class of each device class in this script."""
 
-    def __init__(self, ip_address: str, mac_address: str) -> None:
+    def __init__(self, mac_address: str, ip_address: str="") -> None:
         """Initializing class object by assigning ip and mac addresses."""
         self.ip_address = ip_address
         self.mac_address = mac_address
@@ -24,7 +25,7 @@ class Device(ABC):
 class MiAirPurifier3H(Device):
     """Class used for communication with Xiaomi Mi Air Purifier 3H."""
 
-    # sets of keys for device health and air data
+    # sets of device health keys
     HEALTH_KEYS = (
         "filter_life_remaining",
         "filter_hours_used",
@@ -32,12 +33,18 @@ class MiAirPurifier3H(Device):
         "use_time",
         "purify_volume",
     )
-    AIR_DATA_KEYS = ("aqi", "humidity", "temperature")
 
-    def __init__(self, ip_address: str, mac_address: str, token: str) -> None:
-        """Class constructor."""
-        super().__init__(ip_address, mac_address)
-        self.token = token
+    # sets of device data keys
+    AIR_DATA_KEYS = (
+        "aqi",
+        "humidity",
+        "temperature"
+    )
+
+    def __init__(self, mac_address: str, ip_address: str, token: str) -> None:
+        # calls super class constructor
+        super().__init__(mac_address, ip_address)
+        self.__token = token
         self.__raw_data = self.__fetch_data()
         self.__data = self.__process_data()
 
@@ -71,7 +78,7 @@ class MiAirPurifier3H(Device):
             data = os.popen(
                 f"miiocli airpurifiermiot \
                 --ip \{self.ip_address} \
-                --token {self.token} \
+                --token {self.__token} \
                 status"
             ).read()
         except Exception:
@@ -94,7 +101,7 @@ class MiAirPurifier3H(Device):
                 # converts data types of dictionary values
                 data[key] = self.__type_conversion(value)
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return {}
         else:
             return data
@@ -135,13 +142,15 @@ class MiAirPurifier3H(Device):
 class MiMonitor2(Device):
     """Class used for communication with Xiaomi Mi Monitor 2."""
 
-    # sets of keys for device health and air data
+    # sets of device health keys
     HEALTH_KEYS = ("battery")
+
+    # sets of device data keys
     AIR_DATA_KEYS = ("temperature", "humidity")
 
-    def __init__(self, ip_address: str, mac_address: str) -> None:
-        """Class constructor."""
-        super().__init__(ip_address, mac_address)
+    def __init__(self, mac_address: str) -> None:
+        # calls super class constructor
+        super().__init__(mac_address)
         self.__data = self.__fetch_data()
 
     @property
@@ -174,10 +183,10 @@ class MiMonitor2(Device):
             # converts data to dictionary
             data = client.data._asdict()
         except bluepy.btle.BTLEDisconnectError:
-            logging.error("Error occured when trying connect to device!")
+            logging.error("Error occurred when trying connect to device!")
             return {}
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return {}
         else:
             return data
