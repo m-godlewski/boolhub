@@ -82,7 +82,7 @@ def check_air(air_data: List[dict]) -> List[str]:
                 issues.add(("humidity", data.get("location")))
 
     except Exception:
-        logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+        logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
     finally:
         return issues
 
@@ -151,7 +151,7 @@ def check_network(mac_addresses: Set = {}) -> List[str]:
                         )
 
     except Exception:
-        logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+        logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
     finally:
         return issues
 
