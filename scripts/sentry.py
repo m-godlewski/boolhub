@@ -119,7 +119,7 @@ def check_network(mac_addresses: Set = {}) -> List[str]:
         # CHECKS IF UNKNOWN DEVICE HAS CONNECTED TO LOCAL NETWORK.
         # set of registered devices MAC addresses
         with PostgreSQL() as postgresql_database:
-            known_devices = postgresql_database.known_devices_mac_addresses()
+            known_devices = postgresql_database.known_devices_mac_addresses
         # set that contains unregistered devices MAC addresses
         unknown_devices = mac_addresses - known_devices
         # if above set contains any address
@@ -135,7 +135,7 @@ def check_network(mac_addresses: Set = {}) -> List[str]:
             issues.add("unknown_device")
             # checks if unknown addresses already exists in database
             with PostgreSQL() as postgresql_database:
-                unknown_devices_mac_addresses = postgresql_database.unknown_devices_mac_addresses()
+                unknown_devices_mac_addresses = postgresql_database.unknown_devices_mac_addresses
                 for address in unknown_devices:
                     # if not, inserts new mac address to database
                     if address not in unknown_devices_mac_addresses:

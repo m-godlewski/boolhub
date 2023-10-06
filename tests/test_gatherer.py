@@ -27,7 +27,7 @@ class TestGatherer(TestCase):
         # checks if returned dataset is not empty
         self.assertTrue(arp_scan_results)
         # calls tested method
-        output_data = network_gatherer.gather_network_data(data=arp_scan_results)
+        output_data = network_gatherer._Network__gather_network_data(data=arp_scan_results)
         # checks if tested method returned True
         self.assertTrue(output_data)
 

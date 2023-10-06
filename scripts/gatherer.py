@@ -31,17 +31,29 @@ class Gatherer(ABC):
 class Network(Gatherer):
     """Gathers network data from devices connected to local network."""
 
-    # InfluxDB bucket name
+    # influx database bucket name
     BUCKET = "network"
 
     def __init__(self) -> None:
-        """Constructor and main class method."""
-        # performs arp scan of local network
-        arp_scan_results = self.__arp_scan()
-        # gathers network data
-        self.gather_network_data(data=arp_scan_results)
+        # saves gathered and processed data from arp scan to database
+        self.__gather_network_data(data=self.__arp_scan())
 
-    def gather_network_data(self, data: Set[str]) -> bool:
+    def __arp_scan(self) -> Set[str]:
+        """Performs arp scan of local network and returns set of MAC addresses."""
+        try:
+            # performs arp scan
+            answered, unanswered = arping("192.168.0.0/24", verbose=0)
+            # set of MAC addresses
+            mac_addresses = set(
+                destination["Ether"].src for source, destination in answered
+            )
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return set()
+        else:
+            return mac_addresses
+
+    def __gather_network_data(self, data: Set[str]) -> bool:
         """Saves MAC addresses and number of active devices to database.
         Before data are written to database, sentry.py script is used to verify
         if there are unknown MAC addresses in received 'data' set or
@@ -99,23 +111,7 @@ class Network(Gatherer):
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return False
         else:
-
             return True
-
-    def __arp_scan(self) -> Set[str]:
-        """Performs arp scan of local network and returns list of MAC addresses."""
-        try:
-            # performs arp scan
-            answered, unanswered = arping("192.168.0.0/24", verbose=0)
-            # set of MAC addresses
-            mac_addresses = set(
-                destination["Ether"].src for source, destination in answered
-            )
-        except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
-            return set()
-        else:
-            return mac_addresses
 
 
 class Air(Gatherer):
@@ -125,7 +121,6 @@ class Air(Gatherer):
     BUCKET = "air"
 
     def __init__(self) -> None:
-        """Constructor and main class method."""
         # retrieves data from each 'air' device
         air_scan_results, _ = self.__air_scan()
         # saves gathered data to database
@@ -180,25 +175,20 @@ class Air(Gatherer):
             air_data = []
             # list that stores diagnostic data from each device
             diagnostic_data = []
-            # variable that stores single device data
-            data = None
-            # air devices data
-            air_devices_data = self.__get_air_devices_data()
-            # iterates over devices data
-            for device_data in air_devices_data:
+            # iterates over air devices data
+            for device_data in self.__get_air_devices_data():
                 # name of device
                 device_name = device_data.get("name").lower()
                 # calls specific method depending on device type
                 if "purifier" in device_name:
-                    data, health_data = self.__air_scan_purifier(device_data)
+                    air, diagnostic = self.__air_scan_purifier(device_data)
                 elif "monitor" in device_name:
-                    data, health_data = self.__air_scan_monitor(device_data)
+                    air, diagnostic = self.__air_scan_monitor(device_data)
                 else:
                     logging.error(f"Device '{device_name}' is not supported!")
-                if data:
-                    air_data.append(data)
-                if health_data:
-                    diagnostic_data.append(health_data)
+                # appending current iteration data to list
+                if air: air_data.append(air)
+                if diagnostic: diagnostic_data.append(diagnostic)
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return [], []
@@ -243,34 +233,11 @@ class Air(Gatherer):
             return data, health_data
 
     def __get_air_devices_data(self) -> List[dict]:
-        """Makes query to postgre database and returns list of air devices data."""
+        """Returns air devices data from database."""
         try:
-            # list that stores devices data
-            air_devices_data = []
             # connects to postgresql
             with PostgreSQL() as postgresql_database:
-                postgresql_database.api.execute(
-                    """
-                        SELECT devices_device.name, devices_device.ip_address, devices_device.mac_address, rooms_room.name
-                        FROM devices_device
-                        INNER JOIN rooms_room
-                        ON devices_device.location_id = rooms_room.id
-                        WHERE devices_device.category = 'air';
-                        """
-                )
-                query_result = [
-                    device_info for device_info in postgresql_database.api.fetchall()
-                ]
-                # transforms query result to list of dictionaries
-                for row in query_result:
-                    air_devices_data.append(
-                        {
-                            "name": row[0],
-                            "ip_address": row[1],
-                            "mac_address": row[2],
-                            "location": row[3],
-                        }
-                    )
+                air_devices_data = postgresql_database.devices_air
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return []
