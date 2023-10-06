@@ -4,6 +4,7 @@ This script is used for storing classes used to communicate with databases.
 
 import config
 import logging
+import traceback
 from typing import *
 
 import influxdb_client
@@ -48,15 +49,61 @@ class PostgreSQL(Database):
         self.client.close()
         logging.debug(f"{self.__class__.__name__} connection has been closed")
 
+    @property
     def known_devices_mac_addresses(self) -> Set[str]:
         """Returns mac addresses of registered devices."""
-        self.api.execute("SELECT mac_address FROM devices_device;")
-        return {mac_address[0] for mac_address in self.api.fetchall()}
+        try:
+            self.api.execute("SELECT mac_address FROM devices_device;")
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return {}
+        else:
+            return {mac_address[0] for mac_address in self.api.fetchall()}
 
+    @property
     def unknown_devices_mac_addresses(self) -> Set[str]:
         """Returns mac addresses of unregistered devices."""
-        self.api.execute("SELECT mac_address FROM unknown_devices;")
+        try:
+            self.api.execute("SELECT mac_address FROM unknown_devices;")
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return {}
         return {mac_address[0] for mac_address in self.api.fetchall()}
+
+    @property
+    def devices_air(self) -> List[dict]:
+        """Returns data of air devices"""
+        try:
+            # list that stores devices data
+            air_devices_data = []
+            # makes query to database
+            self.api.execute(
+                """
+                    SELECT devices_device.name, devices_device.ip_address, devices_device.mac_address, rooms_room.name
+                    FROM devices_device
+                    INNER JOIN rooms_room
+                    ON devices_device.location_id = rooms_room.id
+                    WHERE devices_device.category = 'air';
+                    """
+            )
+            query_result = [
+                device_info for device_info in self.api.fetchall()
+            ]
+            # transforms query result to list of dictionaries
+            for row in query_result:
+                air_devices_data.append(
+                    {
+                        "name": row[0],
+                        "ip_address": row[1],
+                        "mac_address": row[2],
+                        "location": row[3],
+                    }
+                )
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return []
+        else:
+            return air_devices_data
 
 
 class InfluxDB(Database):

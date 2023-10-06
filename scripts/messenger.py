@@ -1,6 +1,5 @@
 """
 Messenger module is used for communication with users.
-This module contains method that are used to sending notifications to 'ntfy' mobile application.
 """
 
 import config

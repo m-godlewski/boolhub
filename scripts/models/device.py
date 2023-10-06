@@ -1,6 +1,5 @@
 """
-This script contains dedicated classes for communication with IoT device connected to system.
-Newly created device class should inherit from Device class.
+This script contains dedicated classes for communication with IoT devices connected to system.
 """
 
 import logging
@@ -17,13 +16,14 @@ class Device(ABC):
     """Base class of each device class in this script."""
 
     def __init__(self, mac_address: str, ip_address: str="") -> None:
-        """Initializing class object by assigning ip and mac addresses."""
         self.ip_address = ip_address
         self.mac_address = mac_address
 
 
 class MiAirPurifier3H(Device):
-    """Class used for communication with Xiaomi Mi Air Purifier 3H."""
+    """Class used for communication with Xiaomi Mi Air Purifier 3H.
+    https://mi-home.pl/products/mi-air-purifier-3h.
+    """
 
     # sets of device health keys
     HEALTH_KEYS = (
@@ -82,7 +82,7 @@ class MiAirPurifier3H(Device):
                 status"
             ).read()
         except Exception:
-            logging.error(f"Unknown error occured!\n{traceback.format_exc()}")
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return {}
         else:
             return data
