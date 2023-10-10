@@ -11,8 +11,8 @@ import logging
 import os
 import sys
 import traceback
+import typing
 from datetime import datetime
-from typing import *
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
@@ -22,11 +22,11 @@ from scripts.models.database import PostgreSQL
 
 
 # constant values
-DEVICE_HEALTH_KEYS = ("battery", "filter")
+DEVICE_HEALTH_KEYS = ("battery", "filter_life_remaining")
 DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter": "filtra"}
 
 
-def check_air(air_data: List[dict]) -> List[str]:
+def check_air(air_data: typing.List[typing.Any]) -> typing.List[str]:
     """Checks if air temperature, quality or humidity does not exceed defined thresholds in any of datasets.
     (For testing purposes only) Returns set of tuples, that informs about detected issues. If there was no
     issues, empty set will be returned.
@@ -40,46 +40,46 @@ def check_air(air_data: List[dict]) -> List[str]:
         for data in air_data:
             # checks if air temperature exceeds threshold
             if (
-                data.get("temperature")
+                data.air_data.temperature
                 and config.SCRIPTS["SENTRY"]["NOTIFIES"]["TEMPERATURE"]
                 and (
-                    data.get("temperature")
+                    data.air_data.temperature
                     >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["UP"]
-                    or data.get("temperature")
+                    or data.air_data.temperature
                     <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"][
                         "BOTTOM"
                     ]
                 )
             ):
                 messenger.send_notification(
-                    text=f"Temperatura w {data.get('location')} wynosi {data.get('temperature')}°C"
+                    text=f"Temperatura w {data.device_data.location} wynosi {data.air_data.temperature}°C"
                 )
-                issues.add(("temperature", data.get("location")))
+                issues.add(("temperature", data.device_data.location))
             # checks if air quality exceeds threshold
             if (
-                data.get("aqi")
+                data.air_data.aqi
                 and config.SCRIPTS["SENTRY"]["NOTIFIES"]["AQI"]
-                and data.get("aqi") >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["AQI"]
+                and data.air_data.aqi >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["AQI"]
             ):
                 messenger.send_notification(
-                    text=f"Jakość powietrza w {data.get('location')} wynosi {data.get('aqi')}μg/m³"
+                    text=f"Jakość powietrza w {data.device_data.location} wynosi {data.air_data.aqi}μg/m³"
                 )
-                issues.add(("aqi", data.get("location")))
+                issues.add(("aqi", data.device_data.location))
             # checks if air humidity exceeds threshold
             if (
-                data.get("humidity")
+                data.air_data.humidity
                 and config.SCRIPTS["SENTRY"]["NOTIFIES"]["HUMIDITY"]
                 and (
-                    data.get("humidity")
+                    data.air_data.humidity
                     >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["UP"]
-                    or data.get("humidity")
+                    or data.air_data.humidity
                     <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["BOTTOM"]
                 )
             ):
                 messenger.send_notification(
-                    text=f"Wilgotność powietrza w {data.get('location')} wynosi {data.get('humidity')}%"
+                    text=f"Wilgotność powietrza w {data.device_data.location} wynosi {data.air_data.humidity}%"
                 )
-                issues.add(("humidity", data.get("location")))
+                issues.add(("humidity", data.device_data.location))
 
     except Exception:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
@@ -87,7 +87,7 @@ def check_air(air_data: List[dict]) -> List[str]:
         return issues
 
 
-def check_network(mac_addresses: Set = {}) -> List[str]:
+def check_network(mac_addresses: typing.Set = {}) -> typing.List[str]:
     """Checks if following conditions are met:
     - number of connected devices to local network is more than predefined value.
     - unknown device has connected to local network.
@@ -119,7 +119,7 @@ def check_network(mac_addresses: Set = {}) -> List[str]:
         # CHECKS IF UNKNOWN DEVICE HAS CONNECTED TO LOCAL NETWORK.
         # set of registered devices MAC addresses
         with PostgreSQL() as postgresql_database:
-            known_devices = postgresql_database.known_devices_mac_addresses
+            known_devices = {device.mac_address for device in postgresql_database.devices}
         # set that contains unregistered devices MAC addresses
         unknown_devices = mac_addresses - known_devices
         # if above set contains any address
@@ -135,7 +135,7 @@ def check_network(mac_addresses: Set = {}) -> List[str]:
             issues.add("unknown_device")
             # checks if unknown addresses already exists in database
             with PostgreSQL() as postgresql_database:
-                unknown_devices_mac_addresses = postgresql_database.unknown_devices_mac_addresses
+                unknown_devices_mac_addresses = {device.mac_address for device in postgresql_database.unknown_devices}
                 for address in unknown_devices:
                     # if not, inserts new mac address to database
                     if address not in unknown_devices_mac_addresses:
@@ -156,7 +156,7 @@ def check_network(mac_addresses: Set = {}) -> List[str]:
         return issues
 
 
-def check_diagnostic(diagnostic_data: List[dict]) -> List[str]:
+def check_diagnostic(diagnostic_data: typing.List[dict]) -> typing.List[str]:
     """Verifies that the battery, filter or other consumable parts of the device
     are not at the end of their life.
     (For testing purposes only) Returns set of strings representing detected issues.
@@ -186,7 +186,7 @@ def check_diagnostic(diagnostic_data: List[dict]) -> List[str]:
                         messenger.send_notification(
                             text=f"Poziom {DEVICE_HEALTH_KEY_TRANSLATE_MAP[key]} w urządzeniu {data['name']} w lokacji {data['location']} wynosi {data[key]}"
                         )
-                        issues.add((key, data.get("location")))
+                        issues.add((key, data.device_data.location))
 
     except Exception:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
