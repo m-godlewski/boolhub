@@ -7,111 +7,103 @@ import os
 import traceback
 import typing
 from abc import ABC
+from dataclasses import fields
 
 import bluepy
 from lywsd03mmc import Lywsd03mmcClient
+
+from models.data import DeviceData, MiAirPurifier3HData, MiMonitor2Data
 
 
 class Device(ABC):
     """Base class of each device class in this script."""
 
-    def __init__(self, mac_address: str, ip_address: str="") -> None:
-        self.ip_address = ip_address
-        self.mac_address = mac_address
+    def __init__(self, device_data: DeviceData) -> None:
+        # device metadata
+        self.metadata = device_data
 
 
 class MiAirPurifier3H(Device):
     """Class used for communication with Xiaomi Mi Air Purifier 3H.
-    https://mi-home.pl/products/mi-air-purifier-3h.
+    https://mi-home.pl/products/mi-air-purifier-3h
     """
 
-    # sets of device health keys
-    HEALTH_KEYS = (
-        "filter_life_remaining",
-        "filter_hours_used",
-        "filter_left_time",
-        "use_time",
-        "purify_volume",
-    )
-
-    # sets of device data keys
-    AIR_DATA_KEYS = (
-        "aqi",
-        "humidity",
-        "temperature"
-    )
-
-    def __init__(self, mac_address: str, ip_address: str, token: str) -> None:
+    def __init__(self, device_data: DeviceData) -> None:
         # calls super class constructor
-        super().__init__(mac_address, ip_address)
-        self.__token = token
-        self.__raw_data = self.__fetch_data()
-        self.__data = self.__process_data()
+        super().__init__(device_data)
+
+
+        # TODO TMP!
+        import config
+        self.__token = config.DEVICES["TOKENS"][device_data.mac_address]
+
+
+        # fetches raw data from device
+        raw_data = self.__fetch_data()
+        # processes raw data
+        self.__processed_data = self.__process_data(raw_data)
 
     @property
     def data(self) -> dict:
-        """Returns device core data."""
-        return dict(
-            [
-                (key, value)
-                for key, value in self.__data.items()
-                if key in self.AIR_DATA_KEYS
-            ]
-        )
+        """Returns device air data."""
+        return self.__processed_data
 
-    @property
-    def health(self) -> dict:
-        """Returns device health data."""
-        return dict(
-            [
-                (key, value)
-                for key, value in self.__data.items()
-                if key in self.HEALTH_KEYS
-            ]
-        )
-
-    def __fetch_data(self) -> dict:
+    def __fetch_data(self) -> str:
         """Connects to device and fetches data."""
         try:
             # fetching data from device using miiocli shell command
             # TODO - shell command fetching should be replaced by python library
             data = os.popen(
                 f"miiocli airpurifiermiot \
-                --ip \{self.ip_address} \
+                --ip \{self.metadata.ip_address} \
                 --token {self.__token} \
                 status"
             ).read()
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
-            return {}
+            return ""
         else:
             return data
 
-    def __process_data(self) -> dict:
-        """Processes raw data and returns it in form of structured dataset."""
+    def __parse(self, data: str) -> dict:
+        """Parses raw dataset and returns it's processed form."""
         try:
-            # dictionary that will store processed data
-            data = {}
-            # splits received string by newline chars
-            raw_data = self.__raw_data.strip().split("\n")
+            # dictionary that will store parsed dataset
+            parsed_data = {}
             # iterates over dataset
-            for row in raw_data:
+            for row in data:
                 # parse single row of data
-                key, value = self.__parse(row)
-                # converts data types of dictionary values
-                data[key] = self.__type_conversion(value)
+                key, value = self.__parse_row(row)
+                # if current key is an field in dataclass
+                if key in [field.name for field in fields(MiAirPurifier3HData)]:
+                    parsed_data[key] = value
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return {}
         else:
-            return data
+            return parsed_data
 
-    def __parse(self, data: str) -> str:
+    def __parse_row(self, data: str) -> typing.Union[str, typing.Any]:
         """Parses single line of raw data from dataset and returns it's processed form."""
         return (
             data.split(":")[0].lower().replace(" ", "_"),
-            data.split(":")[1].strip().split(" ")[0],
+            self.__type_conversion(data.split(":")[1].strip().split(" ")[0])
         )
+
+    def __process_data(self, raw_data: str) -> MiAirPurifier3HData:
+        """Processes raw data and returns it as instance of dataclass."""
+        try:
+            # splits received string by newline chars
+            raw_data = raw_data.strip().split("\n")
+            # prase dataset
+            parsed_data = self.__parse(raw_data)
+            # create dataclass instance
+            processed_data = MiAirPurifier3HData(self.metadata, **parsed_data)
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return MiAirPurifier3HData(self.metadata)
+        else:
+            return processed_data
 
     def __type_conversion(self, value: str) -> typing.Any:
         """Converts data from individual fields in a dataset."""
@@ -140,46 +132,26 @@ class MiAirPurifier3H(Device):
 
 
 class MiMonitor2(Device):
-    """Class used for communication with Xiaomi Mi Monitor 2."""
+    """Class used for communication with Xiaomi Mi Monitor 2.
+    https://mi-home.pl/products/mi-temperature-humidity-monitor-2
+    """
 
-    # sets of device health keys
-    HEALTH_KEYS = ("battery")
-
-    # sets of device data keys
-    AIR_DATA_KEYS = ("temperature", "humidity")
-
-    def __init__(self, mac_address: str) -> None:
+    def __init__(self, device_data: DeviceData) -> None:
         # calls super class constructor
-        super().__init__(mac_address)
-        self.__data = self.__fetch_data()
+        super().__init__(device_data)
+        raw_data = self.__fetch_data()
+        self.__processed_data = self.__process_data(raw_data)
 
     @property
     def data(self) -> dict:
-        """Returns device core data."""
-        return dict(
-            [
-                (key, value)
-                for key, value in self.__data.items()
-                if key in self.AIR_DATA_KEYS
-            ]
-        )
-
-    @property
-    def health(self) -> dict:
-        """Returns device health data."""
-        return dict(
-            [
-                (key, value)
-                for key, value in self.__data.items()
-                if key in self.HEALTH_KEYS
-            ]
-        )
+        """Returns processed data."""
+        return self.__processed_data
 
     def __fetch_data(self) -> dict:
         """Connects to device and fetches data."""
         try:
             # fetches data from device using external library
-            client = Lywsd03mmcClient(self.mac_address)
+            client = Lywsd03mmcClient(self.metadata.mac_address)
             # converts data to dictionary
             data = client.data._asdict()
         except bluepy.btle.BTLEDisconnectError:
@@ -190,3 +162,13 @@ class MiMonitor2(Device):
             return {}
         else:
             return data
+
+    def __process_data(self, raw_data: dict) -> MiMonitor2Data:
+        """Processes raw data and returns it as instance of dataclass."""
+        try:
+            processed_data = MiMonitor2Data(self.metadata, **raw_data)
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return MiMonitor2Data(self.metadata)
+        else:
+            return processed_data

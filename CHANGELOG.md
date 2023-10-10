@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0
+- Custom dataset has been implemented in form of Python dataclasses.
+- Logs retention changed to daily.
+- Minor changes in database module.
+
 ## 0.4.5
 - Unit test updated, sentry and messenger module methods moved out of class.
 - Comments spelling corrected.

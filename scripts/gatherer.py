@@ -8,8 +8,8 @@ import logging
 import os
 import sys
 import traceback
+import typing
 from abc import ABC
-from typing import *
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
@@ -18,8 +18,9 @@ from influxdb_client import Point
 
 import config
 from scripts import sentry
-from scripts.models.device import MiAirPurifier3H, MiMonitor2
+from scripts.models.data import DeviceData, AirData, MiAirPurifier3HData, MiMonitor2Data
 from scripts.models.database import PostgreSQL, InfluxDB
+from scripts.models.device import MiAirPurifier3H, MiMonitor2
 
 
 class Gatherer(ABC):
@@ -38,7 +39,7 @@ class Network(Gatherer):
         # saves gathered and processed data from arp scan to database
         self.__gather_network_data(data=self.__arp_scan())
 
-    def __arp_scan(self) -> Set[str]:
+    def __arp_scan(self) -> typing.Set[str]:
         """Performs arp scan of local network and returns set of MAC addresses."""
         try:
             # performs arp scan
@@ -53,7 +54,7 @@ class Network(Gatherer):
         else:
             return mac_addresses
 
-    def __gather_network_data(self, data: Set[str]) -> bool:
+    def __gather_network_data(self, data: typing.Set[str]) -> bool:
         """Saves MAC addresses and number of active devices to database.
         Before data are written to database, sentry.py script is used to verify
         if there are unknown MAC addresses in received 'data' set or
@@ -121,12 +122,10 @@ class Air(Gatherer):
     BUCKET = "air"
 
     def __init__(self) -> None:
-        # retrieves data from each 'air' device
-        air_scan_results, _ = self.__air_scan()
-        # saves gathered data to database
-        self.gather_air_data(air_scan_results)
+        # retrieves data from each 'air' device and saves it to database
+        self.gather_air_data(self.__air_scan())
 
-    def gather_air_data(self, air_data: List[dict]) -> bool:
+    def gather_air_data(self, air_data: typing.List[dict]) -> bool:
         """Saves retrieved data from each air devices to database.
         Returns True, if saving process succeed, otherwise False."""
         try:
@@ -135,13 +134,13 @@ class Air(Gatherer):
                 # iterates over datasets
                 for data in air_data:
                     # data location
-                    location = data.get("location")
+                    location = data.device.location
                     # air quality
-                    aqi = data.get("aqi")
+                    aqi = data.aqi if hasattr(data, "aqi") else None
                     # air humidity
-                    humidity = data.get("humidity")
+                    humidity = data.humidity
                     # air temperature
-                    temperature = data.get("temperature")
+                    temperature = data.temperature
                     # prepares data for saving into influx database
                     point = (
                         Point("air")
@@ -158,7 +157,7 @@ class Air(Gatherer):
                     )
                     logging.info(
                         f"GATHERER | "
-                        f"LOCATION = {data.get('location')} | "
+                        f"LOCATION = {location} | "
                         f"DATA = {self.BUCKET} | "
                         f"VALUES = {aqi}, {humidity}, {temperature} | "
                     )
@@ -168,76 +167,63 @@ class Air(Gatherer):
         else:
             return True
 
-    def __air_scan(self) -> Union[list, list]:
+    def __air_scan(self) -> typing.List[AirData]:
         """Gathers air data from each device tagged as "air" in local network."""
         try:
             # list that stores air data from each device
-            air_data = []
-            # list that stores diagnostic data from each device
-            diagnostic_data = []
+            results = []
             # iterates over air devices data
-            for device_data in self.__get_air_devices_data():
+            for device_data in self.__get_air_devices():
                 # name of device
-                device_name = device_data.get("name").lower()
+                device_name = device_data.name.lower()
                 # calls specific method depending on device type
                 if "purifier" in device_name:
-                    air, diagnostic = self.__air_scan_purifier(device_data)
+                    results.append(self.__air_scan_purifier(device_data))
                 elif "monitor" in device_name:
-                    air, diagnostic = self.__air_scan_monitor(device_data)
+                    results.append(self.__air_scan_monitor(device_data))
                 else:
                     logging.error(f"Device '{device_name}' is not supported!")
-                # appending current iteration data to list
-                if air: air_data.append(air)
-                if diagnostic: diagnostic_data.append(diagnostic)
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
-            return [], []
+            return []
         else:
             # calls sentry script to verifies data
-            sentry.check_air(air_data=air_data)
-            sentry.check_diagnostic(diagnostic_data=diagnostic_data)
-            return air_data, diagnostic_data
+            sentry.check_air(dataset=results)
+            sentry.check_diagnostic(dataset=results)
+            return results
 
-    def __air_scan_purifier(self, device_data: dict) -> Union[dict, dict]:
+    def __air_scan_purifier(self, device_data: DeviceData) -> MiAirPurifier3HData:
         """Gathers data from Xiaomi Purifier device."""
         try:
             # fetches data from device
-            device = MiAirPurifier3H(
-                ip_address=device_data.get("ip_address"),
-                mac_address=device_data.get("mac_address"),
-                token=config.DEVICES["TOKENS"][device_data.get("mac_address")],
-            )
-            # merges datasets
-            data = {**device.data, **device_data}
-            health_data = {**device.health, **device_data}
+            device = MiAirPurifier3H(device_data)
+            # retrieved data
+            data = device.data
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
-            return {}, {}
+            return {}
         else:
-            return data, health_data
+            return data
 
-    def __air_scan_monitor(self, device_data: dict) -> Union[dict, dict]:
+    def __air_scan_monitor(self, device_data: DeviceData) -> MiMonitor2Data:
         """Gathers data from Xiaomi Monitor 2 device."""
         try:
             # fetches data from device
-            device = MiMonitor2(
-                mac_address=device_data.get("mac_address")
-            )
-            # merges datasets
-            data = {**device.data, **device_data}
-            health_data = {**device.health, **device_data}
+            device = MiMonitor2(device_data)
+            # retrieved data
+            data = device.data
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
-            return {}, {}
+            return {}
         else:
-            return data, health_data
+            return data
 
-    def __get_air_devices_data(self) -> List[dict]:
+    def __get_air_devices(self) -> typing.List[DeviceData]:
         """Returns air devices data from database."""
         try:
             # connects to postgresql
             with PostgreSQL() as postgresql_database:
-                air_devices_data = postgresql_database.devices_air
+                air_devices_data = [device for device in postgresql_database.devices if device.category == "air"]
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return []

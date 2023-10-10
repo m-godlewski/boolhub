@@ -1,6 +1,6 @@
 import os
 import logging
-from logging.handlers import RotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler
 
 from dotenv import load_dotenv
 
@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 #############################
 
 # current system version
-VERSION = "0.4.5"
+VERSION = "0.5.0"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -18,17 +18,17 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 # absolute path to log file
 LOG_FILE = os.path.join(BASE_DIR, "scripts.log")
 
-# size of single log file (in megabytes)
-LOG_FILE_SIZE = 50
+# number of logs retention days
+LOG_RETENTION_DAYS = 1
 
 # logging configuration
-rfh = RotatingFileHandler(
-    filename=LOG_FILE, mode="a", maxBytes=LOG_FILE_SIZE * 1024 * 1024
+rtfh = TimedRotatingFileHandler(
+    filename=LOG_FILE, when="D", interval=1, backupCount=LOG_RETENTION_DAYS, delay=False
 )
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s | %(levelname)s | %(message)s",
-    handlers=[rfh],
+    handlers=[rtfh],
 )
 
 # loading environmental variables
