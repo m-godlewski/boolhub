@@ -31,13 +31,6 @@ class MiAirPurifier3H(Device):
     def __init__(self, device_data: DeviceData) -> None:
         # calls super class constructor
         super().__init__(device_data)
-
-
-        # TODO TMP!
-        import config
-        self.__token = config.DEVICES["TOKENS"][device_data.mac_address]
-
-
         # fetches raw data from device
         raw_data = self.__fetch_data()
         # processes raw data
@@ -56,7 +49,7 @@ class MiAirPurifier3H(Device):
             data = os.popen(
                 f"miiocli airpurifiermiot \
                 --ip \{self.metadata.ip_address} \
-                --token {self.__token} \
+                --token {self.metadata.token} \
                 status"
             ).read()
         except Exception:

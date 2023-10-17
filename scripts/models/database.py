@@ -56,7 +56,7 @@ class PostgreSQL(Database):
         try:
             self.api.execute(
                 """
-                SELECT d.name, r.name, d.category, d.brand, d.mac_address, d.ip_address
+                SELECT d.name, r.name, d.category, d.brand, d.mac_address, d.ip_address, d.token
                 FROM devices_device as d
                 INNER JOIN rooms_room as r
                 ON r.id = d.location_id;
