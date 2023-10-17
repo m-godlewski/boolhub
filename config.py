@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 #############################
 
 # current system version
-VERSION = "0.5.1"
+VERSION = "0.5.2"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -56,10 +56,6 @@ DATABASE = {
         "PORT": os.environ.get("POSTGRE_PORT"),
     },
 }
-
-# devices configuration
-# TOOD - move this to database field
-DEVICES = {"TOKENS": {"69:90:c1:7f:e2:0c": os.environ.get("XIAOMI_PURIFIER_TOKEN")}}
 
 # scripts configuration
 SCRIPTS = {

@@ -19,6 +19,7 @@ class DeviceData:
     brand: str
     mac_address: str
     ip_address: str
+    token: str
 
 
 @dataclass

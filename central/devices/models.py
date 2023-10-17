@@ -30,6 +30,8 @@ class Device(models.Model):
     mac_address = models.CharField(max_length=17)
     # IPv4 address of physical device
     ip_address = models.CharField(max_length=15, null=True, blank=True)
+    # authorization token
+    token = models.CharField(max_length=64, null=True, blank=True)
     # location of device
     location = models.ForeignKey(Room, null=True, blank=True, on_delete=models.SET_NULL)
 

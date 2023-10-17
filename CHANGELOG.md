@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.2
+- Added 'token' field to device model.
+
 ## 0.5.1
 - Configuration and test unit fixes.
 
