@@ -74,7 +74,7 @@ class MiAirPurifier3HData(AirData):
     }
 
     @property
-    def air_data(self):
+    def air_data(self) -> dict:
         return dict(
             [
                 (field, self.__getattribute__(field))
@@ -83,7 +83,7 @@ class MiAirPurifier3HData(AirData):
         )
 
     @property
-    def health_data(self):
+    def health_data(self) -> dict:
         return dict(
             [
                 (field, self.__getattribute__(field))
@@ -104,7 +104,7 @@ class MiMonitor2Data(AirData):
     HEALTH_DATA_FIELDS = {"battery"}
 
     @property
-    def air_data(self):
+    def air_data(self) -> dict:
         return dict(
             [
                 (field, self.__getattribute__(field))
@@ -113,7 +113,7 @@ class MiMonitor2Data(AirData):
         )
 
     @property
-    def health_data(self):
+    def health_data(self) -> dict:
         return dict(
             [
                 (field, self.__getattribute__(field))
