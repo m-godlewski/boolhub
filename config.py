@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 #############################
 
 # current system version
-VERSION = "0.5.0"
+VERSION = "0.5.1"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -50,7 +50,9 @@ DATABASE = {
         "NAME": os.environ.get("POSTGRE_NAME"),
         "USER": os.environ.get("POSTGRE_USER"),
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
-        "HOST": os.environ.get("POSTGRE_HOST"),
+        # until scripts are not running inside docker container
+        # host has to be set as 'localhost'
+        "HOST": "localhost",
         "PORT": os.environ.get("POSTGRE_PORT"),
     },
 }

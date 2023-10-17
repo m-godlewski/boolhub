@@ -50,6 +50,7 @@ class AirData(Data):
     # fields
     temperature: float = None
     humidity: float = None
+    aqi: float = None
 
 
 @dataclass
@@ -57,7 +58,6 @@ class MiAirPurifier3HData(AirData):
     """Dataclass of Xiaomi Air Purifier 3H device."""
 
     # fields
-    aqi: float = None
     filter_life_remaining: int = None
     filter_hours_used: int = None
     use_time: int = None
@@ -70,8 +70,6 @@ class MiAirPurifier3HData(AirData):
     }
     HEALTH_DATA_FIELDS = {
         "filter_life_remaining",
-        "filter_hours_used",
-        "use_time",
     }
 
     @property

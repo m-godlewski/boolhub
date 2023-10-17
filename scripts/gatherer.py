@@ -136,7 +136,7 @@ class Air(Gatherer):
                     # data location
                     location = data.device.location
                     # air quality
-                    aqi = data.aqi if hasattr(data, "aqi") else None
+                    aqi = data.aqi
                     # air humidity
                     humidity = data.humidity
                     # air temperature
@@ -188,8 +188,8 @@ class Air(Gatherer):
             return []
         else:
             # calls sentry script to verifies data
-            sentry.check_air(dataset=results)
-            sentry.check_diagnostic(dataset=results)
+            sentry.check_air(results)
+            sentry.check_diagnostic(results)
             return results
 
     def __air_scan_purifier(self, device_data: DeviceData) -> MiAirPurifier3HData:

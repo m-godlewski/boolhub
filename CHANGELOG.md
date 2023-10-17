@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.1
+- Configuration and test unit fixes.
+
 ## 0.5.0
 - Custom dataset has been implemented in form of Python dataclasses.
 - Logs retention changed to daily.
