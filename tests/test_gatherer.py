@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from unittest import TestCase
 
 from scripts.gatherer import Network, Air
+from scripts.models.data import DeviceData
 
 
 class TestGatherer(TestCase):
@@ -77,11 +78,11 @@ class TestGatherer(TestCase):
     def test_air_devices_data(self):
         # calls tested method
         air_gatherer = Air()
-        output_data = air_gatherer._Air__get_air_devices_data()
+        output_data = air_gatherer._Air__get_air_devices()
         # checks if method returned not empty array with dictionaries inside
         self.assertTrue(output_data)
         self.assertTrue(isinstance(output_data, list))
         for data in output_data:
-            self.assertTrue(isinstance(data, dict))
+            self.assertTrue(isinstance(data, DeviceData))
 
     # endregion

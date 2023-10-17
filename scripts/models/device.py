@@ -12,7 +12,7 @@ from dataclasses import fields
 import bluepy
 from lywsd03mmc import Lywsd03mmcClient
 
-from models.data import DeviceData, MiAirPurifier3HData, MiMonitor2Data
+from scripts.models.data import DeviceData, MiAirPurifier3HData, MiMonitor2Data
 
 
 class Device(ABC):

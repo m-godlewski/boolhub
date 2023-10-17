@@ -19,11 +19,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import config
 from scripts import messenger
 from scripts.models.database import PostgreSQL
+from scripts.models.data import MiAirPurifier3HData, MiMonitor2Data
 
 
 # constant values
-DEVICE_HEALTH_KEYS = ("battery", "filter_life_remaining")
-DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter": "filtra"}
+DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter_life_remaining": "filtra"}
 
 
 def check_air(air_data: typing.List[typing.Any]) -> typing.List[str]:
@@ -40,46 +40,46 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.List[str]:
         for data in air_data:
             # checks if air temperature exceeds threshold
             if (
-                data.air_data.temperature
+                data.temperature
                 and config.SCRIPTS["SENTRY"]["NOTIFIES"]["TEMPERATURE"]
                 and (
-                    data.air_data.temperature
+                    data.temperature
                     >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["UP"]
-                    or data.air_data.temperature
+                    or data.temperature
                     <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"][
                         "BOTTOM"
                     ]
                 )
             ):
                 messenger.send_notification(
-                    text=f"Temperatura w {data.device_data.location} wynosi {data.air_data.temperature}°C"
+                    text=f"Temperatura w {data.device.location} wynosi {data.temperature}°C"
                 )
-                issues.add(("temperature", data.device_data.location))
+                issues.add(("temperature", data.device.location))
             # checks if air quality exceeds threshold
             if (
-                data.air_data.aqi
+                data.aqi
                 and config.SCRIPTS["SENTRY"]["NOTIFIES"]["AQI"]
-                and data.air_data.aqi >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["AQI"]
+                and data.aqi >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["AQI"]
             ):
                 messenger.send_notification(
-                    text=f"Jakość powietrza w {data.device_data.location} wynosi {data.air_data.aqi}μg/m³"
+                    text=f"Jakość powietrza w {data.device.location} wynosi {data.aqi}μg/m³"
                 )
-                issues.add(("aqi", data.device_data.location))
+                issues.add(("aqi", data.device.location))
             # checks if air humidity exceeds threshold
             if (
-                data.air_data.humidity
+                data.humidity
                 and config.SCRIPTS["SENTRY"]["NOTIFIES"]["HUMIDITY"]
                 and (
-                    data.air_data.humidity
+                    data.humidity
                     >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["UP"]
-                    or data.air_data.humidity
+                    or data.humidity
                     <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["BOTTOM"]
                 )
             ):
                 messenger.send_notification(
-                    text=f"Wilgotność powietrza w {data.device_data.location} wynosi {data.air_data.humidity}%"
+                    text=f"Wilgotność powietrza w {data.device.location} wynosi {data.humidity}%"
                 )
-                issues.add(("humidity", data.device_data.location))
+                issues.add(("humidity", data.device.location))
 
     except Exception:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
@@ -156,7 +156,7 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.List[str]:
         return issues
 
 
-def check_diagnostic(diagnostic_data: typing.List[dict]) -> typing.List[str]:
+def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.List[str]:
     """Verifies that the battery, filter or other consumable parts of the device
     are not at the end of their life.
     (For testing purposes only) Returns set of strings representing detected issues.
@@ -169,24 +169,23 @@ def check_diagnostic(diagnostic_data: typing.List[dict]) -> typing.List[str]:
 
         # iteration over diagnostic data
         for data in diagnostic_data:
-            # iterate over "health keys"
-            for key in DEVICE_HEALTH_KEYS:
+            # iterate over health fields
+            for field, value in data.health_data.items():
                 # if consumable part level exceeds predefined level
-                if key in data:
-                    if (
-                        config.SCRIPTS["SENTRY"]["NOTIFIES"]["DIAGNOSTICS"]
-                        and data[key]
-                        <= config.SCRIPTS["SENTRY"]["THRESHOLDS"][
-                            "BATTERY_FILTER_LEVEL"
-                        ]
-                    ):
-                        logging.warning(
-                            f"SENTRY | Level of {key} in device {data['name']} in location {data['location']} is {data[key]}"
-                        )
-                        messenger.send_notification(
-                            text=f"Poziom {DEVICE_HEALTH_KEY_TRANSLATE_MAP[key]} w urządzeniu {data['name']} w lokacji {data['location']} wynosi {data[key]}"
-                        )
-                        issues.add((key, data.device_data.location))
+                if (
+                    config.SCRIPTS["SENTRY"]["NOTIFIES"]["DIAGNOSTICS"] and
+                    value and
+                    value <= config.SCRIPTS["SENTRY"]["THRESHOLDS"][
+                        "BATTERY_FILTER_LEVEL"
+                    ]
+                ):
+                    logging.warning(
+                        f"SENTRY | Level of {field} in device {data.device.name} in location {data.device.location} is {value}"
+                    )
+                    messenger.send_notification(
+                        text=f"Poziom {DEVICE_HEALTH_KEY_TRANSLATE_MAP[field]} w urządzeniu {data.device.name} w lokacji {data.device.name} wynosi {field}"
+                    )
+                    issues.add((field, data.device.location))
 
     except Exception:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
