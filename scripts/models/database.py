@@ -5,7 +5,7 @@ This script is used for storing classes used to communicate with databases.
 import config
 import logging
 import traceback
-from typing import *
+import typing
 
 import influxdb_client
 import psycopg2
@@ -51,7 +51,7 @@ class PostgreSQL(Database):
         logging.debug(f"{self.__class__.__name__} connection has been closed")
 
     @property
-    def devices(self) -> List[DeviceData]:
+    def devices(self) -> typing.List[DeviceData]:
         """Returns list of registered devices."""
         try:
             self.api.execute(
@@ -70,7 +70,7 @@ class PostgreSQL(Database):
             return devices
 
     @property
-    def unknown_devices(self) -> List[UnknownDeviceData]:
+    def unknown_devices(self) -> typing.List[UnknownDeviceData]:
         """Returns list of unregistered devices."""
         try:
             self.api.execute("SELECT * FROM unknown_devices;")

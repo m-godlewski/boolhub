@@ -19,14 +19,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import config
 from scripts import messenger
 from scripts.models.database import PostgreSQL
-from scripts.models.data import MiAirPurifier3HData, MiMonitor2Data
 
 
 # constant values
 DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter_life_remaining": "filtra"}
 
 
-def check_air(air_data: typing.List[typing.Any]) -> typing.List[str]:
+def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
     """Checks if air temperature, quality or humidity does not exceed defined thresholds in any of datasets.
     (For testing purposes only) Returns set of tuples, that informs about detected issues. If there was no
     issues, empty set will be returned.
@@ -87,7 +86,7 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.List[str]:
         return issues
 
 
-def check_network(mac_addresses: typing.Set = {}) -> typing.List[str]:
+def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
     """Checks if following conditions are met:
     - number of connected devices to local network is more than predefined value.
     - unknown device has connected to local network.
@@ -156,7 +155,7 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.List[str]:
         return issues
 
 
-def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.List[str]:
+def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str]:
     """Verifies that the battery, filter or other consumable parts of the device
     are not at the end of their life.
     (For testing purposes only) Returns set of strings representing detected issues.

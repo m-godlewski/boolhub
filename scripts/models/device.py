@@ -41,7 +41,7 @@ class MiAirPurifier3H(Device):
         """Returns device air data."""
         return self.__processed_data
 
-    def __fetch_data(self) -> str:
+    def __fetch_data(self) -> MiAirPurifier3HData:
         """Connects to device and fetches data."""
         try:
             # fetching data from device using miiocli shell command
@@ -136,7 +136,7 @@ class MiMonitor2(Device):
         self.__processed_data = self.__process_data(raw_data)
 
     @property
-    def data(self) -> dict:
+    def data(self) -> MiMonitor2Data:
         """Returns processed data."""
         return self.__processed_data
 
