@@ -13,6 +13,7 @@ from scripts import messenger
 
 
 class TestMessenger(TestCase):
+    """Messenger module unit tests class."""
 
     def test_notification(self):
         # calls tested method

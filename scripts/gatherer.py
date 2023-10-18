@@ -72,7 +72,7 @@ class Network(Gatherer):
                         measurement="devices",
                         metric="availability",
                         field="mac_address",
-                        value=mac_address
+                        value=mac_address,
                     )
                 # "number" tag
                 # number of active devices in local network
@@ -82,7 +82,7 @@ class Network(Gatherer):
                     measurement="devices",
                     metric="number",
                     field="quantity",
-                    value=number_of_devices
+                    value=number_of_devices,
                 )
                 logging.info(
                     f"GATHERER | "
@@ -188,7 +188,11 @@ class Air(Gatherer):
         try:
             # connects to postgresql
             with PostgreSQL() as postgresql_database:
-                air_devices_data = [device for device in postgresql_database.devices if device.category == "air"]
+                air_devices_data = [
+                    device
+                    for device in postgresql_database.devices
+                    if device.category == "air"
+                ]
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return []

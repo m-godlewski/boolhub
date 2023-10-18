@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 # region DEVICES
 
+
 @dataclass
 class DeviceData:
     """Dataclass representation of entities stored in
@@ -31,10 +32,12 @@ class UnknownDeviceData:
     mac_address: str
     last_time: str
 
+
 # endregion
 
 
 # region DATASETS
+
 
 @dataclass
 class Data:
@@ -64,11 +67,7 @@ class MiAirPurifier3HData(AirData):
     use_time: int = None
 
     # fields groups
-    AIR_DATA_FIELDS = {
-        "aqi",
-        "humidity",
-        "temperature"
-    }
+    AIR_DATA_FIELDS = {"aqi", "humidity", "temperature"}
     HEALTH_DATA_FIELDS = {
         "filter_life_remaining",
     }
@@ -76,19 +75,13 @@ class MiAirPurifier3HData(AirData):
     @property
     def air_data(self) -> dict:
         return dict(
-            [
-                (field, self.__getattribute__(field))
-                for field in self.AIR_DATA_FIELDS
-            ]
+            [(field, self.__getattribute__(field)) for field in self.AIR_DATA_FIELDS]
         )
 
     @property
     def health_data(self) -> dict:
         return dict(
-            [
-                (field, self.__getattribute__(field))
-                for field in self.HEALTH_DATA_FIELDS
-            ]
+            [(field, self.__getattribute__(field)) for field in self.HEALTH_DATA_FIELDS]
         )
 
 
@@ -106,19 +99,14 @@ class MiMonitor2Data(AirData):
     @property
     def air_data(self) -> dict:
         return dict(
-            [
-                (field, self.__getattribute__(field))
-                for field in self.AIR_DATA_FIELDS
-            ]
+            [(field, self.__getattribute__(field)) for field in self.AIR_DATA_FIELDS]
         )
 
     @property
     def health_data(self) -> dict:
         return dict(
-            [
-                (field, self.__getattribute__(field))
-                for field in self.HEALTH_DATA_FIELDS
-            ]
+            [(field, self.__getattribute__(field)) for field in self.HEALTH_DATA_FIELDS]
         )
+
 
 # endregion

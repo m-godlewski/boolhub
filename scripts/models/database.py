@@ -90,17 +90,25 @@ class PostgreSQL(Database):
         """
         try:
             # if given mac address is not present in unknown_devices database
-            if mac_address not in {device.mac_address for device in self.unknown_devices}:
+            if mac_address not in {
+                device.mac_address for device in self.unknown_devices
+            }:
                 self.api.execute(
                     "INSERT INTO unknown_devices(mac_address, last_time) VALUES(%s, %s);",
-                    (mac_address, datetime.now(),)
+                    (
+                        mac_address,
+                        datetime.now(),
+                    ),
                 )
             # otherwise update 'last_time' column
             else:
                 self.api.execute(
                     "UPDATE unknown_devices SET last_time = %s WHERE mac_address = %s;",
-                    (datetime.now(), mac_address,)
-                )  
+                    (
+                        datetime.now(),
+                        mac_address,
+                    ),
+                )
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return False
@@ -134,16 +142,14 @@ class InfluxDB(Database):
         self.client.close()
         logging.debug(f"{self.__class__.__name__} connection has been closed")
 
-    def add_point_network(self, measurement: str, metric: str, field: str, value: typing.Any) -> bool:
+    def add_point_network(
+        self, measurement: str, metric: str, field: str, value: typing.Any
+    ) -> bool:
         """Writes single network data entity to database.
         Returns True, if operation succeed. Otherwise returns False.
         """
         try:
-            point = (
-                Point(measurement)
-                .tag("metric", metric)
-                .field(field, value)
-            )
+            point = Point(measurement).tag("metric", metric).field(field, value)
             self.api.write(
                 bucket="network",
                 org=config.DATABASE["INFLUX"]["ORGANIZATION"],
