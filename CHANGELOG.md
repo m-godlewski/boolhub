@@ -2,6 +2,7 @@
 
 ## 0.5.3
 - Favicon added.
+- Whole database logic moved to database.py script.
 
 ## 0.5.2
 - Added 'token' field to device model.

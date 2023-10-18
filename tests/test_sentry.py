@@ -109,7 +109,8 @@ class TestSentry(TestCase):
         return AirData(
             device=DeviceData(
                 name="test", location="test", category="test", brand="test",
-                mac_address=self.__generate_random_mac_addresses(n=1), ip_address="192.168.0.255"
+                mac_address=self.__generate_random_mac_addresses(n=1),
+                ip_address="192.168.0.255", token=""
             ),
         )
 
@@ -118,7 +119,8 @@ class TestSentry(TestCase):
         return MiAirPurifier3HData(
             device=DeviceData(
                 name="test", location="test", category="test", brand="test",
-                mac_address=self.__generate_random_mac_addresses(n=1), ip_address="192.168.0.255"
+                mac_address=self.__generate_random_mac_addresses(n=1),
+                ip_address="192.168.0.255", token=""
             ),
         )
 
@@ -127,6 +129,7 @@ class TestSentry(TestCase):
         return MiMonitor2Data(
             device=DeviceData(
                 name="test", location="test", category="test", brand="test",
-                mac_address=self.__generate_random_mac_addresses(n=1), ip_address="192.168.0.255"
+                mac_address=self.__generate_random_mac_addresses(n=1),
+                ip_address="192.168.0.255", token=""
             ),
         )
