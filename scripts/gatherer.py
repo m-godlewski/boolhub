@@ -14,7 +14,6 @@ from abc import ABC
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from scapy.all import arping
-from influxdb_client import Point
 
 import config
 from scripts import sentry
@@ -31,9 +30,6 @@ class Gatherer(ABC):
 
 class Network(Gatherer):
     """Gathers network data from devices connected to local network."""
-
-    # influx database bucket name
-    BUCKET = "network"
 
     def __init__(self) -> None:
         # saves gathered and processed data from arp scan to database
@@ -72,40 +68,32 @@ class Network(Gatherer):
                 # iterates over mac addresses
                 for mac_address in mac_addresses:
                     # writes single data entity to database
-                    point = (
-                        Point("devices")
-                        .tag("metric", "availability")
-                        .field("mac_address", mac_address)
-                    )
-                    influx_database.write(
-                        bucket=self.BUCKET,
-                        org=config.DATABASE["INFLUX"]["ORGANIZATION"],
-                        record=point,
+                    influx_database.add_point_network(
+                        measurement="devices",
+                        metric="availability",
+                        field="mac_address",
+                        value=mac_address
                     )
                 # "number" tag
                 # number of active devices in local network
                 number_of_devices = len(data)
                 # writes data to database
-                point = (
-                    Point("devices")
-                    .tag("metric", "number")
-                    .field("quantity", number_of_devices)
-                )
-                influx_database.write(
-                    bucket=self.BUCKET,
-                    org=config.DATABASE["INFLUX"]["ORGANIZATION"],
-                    record=point,
+                influx_database.add_point_network(
+                    measurement="devices",
+                    metric="number",
+                    field="quantity",
+                    value=number_of_devices
                 )
                 logging.info(
                     f"GATHERER | "
                     f"LOCATION = local | "
-                    f"DATA = {self.BUCKET}.availability | "
+                    f"DATA = network.availability | "
                     f"VALUES = {mac_addresses} | "
                 )
                 logging.info(
                     f"GATHERER | "
                     f"LOCATION = local | "
-                    f"DATA = {self.BUCKET}.number | "
+                    f"DATA = network.number | "
                     f"VALUES = {number_of_devices} | "
                 )
         except Exception:
@@ -118,14 +106,11 @@ class Network(Gatherer):
 class Air(Gatherer):
     """Gathers information from air devices connected to local network."""
 
-    # influx database bucket name
-    BUCKET = "air"
-
     def __init__(self) -> None:
         # retrieves data from each 'air' device and saves it to database
         self.gather_air_data(self.__air_scan())
 
-    def gather_air_data(self, air_data: typing.List[dict]) -> bool:
+    def gather_air_data(self, air_data: typing.List[AirData]) -> bool:
         """Saves retrieved data from each air devices to database.
         Returns True, if saving process succeed, otherwise False."""
         try:
@@ -133,33 +118,13 @@ class Air(Gatherer):
             with InfluxDB() as influx_database:
                 # iterates over datasets
                 for data in air_data:
-                    # data location
-                    location = data.device.location
-                    # air quality
-                    aqi = data.aqi
-                    # air humidity
-                    humidity = data.humidity
-                    # air temperature
-                    temperature = data.temperature
                     # prepares data for saving into influx database
-                    point = (
-                        Point("air")
-                        .tag("room", location)
-                        .field("aqi", aqi)
-                        .field("humidity", humidity)
-                        .field("temperature", temperature)
-                    )
-                    # inserts data to influx database
-                    influx_database.write(
-                        bucket=self.BUCKET,
-                        org=config.DATABASE["INFLUX"]["ORGANIZATION"],
-                        record=point,
-                    )
+                    influx_database.add_point_air(data)
                     logging.info(
                         f"GATHERER | "
-                        f"LOCATION = {location} | "
-                        f"DATA = {self.BUCKET} | "
-                        f"VALUES = {aqi}, {humidity}, {temperature} | "
+                        f"LOCATION = {data.device.location} | "
+                        f"DATA = air | "
+                        f"VALUES = {data.aqi}, {data.humidity}, {data.temperature} | "
                     )
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")

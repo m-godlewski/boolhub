@@ -12,7 +12,6 @@ import os
 import sys
 import traceback
 import typing
-from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
@@ -119,35 +118,22 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
         # set of registered devices MAC addresses
         with PostgreSQL() as postgresql_database:
             known_devices = {device.mac_address for device in postgresql_database.devices}
-        # set that contains unregistered devices MAC addresses
-        unknown_devices = mac_addresses - known_devices
-        # if above set contains any address
-        if unknown_devices:
-            # if notification flag is set to true
-            if config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]:
-                messenger.send_notification(
-                    text="Nieznane urządzenie połączyło się z siecią lokalną!"
+            # set that contains unregistered devices MAC addresses
+            unknown_devices = mac_addresses - known_devices
+            # if above set contains any address
+            if unknown_devices:
+                # if notification flag is set to true
+                if config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]:
+                    messenger.send_notification(
+                        text="Nieznane urządzenie połączyło się z siecią lokalną!"
+                    )
+                logging.warning(
+                    "SENTRY | Unknown device has connected to local network!"
                 )
-            logging.warning(
-                "SENTRY | Unknown device has connected to local network!"
-            )
-            issues.add("unknown_device")
-            # checks if unknown addresses already exists in database
-            with PostgreSQL() as postgresql_database:
-                unknown_devices_mac_addresses = {device.mac_address for device in postgresql_database.unknown_devices}
+                issues.add("unknown_device")
+                # adds unknown device to database
                 for address in unknown_devices:
-                    # if not, inserts new mac address to database
-                    if address not in unknown_devices_mac_addresses:
-                        postgresql_database.api.execute(
-                            "INSERT INTO unknown_devices(mac_address, last_time) VALUES(%s, %s);",
-                            (address, datetime.now(),)
-                        )
-                    # otherwise update 'last_time' column
-                    else:
-                        postgresql_database.api.execute(
-                            "UPDATE unknown_devices SET last_time = %s WHERE mac_address = %s;",
-                            (datetime.now(), address,)
-                        )
+                    postgresql_database.add_unknown_device(address)
 
     except Exception:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
