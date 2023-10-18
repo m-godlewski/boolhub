@@ -21,7 +21,10 @@ from scripts.models.database import PostgreSQL
 
 
 # constant values
-DEVICE_HEALTH_KEY_TRANSLATE_MAP = {"battery": "baterii", "filter_life_remaining": "filtra"}
+DEVICE_HEALTH_KEY_TRANSLATE_MAP = {
+    "battery": "baterii",
+    "filter_life_remaining": "filtra",
+}
 
 
 def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
@@ -30,7 +33,6 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
     issues, empty set will be returned.
     """
     try:
-
         # empty set of issues
         issues = set()
 
@@ -44,9 +46,7 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                     data.temperature
                     >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["UP"]
                     or data.temperature
-                    <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"][
-                        "BOTTOM"
-                    ]
+                    <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["BOTTOM"]
                 )
             ):
                 messenger.send_notification(
@@ -93,7 +93,6 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
     If there is no issues, empty set will be returned.
     """
     try:
-
         # empty set of issues
         issues = set()
 
@@ -117,7 +116,9 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
         # CHECKS IF UNKNOWN DEVICE HAS CONNECTED TO LOCAL NETWORK.
         # set of registered devices MAC addresses
         with PostgreSQL() as postgresql_database:
-            known_devices = {device.mac_address for device in postgresql_database.devices}
+            known_devices = {
+                device.mac_address for device in postgresql_database.devices
+            }
             # set that contains unregistered devices MAC addresses
             unknown_devices = mac_addresses - known_devices
             # if above set contains any address
@@ -148,7 +149,6 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
     If there is no issues, empty set will be returned.
     """
     try:
-
         # empty set of issues
         issues = set()
 
@@ -158,11 +158,10 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
             for field, value in data.health_data.items():
                 # if consumable part level exceeds predefined level
                 if (
-                    config.SCRIPTS["SENTRY"]["NOTIFIES"]["DIAGNOSTICS"] and
-                    value and
-                    value <= config.SCRIPTS["SENTRY"]["THRESHOLDS"][
-                        "BATTERY_FILTER_LEVEL"
-                    ]
+                    config.SCRIPTS["SENTRY"]["NOTIFIES"]["DIAGNOSTICS"]
+                    and value
+                    and value
+                    <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["BATTERY_FILTER_LEVEL"]
                 ):
                     logging.warning(
                         f"SENTRY | Level of {field} in device {data.device.name} in location {data.device.location} is {value}"

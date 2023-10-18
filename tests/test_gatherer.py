@@ -15,6 +15,7 @@ from scripts.models.data import DeviceData
 
 
 class TestGatherer(TestCase):
+    """Gatherer module unit tests class."""
 
     # mac address regex pattern
     MAC_ADDRESS_REGEX = r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
@@ -28,7 +29,9 @@ class TestGatherer(TestCase):
         # checks if returned dataset is not empty
         self.assertTrue(arp_scan_results)
         # calls tested method
-        output_data = network_gatherer._Network__gather_network_data(data=arp_scan_results)
+        output_data = network_gatherer._Network__gather_network_data(
+            data=arp_scan_results
+        )
         # checks if tested method returned True
         self.assertTrue(output_data)
 

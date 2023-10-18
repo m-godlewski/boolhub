@@ -80,7 +80,7 @@ class MiAirPurifier3H(Device):
         """Parses single line of raw data from dataset and returns it's processed form."""
         return (
             data.split(":")[0].lower().replace(" ", "_"),
-            self.__type_conversion(data.split(":")[1].strip().split(" ")[0])
+            self.__type_conversion(data.split(":")[1].strip().split(" ")[0]),
         )
 
     def __process_data(self, raw_data: str) -> MiAirPurifier3HData:

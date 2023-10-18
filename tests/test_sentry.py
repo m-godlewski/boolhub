@@ -18,6 +18,7 @@ from scripts.models.data import DeviceData, AirData, MiAirPurifier3HData, MiMoni
 
 
 class TestSentry(TestCase):
+    """Sentry module unit tests class."""
 
     # region AIR DATA
 
@@ -28,11 +29,11 @@ class TestSentry(TestCase):
         # generate test dataclass instance
         test_instance = self.__generate_test_instance_air_data()
         # tests upper threshold
-        test_instance.temperature = random.randint(up, up+3)
+        test_instance.temperature = random.randint(up, up + 3)
         output_data = sentry.check_air(air_data=[test_instance])
         self.assertIn(("temperature", "test"), output_data)
         # tests bottom threshold
-        test_instance.temperature = random.randint(bottom-3, bottom)
+        test_instance.temperature = random.randint(bottom - 3, bottom)
         output_data = sentry.check_air(air_data=[test_instance])
         self.assertIn(("temperature", "test"), output_data)
 
@@ -42,7 +43,7 @@ class TestSentry(TestCase):
         # generate test dataclass instance
         test_instance = self.__generate_test_instance_air_data()
         # tests exceeding threshold
-        test_instance.aqi = random.randint(threshold, threshold+100)
+        test_instance.aqi = random.randint(threshold, threshold + 100)
         output_data = sentry.check_air(air_data=[test_instance])
         self.assertIn(("aqi", "test"), output_data)
 
@@ -53,11 +54,11 @@ class TestSentry(TestCase):
         # generate test dataclass instance
         test_instance = self.__generate_test_instance_air_data()
         # tests upper threshold
-        test_instance.humidity = random.randint(up, up+5)
+        test_instance.humidity = random.randint(up, up + 5)
         output_data = sentry.check_air(air_data=[test_instance])
         self.assertIn(("humidity", "test"), output_data)
         # tests bottom threshold
-        test_instance.humidity = random.randint(bottom-5, bottom)
+        test_instance.humidity = random.randint(bottom - 5, bottom)
         output_data = sentry.check_air(air_data=[test_instance])
         self.assertIn(("humidity", "test"), output_data)
 
@@ -88,19 +89,19 @@ class TestSentry(TestCase):
         threshold = config.SCRIPTS["SENTRY"]["THRESHOLDS"]["BATTERY_FILTER_LEVEL"]
         # tests exceeding battery level threshold
         test_instance = self.__generate_test_instance_monitor()
-        test_instance.battery = random.randint(threshold-5, threshold)
+        test_instance.battery = random.randint(threshold - 5, threshold)
         output_data = sentry.check_diagnostic(diagnostic_data=[test_instance])
         assert ("battery", "test") in output_data
         # tests exceeding filter level threshold
         test_instance = self.__generate_test_instance_purifier()
-        test_instance.filter_life_remaining = random.randint(threshold-5, threshold)
+        test_instance.filter_life_remaining = random.randint(threshold - 5, threshold)
         output_data = sentry.check_diagnostic(diagnostic_data=[test_instance])
         assert ("filter_life_remaining", "test") in output_data
 
     # endregion
 
     def __generate_random_mac_addresses(self, n: int = 1) -> typing.Set[str]:
-        """Generates and returns set of mac addresses, 
+        """Generates and returns set of mac addresses,
         where length of set is defined by argument."""
         return set(RandMac() for i in range(n))
 
@@ -108,9 +109,13 @@ class TestSentry(TestCase):
         """Return predefined, test instance of AirData dataclass."""
         return AirData(
             device=DeviceData(
-                name="test", location="test", category="test", brand="test",
+                name="test",
+                location="test",
+                category="test",
+                brand="test",
                 mac_address=self.__generate_random_mac_addresses(n=1),
-                ip_address="192.168.0.255", token=""
+                ip_address="192.168.0.255",
+                token="",
             ),
         )
 
@@ -118,9 +123,13 @@ class TestSentry(TestCase):
         """Return predefined, test instance of MiAirPurifier3HData dataclass."""
         return MiAirPurifier3HData(
             device=DeviceData(
-                name="test", location="test", category="test", brand="test",
+                name="test",
+                location="test",
+                category="test",
+                brand="test",
                 mac_address=self.__generate_random_mac_addresses(n=1),
-                ip_address="192.168.0.255", token=""
+                ip_address="192.168.0.255",
+                token="",
             ),
         )
 
@@ -128,8 +137,12 @@ class TestSentry(TestCase):
         """Return predefined, test instance of MiMonitor2Data dataclass."""
         return MiMonitor2Data(
             device=DeviceData(
-                name="test", location="test", category="test", brand="test",
+                name="test",
+                location="test",
+                category="test",
+                brand="test",
                 mac_address=self.__generate_random_mac_addresses(n=1),
-                ip_address="192.168.0.255", token=""
+                ip_address="192.168.0.255",
+                token="",
             ),
         )
