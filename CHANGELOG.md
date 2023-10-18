@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.3
+- Favicon added.
+
 ## 0.5.2
 - Added 'token' field to device model.
 
