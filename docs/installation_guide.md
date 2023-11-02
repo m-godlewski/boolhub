@@ -13,9 +13,10 @@ $ sudo apt-get install openssh-client
 ```
 $ sudo apt-get install net-tools
 ```
-4. Install python pip.
+4. Install python pip and venv.
 ```
 $ sudo apt-get install python3-pip
+$ sudo apt-get install python3.8-venv
 ```
 5. Configure server timezone. [Guide](https://linuxize.com/post/how-to-set-or-change-timezone-in-linux/)
 6. Set static IP. [Guide](https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/)
@@ -37,7 +38,18 @@ After successfull login, Grafana will as you for new password.
 Set organization name to boolhub and initial bucket to network.   
 Add other data buckets manually.
 14. Configure connection between Grafana and Influx.  
-15. Set up cronjob to use gatherer.py script.
+15. Configure data gathering
+Create venv and install all libraries listed in requirements.txt in scripts directory
+```
+$ cd scripts
+$ python3 -m venv venv
+$ source venv venv
+$ (venv) pip install -r requirements.txt
+```
+Set up (sudo user for this moment )cronjob for runing gatherer.py script.
+```
+$ sudo crontab -e
+```
 
 ### Optional configuration
 1. Set up SSH key authorization. [Guide](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-20-04)

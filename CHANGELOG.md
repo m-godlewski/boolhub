@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.4
+- Installation guide and troubleshooting updated.
+- Added init-user-db.sh script used for main postgres user database initialization.
+- First functionalities implemented in archivist.py script.
+- Utils script - docker.py added.
+
 ## 0.5.3
 - Favicon added.
 - Whole database logic moved to database.py script.
