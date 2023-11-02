@@ -33,3 +33,14 @@ Change ownership of grafana mapped directory.
 ```
 sudo chown 472:472 /data/grafana/
 ```
+### 4. Error during psycopg2 installation.
+```
+Error: pg_config executable not found.
+```
+__Solution:__   
+```
+sudo apt-get install libpq-dev
+```
+
+### 5. Error during bluepy installation.
+When you are facing errors during bluepy installation. Follow installation guide on [official github repository](https://github.com/IanHarvey/bluepy).
