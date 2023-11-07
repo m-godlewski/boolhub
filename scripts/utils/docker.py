@@ -32,7 +32,7 @@ async def docker_compose_down(rmi: bool = False) -> bool:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
         return False
     else:
-        logging.critical(f"All containers has been stopped\n{output.decode('utf-8')}")
+        logging.critical(f"{output.decode('utf-8')}All containers has been stopped")
         return True
 
 
@@ -52,5 +52,5 @@ async def docker_compose_up() -> bool:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
         return False
     else:
-        logging.critical(f"All containers has been started\n{output.decode('utf-8')}")
+        logging.critical(f"{output.decode('utf-8')}All containers has been started")
         return True
