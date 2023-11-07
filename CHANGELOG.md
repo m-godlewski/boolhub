@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.5
+- archivist.py script added.
+- Minor changes.
+
 ## 0.5.4
 - Installation guide and troubleshooting updated.
 - Added init-user-db.sh script used for main postgres user database initialization.

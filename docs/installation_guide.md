@@ -33,7 +33,7 @@ $ docker compose run central python manage.py createsuperuser
 ```
 12. Set admin password for Grafana.   
 To set password for Grafana admin user, just log in for the first time using admin/admin credentials.
-After successfull login, Grafana will as you for new password.
+After successful login, Grafana will as you for new password.
 13. Set up admin user for InfluxDB.  
 Set organization name to boolhub and initial bucket to network.   
 Add other data buckets manually.

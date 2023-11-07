@@ -21,7 +21,6 @@ AttributeError: 'DeviceGroup' object has no attribute 'resultcallback'
 ```
 __Solution:__   
 Remove @resultcallback decorator from line pointed in error message.
-
 ### 3. Grafana container is crashing when starting.
 ```
 grafana_1        | GF_PATHS_DATA='/var/lib/grafana' is not writable.
@@ -41,6 +40,9 @@ __Solution:__
 ```
 sudo apt-get install libpq-dev
 ```
-
 ### 5. Error during bluepy installation.
 When you are facing errors during bluepy installation. Follow installation guide on [official github repository](https://github.com/IanHarvey/bluepy).
+### 6. Gatherer.py cannot read data from Xiaomi Monitor 2
+```
+$ sudo apt install bluez
+```

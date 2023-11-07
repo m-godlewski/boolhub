@@ -21,6 +21,7 @@ services:
       - 8086:8086
     volumes:
       - /data/influxdb:/var/lib/influxdb2
+      - ${BOOLHUB_BACKUPS_PATH}:${BOOLHUB_BACKUPS_PATH}
     networks:
       - boolnet
   grafana:
@@ -58,7 +59,7 @@ services:
       - 5432:5432
     volumes:
       - /data/postgres/:/var/lib/postgresql/data/
-      - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+      - ./docker/postgresql/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
     environment:
       - POSTGRES_PASSWORD=${POSTGRE_PASSWORD}
       - POSTGRES_USER=${POSTGRE_USER}

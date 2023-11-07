@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 #############################
 
 # current system version
-VERSION = "0.5.4"
+VERSION = "0.5.5"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -78,3 +78,6 @@ SCRIPTS = {
     },
     "MESSENGER": {"NTFY_SERVER_URL": os.environ.get("NTFY_SERVER_URL")},
 }
+
+# backups configuration
+BACKUPS = {"PATH": os.environ.get("BOOLHUB_BACKUPS_PATH")}
