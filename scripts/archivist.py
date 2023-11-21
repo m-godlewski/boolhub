@@ -24,7 +24,7 @@ async def backup_influx(backup_directory: str) -> bool:
         logging.info("InfluxDB backup process started!")
         # command that will be executed inside docker container
         command = f"""
-        docker exec -it influxdb influx backup \
+        docker exec influxdb influx backup \
         -t {config.DATABASE['INFLUX']['API_TOKEN']} \
         {os.path.join(backup_directory, "influxdb")}
         """
@@ -50,7 +50,7 @@ async def backup_postgresql(backup_directory: str) -> bool:
         logging.info("PostgreSQL backup process started!")
         # command that will be executed inside docker container
         command = f"""
-        docker exec -it postgresql pg_dumpall -c \
+        docker exec postgresql pg_dumpall -c \
         -U {config.DATABASE['POSTGRE']['USER']} \
         > {os.path.join(backup_directory, "postgresql" ,"postgres_dump.sql")}
         """
@@ -95,7 +95,7 @@ def __prepare_directory(overwrite: bool = False) -> str:
                 "Backup subdirectory already exists, consider using overwrite argument!"
             )
     # create subdirectories for each database
-    for name in ("logs", "influxdb", "postgresql"):
+    for name in ("influxdb", "postgresql"):
         os.mkdir(os.path.join(subdirectory_path, name))
     return subdirectory_path
 
