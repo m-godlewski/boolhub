@@ -167,7 +167,7 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
                         f"SENTRY | Level of {field} in device {data.device.name} in location {data.device.location} is {value}"
                     )
                     messenger.send_notification(
-                        text=f"Poziom {DEVICE_HEALTH_KEY_TRANSLATE_MAP[field]} w urządzeniu {data.device.name} w lokacji {data.device.name} wynosi {field}"
+                        text=f"Poziom {DEVICE_HEALTH_KEY_TRANSLATE_MAP[field]} w urządzeniu {data.device.name} w lokacji {data.device.location} wynosi {value}"
                     )
                     issues.add((field, data.device.location))
 
