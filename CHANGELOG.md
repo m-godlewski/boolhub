@@ -1,7 +1,9 @@
 # Changelog
 
 ## 0.5.5
-- archivist.py script added.
+- Archivist module implemented.
+- Archivist - backup modes added for InfluxDB and PostgreSQL.
+- Archivist - recovery mode added for InfluxDB and PostgreSQL.
 - Minor changes.
 
 ## 0.5.4
