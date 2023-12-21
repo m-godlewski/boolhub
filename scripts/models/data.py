@@ -109,4 +109,28 @@ class MiMonitor2Data(AirData):
         )
 
 
+@dataclass
+class OutsideVirtualThermometerData(AirData):
+    """Dataclass of virtual outside thermometer."""
+
+    # fields
+    battery: int = 100
+
+    # fields groups
+    AIR_DATA_FIELDS = {"temperature", "humidity", "aqi"}
+    HEALTH_DATA_FIELDS = {"battery"}
+
+    @property
+    def air_data(self) -> dict:
+        return dict(
+            [(field, self.__getattribute__(field)) for field in self.AIR_DATA_FIELDS]
+        )
+
+    @property
+    def health_data(self) -> dict:
+        return dict(
+            [(field, self.__getattribute__(field)) for field in self.HEALTH_DATA_FIELDS]
+        )
+
+
 # endregion

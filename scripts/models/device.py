@@ -10,9 +10,16 @@ from abc import ABC
 from dataclasses import fields
 
 import bluepy
+import requests
 from lywsd03mmc import Lywsd03mmcClient
 
-from scripts.models.data import DeviceData, MiAirPurifier3HData, MiMonitor2Data
+import config
+from scripts.models.data import (
+    DeviceData,
+    MiAirPurifier3HData,
+    MiMonitor2Data,
+    OutsideVirtualThermometerData,
+)
 
 
 class Device(ABC):
@@ -160,6 +167,61 @@ class MiMonitor2(Device):
         """Processes raw data and returns it as instance of dataclass."""
         try:
             processed_data = MiMonitor2Data(self.metadata, **raw_data)
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return MiMonitor2Data(self.metadata)
+        else:
+            return processed_data
+
+
+class OutsideVirtualThermometer(Device):
+    """Class used for communication with external API (https://weatherapi.com) to fetch weather data."""
+
+    def __init__(self, device_data: DeviceData) -> None:
+        # calls super class constructor
+        super().__init__(device_data)
+        raw_data = self.__fetch_data()
+        self.__processed_data = self.__process_data(raw_data)
+
+    @property
+    def data(self) -> OutsideVirtualThermometerData:
+        """Returns processed data."""
+        return self.__processed_data
+
+    def __fetch_data(self) -> OutsideVirtualThermometerData:
+        """Connects to device and fetches data."""
+        try:
+            # sending request to weather api
+            response = requests.get(
+                url=f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['API_URL']}",
+                params={
+                    "key": self.metadata.token,
+                    "q": f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LATITUDE']}, {config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LONGITUDE']}",
+                    "aqi": "yes",
+                },
+            )
+            # if returned status code indicates external server error
+            if response.status_code == 500:
+                raise Exception("External Server Error!")
+            # retrieving data in JSON format
+            data = response.json()
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return {}
+        else:
+            return data
+
+    def __process_data(self, raw_data: dict) -> MiMonitor2Data:
+        """Processes raw data and returns it as instance of dataclass."""
+        try:
+            data = {
+                "temperature": raw_data.get("current").get("temp_c"),
+                "humidity": raw_data.get("current").get("humidity"),
+                "aqi": max(
+                    round(raw_data.get("current").get("air_quality").get("pm2_5")), 1
+                ),
+            }
+            processed_data = OutsideVirtualThermometerData(self.metadata, **data)
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
             return MiMonitor2Data(self.metadata)
