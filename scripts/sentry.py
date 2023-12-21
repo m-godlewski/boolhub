@@ -42,6 +42,8 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
             if (
                 data.temperature
                 and config.SCRIPTS["SENTRY"]["NOTIFIES"]["TEMPERATURE"]
+                # outside air devices data should not be verified
+                and data.device.location != "zewnątrz"
                 and (
                     data.temperature
                     >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["UP"]

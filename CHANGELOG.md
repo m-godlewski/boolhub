@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.0
+- Implemented virtual outside thermometer.
+
 ## 0.5.5
 - Archivist module implemented.
 - Archivist - backup modes added for InfluxDB and PostgreSQL.

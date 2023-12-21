@@ -15,11 +15,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from scapy.all import arping
 
-import config
 from scripts import sentry
-from scripts.models.data import DeviceData, AirData, MiAirPurifier3HData, MiMonitor2Data
+from scripts.models.data import DeviceData, AirData, MiAirPurifier3HData, MiMonitor2Data, OutsideVirtualThermometerData
 from scripts.models.database import PostgreSQL, InfluxDB
-from scripts.models.device import MiAirPurifier3H, MiMonitor2
+from scripts.models.device import MiAirPurifier3H, MiMonitor2, OutsideVirtualThermometer
 
 
 class Gatherer(ABC):
@@ -146,6 +145,8 @@ class Air(Gatherer):
                     results.append(self.__air_scan_purifier(device_data))
                 elif "monitor" in device_name:
                     results.append(self.__air_scan_monitor(device_data))
+                elif "outside thermometer" in device_name:
+                    results.append(self.__air_scan_outside_thermometer(device_data))
                 else:
                     logging.error(f"Device '{device_name}' is not supported!")
         except Exception:
@@ -175,6 +176,19 @@ class Air(Gatherer):
         try:
             # fetches data from device
             device = MiMonitor2(device_data)
+            # retrieved data
+            data = device.data
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return {}
+        else:
+            return data
+
+    def __air_scan_outside_thermometer(self, device_data: DeviceData) -> OutsideVirtualThermometerData:
+        """Gathers data from virtual outside thermometer."""
+        try:
+            # fetches data from device
+            device = OutsideVirtualThermometer(device_data)
             # retrieved data
             data = device.data
         except Exception:

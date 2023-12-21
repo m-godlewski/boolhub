@@ -7,9 +7,9 @@ class Room(models.Model):
     # room name
     name = models.CharField(max_length=30)
     # room dimensions
-    length = models.FloatField()
-    width = models.FloatField()
-    height = models.FloatField()
+    length = models.FloatField(null=True)
+    width = models.FloatField(null=True)
+    height = models.FloatField(null=True)
 
     def __str__(self) -> str:
         """Returns representation of object in form of string."""
