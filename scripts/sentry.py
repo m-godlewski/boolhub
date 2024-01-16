@@ -69,6 +69,7 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
             if (
                 data.humidity
                 and config.SCRIPTS["SENTRY"]["NOTIFIES"]["HUMIDITY"]
+                and data.device.location != "zewnątrz"
                 and (
                     data.humidity
                     >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["UP"]
