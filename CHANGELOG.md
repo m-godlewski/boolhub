@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.0
+- Prometheus and Node Exporter added to monitor internal host's statistics
+
 ## 0.6.0
 - Implemented virtual outside thermometer.
 
