@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.8.0
+- Landing page reworked to work on tablet device.
+
 ## 0.7.0
 - Prometheus and Node Exporter added to monitor internal host's statistics
 

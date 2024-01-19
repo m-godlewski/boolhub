@@ -3,5 +3,100 @@
 {% block title %}BoolHub{% endblock %}
 
 {% block content %}
-    <iframe class="responsive-iframe" src="http://192.168.0.250:3000/d/SIkdSQfVz/main?orgId=1?orgId=1k&kiosk&refresh=60s" frameborder="0" scrolling="no"></iframe>
+
+    <!-- Main container -->
+    <div class="container-fluid bg-light bg-gradient">
+
+        <!-- First row -->
+        <div class="row row-cols-2">
+
+            <!-- Powietrze -->
+            <div class="col-sm tile">
+                <center>
+                    <a href="http://192.168.0.250:3000/d/F8x_fd14z/powietrze?orgId=1&kiosk&refresh=60s">
+                        <img src="https://www.svgrepo.com/show/503640/air-conditioner.svg" class="tile-image"/>
+                    </a>
+                    <figcaption><p class="h4">Powietrze</p></figcaption>
+                </center>
+            </div>
+
+            <!-- Pogoda -->
+            <div class="col-sm tile">
+                <center>
+                    <a href="#">
+                        <img src="https://www.svgrepo.com/show/530233/weather.svg" class="tile-image"/>
+                    </a>
+                    <figcaption><p class="h4">Pogoda</p></figcaption>
+                </center>
+            </div>
+
+            <!-- Oświetlenie -->
+            <div class="col-sm tile">
+                <center>
+                    <a href="#">
+                        <img src="https://www.svgrepo.com/show/499912/light-bulb.svg" class="tile-image"/>
+                    </a>
+                    <figcaption><p class="h4">Oświetlenie</p></figcaption>
+                </center>
+            </div>
+
+            <!-- Sieć -->
+            <div class="col-sm tile">
+                <center>
+                    <a href="http://192.168.0.250:3000/d/YRGtmDi4z/siec?orgId=1&kiosk&refresh=60s">
+                        <img src="https://www.svgrepo.com/show/506947/cld-cloud-computer-network.svg" class="tile-image"/>
+                    </a>
+                    <figcaption><p class="h4">Sieć</p></figcaption>
+                </center>
+            </div>
+
+        </div>
+
+        <!-- Second row -->
+        <div class="row row-cols-2">
+
+            <!-- Monitoring -->
+            <div class="col-sm tile">
+                <center>
+                    <a href="#">
+                        <img src="https://www.svgrepo.com/show/387078/camera-two.svg" class="tile-image"/>
+                    </a>
+                    <figcaption><p class="h4">Monitoring</p></figcaption>
+                </center>
+            </div>
+
+            <!-- Tryb 'poza domem' -->
+            <div class="col-sm tile">
+                <center>
+                    <a href="#">
+                        <img src="https://www.svgrepo.com/show/463666/sign-out-alt-3.svg" class="tile-image"/>
+                    </a>
+                    <figcaption><p class="h4">Tryb "poza domem"</p></figcaption>
+                </center>
+            </div>
+
+            <!-- Wewnętrzne statystyki -->
+            <div class="col-sm tile">
+                <center>
+                    <a href="http://192.168.0.250:3000/d/e2edc076-5dd9-4609-863a-34bb97f70f07/wewnetrzne-statystyki?orgId=1&kiosk&refresh=60s">
+                        <img src="https://www.svgrepo.com/show/506982/gen-heart-rate.svg" class="tile-image"/>
+                    </a>
+                    <figcaption><p class="h4">Wewnętrzne statystyki</p></figcaption>
+                </center>
+            </div>
+
+            <!-- Panel Administracyjny -->
+            <div class="col-sm tile">
+                <center>
+                    <a href="/admin">
+                        <img src="https://www.svgrepo.com/show/528592/settings.svg" class="tile-image"/>
+                    </a>
+                    <figcaption><p class="h4">Panel Administracyjny</p></figcaption>
+                </center>
+            </div>
+        
+        </div>
+
+    </div>
+
 {% endblock %}
