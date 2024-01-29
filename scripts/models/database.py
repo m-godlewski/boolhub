@@ -115,6 +115,34 @@ class PostgreSQL(Database):
         else:
             return True
 
+    def get_device_by_name(self, device_name: str="") -> typing.List[DeviceData]:
+        """Returns list of DeviceData objects of given device name."""
+        try:
+            devices_data = [
+                device
+                for device in self.devices
+                if device.name == device_name
+            ]
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return []
+        else:
+            return devices_data
+
+    def get_device_by_type(self, device_type: str="") -> typing.List[DeviceData]:
+        """Returns list of DeviceData objects of given device type."""
+        try:
+            devices_data = [
+                device
+                for device in self.devices
+                if device.category == device_type
+            ]
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return []
+        else:
+            return devices_data
+
 
 class InfluxDB(Database):
     """Class responsible for Influx database connection."""
