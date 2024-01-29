@@ -66,7 +66,7 @@ SCRIPTS = {
             "TEMPERATURE": True,
             "AQI": True,
             "HUMIDITY": True,
-            "DIAGNOSTICS": True,
+            "DIAGNOSTICS": False,
         },
         "THRESHOLDS": {
             "MAX_NUMBER_OF_DEVICES": 10,
