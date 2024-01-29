@@ -197,15 +197,25 @@ class Air(Gatherer):
         else:
             return data
 
-    def __get_air_devices(self) -> typing.List[DeviceData]:
+    def __get_air_devices(self, name: str="") -> typing.List[DeviceData]:
         """Returns air devices data from database."""
         try:
             # connects to postgresql
             with PostgreSQL() as postgresql_database:
-                air_devices_data = [
-                    device
-                    for device in postgresql_database.devices
-                    if device.category == "air"
+                # if no device name was specified
+                if not name:
+                    air_devices_data = [
+                        device
+                        for device in postgresql_database.devices
+                        if device.category == "air"
+                ]
+                # fetch data of each air device
+                else:
+                    air_devices_data = [
+                        device
+                        for device in postgresql_database.devices
+                        if device.category == "air"
+                        and device.name == name
                 ]
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
