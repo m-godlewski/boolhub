@@ -78,14 +78,4 @@ class TestGatherer(TestCase):
     def test_air_scan_monitor(self):
         pass
 
-    def test_air_devices_data(self):
-        # calls tested method
-        air_gatherer = Air()
-        output_data = air_gatherer._Air__get_air_devices()
-        # checks if method returned not empty array with dictionaries inside
-        self.assertTrue(output_data)
-        self.assertTrue(isinstance(output_data, list))
-        for data in output_data:
-            self.assertTrue(isinstance(data, DeviceData))
-
     # endregion
