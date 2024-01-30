@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.0
+- Fetching weather forecast to InfluxDB implemented.
+
 ## 0.8.0
 - Landing page reworked to work on tablet device.
 
