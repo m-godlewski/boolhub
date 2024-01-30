@@ -16,7 +16,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from scapy.all import arping
 
 from scripts import sentry
-from scripts.models.data import DeviceData, AirData, MiAirPurifier3HData, MiMonitor2Data, OutsideVirtualThermometerData
+from scripts.models.data import (
+    DeviceData,
+    AirData,
+    MiAirPurifier3HData,
+    MiMonitor2Data,
+    OutsideVirtualThermometerData,
+    ForecastData,
+)
 from scripts.models.database import PostgreSQL, InfluxDB
 from scripts.models.device import MiAirPurifier3H, MiMonitor2, OutsideVirtualThermometer
 
@@ -184,7 +191,9 @@ class Air(Gatherer):
         else:
             return data
 
-    def __air_scan_outside_thermometer(self, device_data: DeviceData) -> OutsideVirtualThermometerData:
+    def __air_scan_outside_thermometer(
+        self, device_data: DeviceData
+    ) -> OutsideVirtualThermometerData:
         """Gathers data from virtual outside thermometer."""
         try:
             # fetches data from device
@@ -198,6 +207,50 @@ class Air(Gatherer):
             return data
 
 
+class Forecast(Gatherer):
+    """Gathers information about weather forecast from external API."""
+
+    def __init__(self) -> None:
+        # retrieves weather forecast and saves it to database
+        self.gather_forecast_data(self.__forecast_scan())
+
+    def gather_forecast_data(self, forecast_data: typing.List[ForecastData]) -> bool:
+        """Saves retrieved forecast data from virtual thermometer to database.
+        Returns True, if saving process succeed, otherwise False."""
+        try:
+            # connects to influx database
+            with InfluxDB() as influx_database:
+                # iterates over datasets
+                for data in forecast_data:
+                    # prepares data for saving into influx database
+                    influx_database.add_point_forecast(data)
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return False
+        else:
+            return True
+
+    def __forecast_scan(self) -> typing.List[ForecastData]:
+        """Gathers weather forecast data from virtual thermometer."""
+        try:
+            # gets virtual thermometer device data from database
+            device_data = PostgreSQL().get_device_by_name(
+                device_name="Outside Thermometer"
+            )
+            # fetches forecast data from device
+            forecast_device = OutsideVirtualThermometer(
+                device_data=device_data,
+                forecast=True
+            )
+            # retrieved data
+            forecast_data = forecast_device.data
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return []
+        else:
+            return forecast_data
+
+
 # main section of script
 if __name__ == "__main__":
     # parses script arguments
@@ -209,3 +262,5 @@ if __name__ == "__main__":
         Network()
     if arguments.data == "air":
         Air()
+    if arguments.data == "forecast":
+        Forecast()
