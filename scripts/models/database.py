@@ -115,19 +115,27 @@ class PostgreSQL(Database):
         else:
             return True
 
-    def get_device_by_name(self, device_name: str="") -> typing.List[DeviceData]:
+    def get_device_by_name(self, device_name: str="") -> DeviceData:
         """Returns list of DeviceData objects of given device name."""
         try:
-            devices_data = [
-                device
-                for device in self.devices
-                if device.name == device_name
-            ]
+            self.api.execute(
+                """
+                SELECT d.name, r.name, d.category, d.brand, d.mac_address, d.ip_address, d.token
+                FROM devices_device as d
+                INNER JOIN rooms_room as r
+                ON r.id = d.location_id
+                WHERE d.name = %s;
+                """,
+                (
+                    device_name,
+                ),
+            )
+            device = DeviceData(*self.api.fetchone())
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
-            return []
+            return None
         else:
-            return devices_data
+            return device
 
     def get_device_by_type(self, device_type: str="") -> typing.List[DeviceData]:
         """Returns list of DeviceData objects of given device type."""
@@ -203,6 +211,28 @@ class InfluxDB(Database):
             )
             self.api.write(
                 bucket="air",
+                org=config.DATABASE["INFLUX"]["ORGANIZATION"],
+                record=point,
+            )
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return False
+        else:
+            return True
+
+    def add_point_forecast(self, forecast_data) -> bool:
+        """Writes single forecast data entity to database.
+        Returns True, if operation succeed. Otherwise returns False.
+        """
+        try:
+            point = (
+                Point("forecast")
+                .field("temperature", forecast_data.temperature)
+                .field("humidity", forecast_data.humidity)
+                .time(forecast_data.date)
+            )
+            self.api.write(
+                bucket="forecast",
                 org=config.DATABASE["INFLUX"]["ORGANIZATION"],
                 record=point,
             )

@@ -36,7 +36,7 @@ class UnknownDeviceData:
 # endregion
 
 
-# region DATASETS
+# region AIR DATASETS
 
 
 @dataclass
@@ -131,6 +131,15 @@ class OutsideVirtualThermometerData(AirData):
         return dict(
             [(field, self.__getattribute__(field)) for field in self.HEALTH_DATA_FIELDS]
         )
+
+
+@dataclass
+class ForecastData:
+
+    # fields
+    date: int
+    temperature: float
+    humidity: float
 
 
 # endregion

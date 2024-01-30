@@ -19,6 +19,7 @@ from scripts.models.data import (
     MiAirPurifier3HData,
     MiMonitor2Data,
     OutsideVirtualThermometerData,
+    ForecastData,
 )
 
 
@@ -177,23 +178,84 @@ class MiMonitor2(Device):
 class OutsideVirtualThermometer(Device):
     """Class used for communication with external API (https://weatherapi.com) to fetch weather data."""
 
-    def __init__(self, device_data: DeviceData) -> None:
+    def __init__(self, device_data: DeviceData, forecast: bool=False) -> None:
         # calls super class constructor
         super().__init__(device_data)
-        raw_data = self.__fetch_data()
-        self.__processed_data = self.__process_data(raw_data)
+        # fetches weather data, if flag was set to False
+        if not forecast:
+            raw_data = self.__fetch_weather_data()
+            self.__processed_data = self.__process_weather_data(raw_data)
+        # otherwise, fetches forecast data
+        else:
+            raw_data = self.__fetch_forecast_data()
+            self.__processed_data = self.__process_forecast_data(raw_data)
 
     @property
     def data(self) -> OutsideVirtualThermometerData:
         """Returns processed data."""
         return self.__processed_data
 
-    def __fetch_data(self) -> OutsideVirtualThermometerData:
+    # region FORECAST
+
+    def __fetch_forecast_data(self) -> dict:
         """Connects to device and fetches data."""
         try:
             # sending request to weather api
             response = requests.get(
-                url=f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['API_URL']}",
+                url=f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['API_URL']}/forecast.json",
+                params={
+                    "key": self.metadata.token,
+                    "q": f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LATITUDE']}, {config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LONGITUDE']}",
+                    "aqi": "yes",
+                    "days": 3,
+                },
+            )
+            # if returned status code indicates external server error
+            if response.status_code == 500:
+                raise Exception("External Server Error!")
+            # retrieving data in JSON format
+            data = response.json()
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return {}
+        else:
+            return data
+
+    def __process_forecast_data(self, raw_data: dict) -> typing.List[ForecastData]:
+        """Processes raw data and returns it as instance of dataclass."""
+        try:
+            # empty list to store dataclass instances
+            processed_data = []
+            # list of daily forecasts
+            forecast_data = raw_data.get("forecast").get("forecastday")
+            # iterate over daily forecast
+            for daily_forecast in forecast_data:
+                # iterate over hourly forecast
+                for hourly_forecast in daily_forecast.get("hour"):
+                    # create forecast dataclass and append it to final list
+                    processed_data.append(
+                        ForecastData(
+                            date = hourly_forecast.get("time"),
+                            temperature = hourly_forecast.get("temp_c"),
+                            humidity = hourly_forecast.get("humidity")
+                        )
+                    )
+        except Exception:
+            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            return []
+        else:
+            return processed_data
+
+    # endregion
+
+    # region WEATHER
+
+    def __fetch_weather_data(self) -> dict:
+        """Connects to device and fetches data."""
+        try:
+            # sending request to weather api
+            response = requests.get(
+                url=f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['API_URL']}/current.json",
                 params={
                     "key": self.metadata.token,
                     "q": f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LATITUDE']}, {config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LONGITUDE']}",
@@ -211,7 +273,7 @@ class OutsideVirtualThermometer(Device):
         else:
             return data
 
-    def __process_data(self, raw_data: dict) -> MiMonitor2Data:
+    def __process_weather_data(self, raw_data: dict) -> OutsideVirtualThermometerData:
         """Processes raw data and returns it as instance of dataclass."""
         try:
             data = {
@@ -227,3 +289,5 @@ class OutsideVirtualThermometer(Device):
             return MiMonitor2Data(self.metadata)
         else:
             return processed_data
+
+    # endregion
