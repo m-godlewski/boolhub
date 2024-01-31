@@ -135,6 +135,7 @@ class OutsideVirtualThermometerData(AirData):
 
 @dataclass
 class ForecastData:
+    """Dataclass of forecast data from virtual outside thermometer."""
 
     # fields
     date: int

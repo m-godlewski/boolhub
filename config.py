@@ -81,7 +81,7 @@ SCRIPTS = {
         "VIRTUAL_THERMOMETER": {
             "API_URL": os.environ.get("WEATHER_API_URL"),
             "LATITUDE": os.environ.get("LATITUDE"),
-            "LONGITUDE": os.environ.get("LONGITUDE")
+            "LONGITUDE": os.environ.get("LONGITUDE"),
         }
     },
 }

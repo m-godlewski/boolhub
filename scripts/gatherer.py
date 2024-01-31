@@ -239,8 +239,7 @@ class Forecast(Gatherer):
             )
             # fetches forecast data from device
             forecast_device = OutsideVirtualThermometer(
-                device_data=device_data,
-                forecast=True
+                device_data=device_data, forecast=True
             )
             # retrieved data
             forecast_data = forecast_device.data
