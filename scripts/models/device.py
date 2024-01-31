@@ -178,7 +178,7 @@ class MiMonitor2(Device):
 class OutsideVirtualThermometer(Device):
     """Class used for communication with external API (https://weatherapi.com) to fetch weather data."""
 
-    def __init__(self, device_data: DeviceData, forecast: bool=False) -> None:
+    def __init__(self, device_data: DeviceData, forecast: bool = False) -> None:
         # calls super class constructor
         super().__init__(device_data)
         # fetches weather data, if flag was set to False
@@ -235,9 +235,9 @@ class OutsideVirtualThermometer(Device):
                     # create forecast dataclass and append it to final list
                     processed_data.append(
                         ForecastData(
-                            date = hourly_forecast.get("time"),
-                            temperature = hourly_forecast.get("temp_c"),
-                            humidity = hourly_forecast.get("humidity")
+                            date=hourly_forecast.get("time"),
+                            temperature=hourly_forecast.get("temp_c"),
+                            humidity=hourly_forecast.get("humidity"),
                         )
                     )
         except Exception:

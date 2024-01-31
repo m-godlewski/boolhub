@@ -115,7 +115,7 @@ class PostgreSQL(Database):
         else:
             return True
 
-    def get_device_by_name(self, device_name: str="") -> DeviceData:
+    def get_device_by_name(self, device_name: str = "") -> DeviceData:
         """Returns list of DeviceData objects of given device name."""
         try:
             self.api.execute(
@@ -126,9 +126,7 @@ class PostgreSQL(Database):
                 ON r.id = d.location_id
                 WHERE d.name = %s;
                 """,
-                (
-                    device_name,
-                ),
+                (device_name,),
             )
             device = DeviceData(*self.api.fetchone())
         except Exception:
@@ -137,13 +135,11 @@ class PostgreSQL(Database):
         else:
             return device
 
-    def get_device_by_type(self, device_type: str="") -> typing.List[DeviceData]:
+    def get_device_by_type(self, device_type: str = "") -> typing.List[DeviceData]:
         """Returns list of DeviceData objects of given device type."""
         try:
             devices_data = [
-                device
-                for device in self.devices
-                if device.category == device_type
+                device for device in self.devices if device.category == device_type
             ]
         except Exception:
             logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
