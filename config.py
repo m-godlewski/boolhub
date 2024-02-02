@@ -62,16 +62,16 @@ SCRIPTS = {
     "SENTRY": {
         "NOTIFIES": {
             "UNKNOWN_DEVICE": False,
-            "NETWORK_OVERLOAD": True,
-            "TEMPERATURE": True,
-            "AQI": True,
-            "HUMIDITY": True,
+            "NETWORK_OVERLOAD": False,
+            "TEMPERATURE": False,
+            "AQI": False,
+            "HUMIDITY": False,
             "DIAGNOSTICS": False,
         },
         "THRESHOLDS": {
             "MAX_NUMBER_OF_DEVICES": 10,
             "BATTERY_FILTER_LEVEL": 15,
-            "TEMPERATURE": {"UP": 28.0, "BOTTOM": 18.0},
+            "TEMPERATURE": {"UP": 27.0, "BOTTOM": 19.0},
             "AQI": 50,
             "HUMIDITY": {"UP": 85, "BOTTOM": 20},
         },

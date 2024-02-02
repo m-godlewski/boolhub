@@ -52,7 +52,9 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                 )
             ):
                 messenger.send_notification(
-                    text=f"Temperatura w {data.device.location} wynosi {data.temperature}°C"
+                    text=f"Temperatura wynosi {data.temperature}°C",
+                    title=data.device.location.capitalize(),
+                    priority=3,
                 )
                 issues.add(("temperature", data.device.location))
             # checks if air quality exceeds threshold
@@ -62,7 +64,9 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                 and data.aqi >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["AQI"]
             ):
                 messenger.send_notification(
-                    text=f"Jakość powietrza w {data.device.location} wynosi {data.aqi}μg/m³"
+                    text=f"Jakość powietrza wynosi {data.aqi}μg/m³",
+                    title=data.device.location.capitalize(),
+                    priority=3,
                 )
                 issues.add(("aqi", data.device.location))
             # checks if air humidity exceeds threshold
@@ -78,7 +82,9 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                 )
             ):
                 messenger.send_notification(
-                    text=f"Wilgotność powietrza w {data.device.location} wynosi {data.humidity}%"
+                    text=f"Wilgotność powietrza wynosi {data.humidity}%",
+                    title=data.device.location.capitalize(),
+                    priority=3,
                 )
                 issues.add(("humidity", data.device.location))
 
@@ -112,7 +118,9 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
                 f"SENTRY | Network overload! Number of active devices = {number_of_devices}"
             )
             messenger.send_notification(
-                text=f"Przeciążenie sieci! Liczba aktywnych urządzeń = {number_of_devices}"
+                text=f"Liczba aktywnych urządzeń = {number_of_devices}",
+                title="Sieć",
+                priority=2,
             )
             issues.add("overload")
 
@@ -129,7 +137,9 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
                 # if notification flag is set to true
                 if config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]:
                     messenger.send_notification(
-                        text="Nieznane urządzenie połączyło się z siecią lokalną!"
+                        text="Nieznane urządzenie połączyło się z siecią lokalną!",
+                        title="Sieć",
+                        priority=4,
                     )
                 logging.warning(
                     "SENTRY | Unknown device has connected to local network!"
@@ -170,7 +180,9 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
                         f"SENTRY | Level of {field} in device {data.device.name} in location {data.device.location} is {value}"
                     )
                     messenger.send_notification(
-                        text=f"Poziom {DEVICE_HEALTH_KEY_TRANSLATE_MAP[field]} w urządzeniu {data.device.name} w lokacji {data.device.location} wynosi {value}"
+                        text=f"Poziom {DEVICE_HEALTH_KEY_TRANSLATE_MAP[field]} wynosi {value}",
+                        title=f"{data.device.name} - {data.device.location}",
+                        priority=4,
                     )
                     issues.add((field, data.device.location))
 

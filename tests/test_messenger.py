@@ -17,6 +17,8 @@ class TestMessenger(TestCase):
 
     def test_notification(self):
         # calls tested method
-        status_code = messenger.send_notification("PyTest message!")
+        status_code = messenger.send_notification(
+            text="Lorem Ipsum", title="PyTest message!"
+        )
         # checks returned http code
         self.assertEqual(status_code, 200)
