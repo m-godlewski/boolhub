@@ -59,7 +59,7 @@ DATABASE = {
         "PASSWORD": os.environ.get("REDIS_PASSWORD"),
         # until scripts are not running inside docker container
         # host has to be set as 'localhost'
-        "HOST": os.environ.get("REDIS_HOST"),
+        "HOST": "localhost",
         "PORT": os.environ.get("REDIS_PORT"),
         "DB_ID": os.environ.get("REDIS_DB_ID"),
     },
