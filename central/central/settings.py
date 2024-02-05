@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "bootstrap5",
+    "constance",
     "devices.apps.DevicesConfig",
     "rooms.apps.RoomsConfig",
 ]
@@ -134,3 +135,55 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Constance configuration
+# https://django-constance.readthedocs.io/en/latest/
+
+CONSTANCE_BACKEND = "constance.backends.redisd.RedisBackend"
+
+CONSTANCE_REDIS_CONNECTION = {
+    "host": os.environ.get("REDIS_HOST"),
+    "password": os.environ.get("REDIS_PASSWORD"),
+    "port": os.environ.get("REDIS_PORT"),
+    "db": os.environ.get("REDIS_DATABASE_ID"),
+}
+
+CONSTANCE_CONFIG = {
+    "Powiadamiaj o temperaturze": (False, "", bool),
+    "Powiadamiaj o wilgotności": (False, "", bool),
+    "Powiadamiaj o zanieczyszczeniu": (False, "", bool),
+    "Powiadamiaj o diagnostyce urządzeń": (False, "", bool),
+    "Powiadamiaj o przeciążeniu sieci": (False, "", bool),
+    "Powiadamiaj o nieznanym urządzeniu w sieci": (False, "", bool),
+    "Minimalna temperatura": (19.0, "", float),
+    "Maksymalna temperatura": (27.0, "", float),
+    "Maksymalna wilgotność": (85, "", int),
+    "Minimalna wilgotność": (20, "", int),
+    "Próg zanieczyszczenia": (50, "", int),
+    "Minimalny poziom baterii/filtra": (15, "", int),
+    "Próg przeciążenia sieci": (10, "", int),
+}
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    "Sieć": (
+        "Powiadamiaj o przeciążeniu sieci",
+        "Powiadamiaj o nieznanym urządzeniu w sieci",
+        "Próg przeciążenia sieci",
+    ),
+    "Temperatura": (
+        "Powiadamiaj o temperaturze",
+        "Minimalna temperatura",
+        "Maksymalna temperatura",
+    ),
+    "Wilgotność": (
+        "Powiadamiaj o wilgotności",
+        "Maksymalna wilgotność",
+        "Minimalna wilgotność",
+    ),
+    "Zanieczyszczenie": ("Powiadamiaj o zanieczyszczeniu", "Próg zanieczyszczenia"),
+    "Diagnostyka": (
+        "Powiadamiaj o diagnostyce urządzeń",
+        "Minimalny poziom baterii/filtra",
+    ),
+}

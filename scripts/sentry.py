@@ -15,9 +15,8 @@ import typing
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-import config
 from scripts import messenger
-from scripts.models.database import PostgreSQL
+from scripts.models.database import PostgreSQL, Redis
 
 
 # constant values
@@ -33,60 +32,54 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
     issues, empty set will be returned.
     """
     try:
-        # empty set of issues
-        issues = set()
+        # establish connection to Redis
+        with Redis() as redis:
+            # empty set of issues
+            issues = set()
 
-        # iterate over air devices data
-        for data in air_data:
-            # checks if air temperature exceeds threshold
-            if (
-                data.temperature
-                and config.SCRIPTS["SENTRY"]["NOTIFIES"]["TEMPERATURE"]
-                # outside air devices data should not be verified
-                and data.device.location != "zewnątrz"
-                and (
+            # iterate over air devices data
+            for data in air_data:
+                # checks if air temperature exceeds threshold
+                if (
                     data.temperature
-                    >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["UP"]
-                    or data.temperature
-                    <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["TEMPERATURE"]["BOTTOM"]
-                )
-            ):
-                messenger.send_notification(
-                    text=f"Temperatura wynosi {data.temperature}°C",
-                    title=data.device.location.capitalize(),
-                    priority=3,
-                )
-                issues.add(("temperature", data.device.location))
-            # checks if air quality exceeds threshold
-            if (
-                data.aqi
-                and config.SCRIPTS["SENTRY"]["NOTIFIES"]["AQI"]
-                and data.aqi >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["AQI"]
-            ):
-                messenger.send_notification(
-                    text=f"Jakość powietrza wynosi {data.aqi}μg/m³",
-                    title=data.device.location.capitalize(),
-                    priority=3,
-                )
-                issues.add(("aqi", data.device.location))
-            # checks if air humidity exceeds threshold
-            if (
-                data.humidity
-                and config.SCRIPTS["SENTRY"]["NOTIFIES"]["HUMIDITY"]
-                and data.device.location != "zewnątrz"
-                and (
+                    and redis.notify_temperatue
+                    # outside air devices data should not be verified
+                    and data.device.location != "zewnątrz"
+                    and (
+                        data.temperature >= redis.notify_temperatue_upper
+                        or data.temperature <= redis.notify_temperatue_lower
+                    )
+                ):
+                    messenger.send_notification(
+                        text=f"Temperatura wynosi {data.temperature}°C",
+                        title=data.device.location.capitalize(),
+                        priority=3,
+                    )
+                    issues.add(("temperature", data.device.location))
+                # checks if air quality exceeds threshold
+                if data.aqi and redis.notify_aqi and data.aqi >= redis.notify_aqi_max:
+                    messenger.send_notification(
+                        text=f"Jakość powietrza wynosi {data.aqi}μg/m³",
+                        title=data.device.location.capitalize(),
+                        priority=3,
+                    )
+                    issues.add(("aqi", data.device.location))
+                # checks if air humidity exceeds threshold
+                if (
                     data.humidity
-                    >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["UP"]
-                    or data.humidity
-                    <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["HUMIDITY"]["BOTTOM"]
-                )
-            ):
-                messenger.send_notification(
-                    text=f"Wilgotność powietrza wynosi {data.humidity}%",
-                    title=data.device.location.capitalize(),
-                    priority=3,
-                )
-                issues.add(("humidity", data.device.location))
+                    and redis.notify_humidity
+                    and data.device.location != "zewnątrz"
+                    and (
+                        data.humidity >= redis.notify_humidity_upper
+                        or data.humidity <= redis.notify_humidity_lower
+                    )
+                ):
+                    messenger.send_notification(
+                        text=f"Wilgotność powietrza wynosi {data.humidity}%",
+                        title=data.device.location.capitalize(),
+                        priority=3,
+                    )
+                    issues.add(("humidity", data.device.location))
 
     except Exception:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
@@ -102,52 +95,53 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
     If there is no issues, empty set will be returned.
     """
     try:
-        # empty set of issues
-        issues = set()
+        # establish connection to Redis
+        with Redis() as redis:
+            # empty set of issues
+            issues = set()
 
-        # CHECKS IF NUMBER OF CONNECTED DEVICES TO LOCAL NETWORK IS MORE THAN PREDEFINED VALUE.
-        # number of active devices in local network
-        number_of_devices = len(mac_addresses)
-        # if number of active devices is equal or higher than predefined value
-        if (
-            config.SCRIPTS["SENTRY"]["NOTIFIES"]["NETWORK_OVERLOAD"]
-            and number_of_devices
-            >= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["MAX_NUMBER_OF_DEVICES"]
-        ):
-            logging.warning(
-                f"SENTRY | Network overload! Number of active devices = {number_of_devices}"
-            )
-            messenger.send_notification(
-                text=f"Liczba aktywnych urządzeń = {number_of_devices}",
-                title="Sieć",
-                priority=2,
-            )
-            issues.add("overload")
-
-        # CHECKS IF UNKNOWN DEVICE HAS CONNECTED TO LOCAL NETWORK.
-        # set of registered devices MAC addresses
-        with PostgreSQL() as postgresql_database:
-            known_devices = {
-                device.mac_address for device in postgresql_database.devices
-            }
-            # set that contains unregistered devices MAC addresses
-            unknown_devices = mac_addresses - known_devices
-            # if above set contains any address
-            if unknown_devices:
-                # if notification flag is set to true
-                if config.SCRIPTS["SENTRY"]["NOTIFIES"]["UNKNOWN_DEVICE"]:
-                    messenger.send_notification(
-                        text="Nieznane urządzenie połączyło się z siecią lokalną!",
-                        title="Sieć",
-                        priority=4,
-                    )
+            # CHECKS IF NUMBER OF CONNECTED DEVICES TO LOCAL NETWORK IS MORE THAN PREDEFINED VALUE.
+            # number of active devices in local network
+            number_of_devices = len(mac_addresses)
+            # if number of active devices is equal or higher than predefined value
+            if (
+                redis.notify_network_overload
+                and number_of_devices >= redis.notify_network_overload_level
+            ):
                 logging.warning(
-                    "SENTRY | Unknown device has connected to local network!"
+                    f"SENTRY | Network overload! Number of active devices = {number_of_devices}"
                 )
-                issues.add("unknown_device")
-                # adds unknown device to database
-                for address in unknown_devices:
-                    postgresql_database.add_unknown_device(address)
+                messenger.send_notification(
+                    text=f"Liczba aktywnych urządzeń = {number_of_devices}",
+                    title="Sieć",
+                    priority=2,
+                )
+                issues.add("overload")
+
+            # CHECKS IF UNKNOWN DEVICE HAS CONNECTED TO LOCAL NETWORK.
+            # set of registered devices MAC addresses
+            with PostgreSQL() as postgresql_database:
+                known_devices = {
+                    device.mac_address for device in postgresql_database.devices
+                }
+                # set that contains unregistered devices MAC addresses
+                unknown_devices = mac_addresses - known_devices
+                # if above set contains any address
+                if unknown_devices:
+                    # if notification flag is set to true
+                    if redis.notify_network_unknown_device:
+                        messenger.send_notification(
+                            text="Nieznane urządzenie połączyło się z siecią lokalną!",
+                            title="Sieć",
+                            priority=4,
+                        )
+                        issues.add("unknown_device")
+                    logging.warning(
+                        "SENTRY | Unknown device has connected to local network!"
+                    )
+                    # adds unknown device to database
+                    for address in unknown_devices:
+                        postgresql_database.add_unknown_device(address)
 
     except Exception:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
@@ -162,29 +156,30 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
     If there is no issues, empty set will be returned.
     """
     try:
-        # empty set of issues
-        issues = set()
+        # establish connection to Redis
+        with Redis() as redis:
+            # empty set of issues
+            issues = set()
 
-        # iteration over diagnostic data
-        for data in diagnostic_data:
-            # iterate over health fields
-            for field, value in data.health_data.items():
-                # if consumable part level exceeds predefined level
-                if (
-                    config.SCRIPTS["SENTRY"]["NOTIFIES"]["DIAGNOSTICS"]
-                    and value
-                    and value
-                    <= config.SCRIPTS["SENTRY"]["THRESHOLDS"]["BATTERY_FILTER_LEVEL"]
-                ):
-                    logging.warning(
-                        f"SENTRY | Level of {field} in device {data.device.name} in location {data.device.location} is {value}"
-                    )
-                    messenger.send_notification(
-                        text=f"Poziom {DEVICE_HEALTH_KEY_TRANSLATE_MAP[field]} wynosi {value}",
-                        title=f"{data.device.name} - {data.device.location}",
-                        priority=4,
-                    )
-                    issues.add((field, data.device.location))
+            # iteration over diagnostic data
+            for data in diagnostic_data:
+                # iterate over health fields
+                for field, value in data.health_data.items():
+                    # if consumable part level exceeds predefined level
+                    if (
+                        redis.notify_devices_diagnostics
+                        and value
+                        and value <= redis.notify_devices_diagnostics_level
+                    ):
+                        logging.warning(
+                            f"SENTRY | Level of {field} in device {data.device.name} in location {data.device.location} is {value}"
+                        )
+                        messenger.send_notification(
+                            text=f"Poziom {DEVICE_HEALTH_KEY_TRANSLATE_MAP[field]} wynosi {value}",
+                            title=f"{data.device.name} - {data.device.location}",
+                            priority=4,
+                        )
+                        issues.add((field, data.device.location))
 
     except Exception:
         logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")

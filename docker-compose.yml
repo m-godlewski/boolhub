@@ -100,6 +100,18 @@ services:
       - node_exporter
     networks:
       - boolnet
+  redis:
+    container_name: redis
+    image: redis/redis-stack-server
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - /data/redis/:/data
+    environment:
+      REDIS_ARGS: "--requirepass ${REDIS_PASSWORD} --save 60 1"
+    networks:
+      - boolnet
 networks:
   boolnet:
     driver: bridge
