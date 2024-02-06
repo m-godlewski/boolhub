@@ -23,7 +23,7 @@ urlpatterns = [
     # website app
     path("", include("website.urls")),
     # devices app
-    path("devices/", include("devices.urls")),
+    path("lighting/", include("lighting.urls")),
     # administration panel
     path("admin/", admin.site.urls),
 ]
