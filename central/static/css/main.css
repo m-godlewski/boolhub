@@ -1,6 +1,38 @@
 
+/* phone */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: visible;
+}
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+.box .row.header {
+  flex: 0 1 auto;
+}
+.box .row.content {
+  flex: 1 1 auto;
+}
+.box .row.footer {
+  flex: 0 1 40px;
+}
+.tile{
+  padding-top: 3em;
+  padding-right: 0.5em;
+  padding-left: 0.5em;
+  padding-bottom: 0;
+}
+.tile-image{
+  width: 40%;
+  height: 100%;
+}
+
 /* tablet */
-@media screen and (max-width: 1366px) {
+@media screen and (min-width: 1366px) {
   html,
   body {
     height: 100%;
