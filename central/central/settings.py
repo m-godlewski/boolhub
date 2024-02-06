@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "constance",
     "devices.apps.DevicesConfig",
     "rooms.apps.RoomsConfig",
+    "lighting.apps.LightingConfig",
 ]
 
 MIDDLEWARE = [
