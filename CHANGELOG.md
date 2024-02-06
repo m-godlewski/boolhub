@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.9.0
+## 0.10.1
+- Fixed error that recognized devices that has no location assigned as unknown devices.
+
+## 0.10.0
 - Application-wide settings now can be modified by django-constance in django admin panel.
 
 ## 0.9.0
