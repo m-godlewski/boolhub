@@ -12,7 +12,7 @@ def index(request):
     # query database for each room object
     query_results = Room.objects.all()
     # packs room object in context dictionary
-    context = {room.name:room for room in query_results}
+    context = {room.name: room for room in query_results}
     # renders template
     return render(request=request, template_name="lighting.html", context=context)
 
