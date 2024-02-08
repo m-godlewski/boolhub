@@ -13,3 +13,4 @@ redis==5.0.1
 soupsieve==2.5
 sqlparse==0.4.4
 typing-extensions==4.9.0
+yeelight==0.7.14

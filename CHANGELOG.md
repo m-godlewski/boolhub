@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.11.0
+- Added lighting module. Basic panel and integration with yeelight bulb implemented.
+
 ## 0.10.1
 - Fixed error that recognized devices that has no location assigned as unknown devices.
 
