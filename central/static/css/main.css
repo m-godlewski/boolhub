@@ -1,5 +1,4 @@
-
-/* phone */
+/* base and mobile */
 html,
 body {
   height: 100%;
@@ -30,38 +29,50 @@ body {
   width: 40%;
   height: 100%;
 }
+.lighting-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #111217;
+}
+.lighting-container {
+  align-items: center;
+  justify-content: center;
+  height: 50%;
+}
+.lighting-room {
+  color: white;
+  border-radius: 10px;
+  justify-content: center;
+}
+.lighting-room-salon {
+  background-color: #14A44D;
+  height: 94%;
+}
+.lighting-room-bedroom {
+  background-color: #E4A11B;
+  height: 46%;
+}
+.lighting-room-bathroom {
+  background-color: #54B4D3;
+  height: 46%;
+}
 
 /* tablet */
-@media screen and (min-width: 1366px) {
+@media screen and (max-width: 1366px) {
   html,
   body {
-    height: 100%;
-    margin: 0;
     overflow: hidden;
-  }
-  .box {
-    display: flex;
-    flex-flow: column;
-    height: 100%;
-  }
-  .box .row.header {
-    flex: 0 1 auto;
-  }
-  .box .row.content {
-    flex: 1 1 auto;
-  }
-  .box .row.footer {
-    flex: 0 1 40px;
   }
   .tile{
     padding-top: 5em;
     padding-right: 1em;
     padding-left: 1em;
-    padding-bottom: 0;
   }
-  .tile-image{
-    width: 40%;
-    height: 100%;
+  .lighting-container {
+    align-items: center;
+    justify-content: center;
+    height: 80%;
   }
 }
 
@@ -69,28 +80,15 @@ body {
 @media screen and (min-width: 1366px) {
   html,
   body {
-    height: 100%;
-    margin: 0;
     overflow: hidden;
-  }
-  .box {
-    display: flex;
-    flex-flow: column;
-    height: 100%;
-  }
-  .box .row.header {
-    flex: 0 1 auto;
-  }
-  .box .row.content {
-    flex: 1 1 auto;
-  }
-  .box .row.footer {
-    flex: 0 1 40px;
-  }
-  .tile{
   }
   .tile-image{
     width: 50%;
     height: 100%;
+  }
+  .lighting-container {
+    align-items: center;
+    justify-content: center;
+    height: 50%;
   }
 }
