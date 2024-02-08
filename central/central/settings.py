@@ -164,6 +164,10 @@ CONSTANCE_CONFIG = {
     "Próg zanieczyszczenia": (50, "", int),
     "Minimalny poziom baterii/filtra": (15, "", int),
     "Próg przeciążenia sieci": (10, "", int),
+    "NTFY URL": ("", "", str),
+    "WEATHER API URL": ("", "", str),
+    "LATITUDE": ("", "", str),
+    "LONGITUDE": ("", "", str),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
@@ -187,4 +191,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "Powiadamiaj o diagnostyce urządzeń",
         "Minimalny poziom baterii/filtra",
     ),
+    "NTFY": {"NTFY URL"},
+    "WEATHER API": {"WEATHER API URL", "LATITUDE", "LONGITUDE"},
 }

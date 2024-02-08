@@ -335,3 +335,27 @@ class Redis(Database):
         return pickle.loads(self.client.get("constance:Próg przeciążenia sieci"))
 
     # endregion
+
+    # region NTFY
+
+    @property
+    def ntfy_url(self) -> int:
+        return pickle.loads(self.client.get("constance:NTFY URL"))
+
+    # endregion
+
+    # region WEATHER API
+
+    @property
+    def weather_api_url(self) -> int:
+        return pickle.loads(self.client.get("constance:WEATHER API URL"))
+
+    @property
+    def longitude(self) -> int:
+        return pickle.loads(self.client.get("constance:LONGITUDE"))
+
+    @property
+    def latitude(self) -> int:
+        return pickle.loads(self.client.get("constance:LATITUDE"))
+
+    # endregion

@@ -21,6 +21,7 @@ from scripts.models.data import (
     OutsideVirtualThermometerData,
     ForecastData,
 )
+from models.database import Redis
 
 
 class Device(ABC):
@@ -200,16 +201,18 @@ class OutsideVirtualThermometer(Device):
     def __fetch_forecast_data(self) -> dict:
         """Connects to device and fetches data."""
         try:
-            # sending request to weather api
-            response = requests.get(
-                url=f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['API_URL']}/forecast.json",
-                params={
-                    "key": self.metadata.token,
-                    "q": f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LATITUDE']}, {config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LONGITUDE']}",
-                    "aqi": "yes",
-                    "days": 3,
-                },
-            )
+            # connect to redis
+            with Redis() as redis:
+                # sending request to weather api
+                response = requests.get(
+                    url=f"{redis.weather_api_url}/forecast.json",
+                    params={
+                        "key": self.metadata.token,
+                        "q": f"{redis.latitude}, {redis.longitude}",
+                        "aqi": "yes",
+                        "days": 3,
+                    },
+                )
             # if returned status code indicates external server error
             if response.status_code == 500:
                 raise Exception("External Server Error!")
@@ -253,15 +256,17 @@ class OutsideVirtualThermometer(Device):
     def __fetch_weather_data(self) -> dict:
         """Connects to device and fetches data."""
         try:
-            # sending request to weather api
-            response = requests.get(
-                url=f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['API_URL']}/current.json",
-                params={
-                    "key": self.metadata.token,
-                    "q": f"{config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LATITUDE']}, {config.SCRIPTS['GATHERER']['VIRTUAL_THERMOMETER']['LONGITUDE']}",
-                    "aqi": "yes",
-                },
-            )
+            # connect to redis
+            with Redis() as redis:
+                # sending request to weather api
+                response = requests.get(
+                    url=f"{redis.weather_api_url}/current.json",
+                    params={
+                        "key": self.metadata.token,
+                        "q": f"{redis.latitude}, {redis.longitude}",
+                        "aqi": "yes",
+                    },
+                )
             # if returned status code indicates external server error
             if response.status_code == 500:
                 raise Exception("External Server Error!")

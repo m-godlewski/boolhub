@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 #############################
 
 # current system version
-VERSION = "0.11.0"
+VERSION = "0.11.1"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -62,35 +62,6 @@ DATABASE = {
         "HOST": "localhost",
         "PORT": os.environ.get("REDIS_PORT"),
         "DB_ID": os.environ.get("REDIS_DB_ID"),
-    },
-}
-
-# scripts configuration
-SCRIPTS = {
-    "SENTRY": {
-        "NOTIFIES": {
-            "UNKNOWN_DEVICE": False,
-            "NETWORK_OVERLOAD": False,
-            "TEMPERATURE": False,
-            "AQI": False,
-            "HUMIDITY": False,
-            "DIAGNOSTICS": False,
-        },
-        "THRESHOLDS": {
-            "MAX_NUMBER_OF_DEVICES": 10,
-            "BATTERY_FILTER_LEVEL": 15,
-            "TEMPERATURE": {"UP": 27.0, "BOTTOM": 19.0},
-            "AQI": 50,
-            "HUMIDITY": {"UP": 85, "BOTTOM": 20},
-        },
-    },
-    "MESSENGER": {"NTFY_SERVER_URL": os.environ.get("NTFY_SERVER_URL")},
-    "GATHERER": {
-        "VIRTUAL_THERMOMETER": {
-            "API_URL": os.environ.get("WEATHER_API_URL"),
-            "LATITUDE": os.environ.get("LATITUDE"),
-            "LONGITUDE": os.environ.get("LONGITUDE"),
-        }
     },
 }
 

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.11.1
+- Moved scripts configuration from config.py file to constance in django-admin.
+
 ## 0.11.0
 - Added lighting module. Basic panel and integration with yeelight bulb implemented.
 
