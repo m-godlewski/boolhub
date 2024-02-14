@@ -59,7 +59,7 @@ body {
 }
 
 /* tablet */
-@media screen and (max-width: 1366px) {
+@media screen and (max-width: 1366px) and (orientation: landscape){
   html,
   body {
     overflow: hidden;
