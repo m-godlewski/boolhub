@@ -38,19 +38,19 @@ services:
       - GF_PLUGINS_ENABLE_ALPHA=true
     networks:
       - boolnet
-  ntfy:
-    container_name: ntfy
-    image: binwiederhier/ntfy
-    restart: unless-stopped
-    ports:
-      - 80:80
-    volumes:
-      - /var/cache/ntfy:/var/cache/ntfy
-      - /etc/ntfy:/etc/ntfy
-    command:
-      - serve
-    environment:
-      - TZ=CEST
+  # ntfy:
+  #   container_name: ntfy
+  #   image: binwiederhier/ntfy
+  #   restart: unless-stopped
+  #   ports:
+  #     - 80:80
+  #   volumes:
+  #     - /var/cache/ntfy:/var/cache/ntfy
+  #     - /etc/ntfy:/etc/ntfy
+  #   command:
+  #     - serve
+  #   environment:
+  #     - TZ=CEST
   postgresql:
     container_name: postgresql
     image: postgres:15.3
@@ -70,7 +70,7 @@ services:
     build: ${BOOLHUB_CENTRAL_PATH}
     restart: always
     ports:
-      - 8000:8000
+      - 80:8000
     volumes:
       - /data/central/:/usr/src/app/
     env_file:
