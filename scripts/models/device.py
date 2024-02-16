@@ -13,7 +13,6 @@ import bluepy
 import requests
 from lywsd03mmc import Lywsd03mmcClient
 
-import config
 from scripts.models.data import (
     DeviceData,
     MiAirPurifier3HData,
@@ -21,7 +20,7 @@ from scripts.models.data import (
     OutsideVirtualThermometerData,
     ForecastData,
 )
-from models.database import Redis
+from .database import Redis
 
 
 class Device(ABC):
