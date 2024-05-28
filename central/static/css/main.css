@@ -4,7 +4,9 @@ body {
   height: 100%;
   margin: 0;
   overflow: visible;
+  background: linear-gradient(180.2deg, rgb(30, 33, 48) 6.8%, rgb(74, 98, 110) 131%);
 }
+
 .box {
   display: flex;
   flex-flow: column;
@@ -19,16 +21,22 @@ body {
 .box .row.footer {
   flex: 0 1 40px;
 }
+
 .tile{
-  padding-top: 3em;
-  padding-right: 0.5em;
-  padding-left: 0.5em;
-  padding-bottom: 0;
+  width: 40%;
+  margin: 5%;
+  padding: 5%;
+  background: white;
+  border-radius: 15%;
 }
 .tile-image{
   width: 40%;
-  height: 100%;
+  height: 40%;
 }
+.tile-title{
+  color: black;
+}
+
 .lighting-box {
   display: flex;
   align-items: center;
@@ -58,6 +66,8 @@ body {
   height: 46%;
 }
 
+
+
 /* tablet */
 @media screen and (max-width: 1366px) and (orientation: landscape){
   html,
@@ -65,9 +75,13 @@ body {
     overflow: hidden;
   }
   .tile{
-    padding-top: 5em;
-    padding-right: 1em;
-    padding-left: 1em;
+    width: 20%;
+    margin: 3% 2.5% 3% 2.5%;
+    padding: 2%;
+  }
+  .tile-image{
+    width: 80%;
+    height: 100%;
   }
   .lighting-container {
     align-items: center;
@@ -75,6 +89,8 @@ body {
     height: 80%;
   }
 }
+
+
 
 /* desktop */
 @media screen and (min-width: 1366px) {

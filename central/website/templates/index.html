@@ -7,93 +7,93 @@
 {% block content %}
 
     <!-- Main container -->
-    <div class="container-fluid bg-light bg-gradient">
+    <div class="container">
 
         <!-- First row -->
-        <div class="row row-cols-2">
+        <div class="row g-0 row-cols-2">
 
-            <!-- Powietrze -->
-            <div class="col-sm tile">
+            <!-- Air -->
+            <div class="tile">
                 <center>
                     <a href="http://192.168.0.250:3000/d/F8x_fd14z/powietrze?orgId=1&kiosk&refresh=60s">
                         <img src="{% static 'images/air-conditioner.svg' %}" class="tile-image"/>
                     </a>
-                    <figcaption><p class="h4">Powietrze</p></figcaption>
+                    <figcaption><p class="h4 tile-title">Air</p></figcaption>
                 </center>
             </div>
 
-            <!-- Pogoda -->
-            <div class="col-sm tile">
+            <!-- Weather -->
+            <div class="tile">
                 <center>
                     <a href="http://192.168.0.250:3000/d/cce53fdf-217c-409b-9b44-0c91e47b3ac7/pogoda?orgId=1&kiosk&from=now&to=now%2B24h&refresh=60s">
                         <img src="{% static 'images/weather.svg' %}" class="tile-image"/>
                     </a>
-                    <figcaption><p class="h4">Pogoda</p></figcaption>
+                    <figcaption><p class="h4 tile-title">Weather</p></figcaption>
                 </center>
             </div>
 
-            <!-- Oświetlenie -->
-            <div class="col-sm tile">
+            <!-- Lighting -->
+            <div class="tile">
                 <center>
                     <a href="/lighting">
                         <img src="{% static 'images/light-bulb.svg' %}" class="tile-image"/>
                     </a>
-                    <figcaption><p class="h4">Oświetlenie</p></figcaption>
+                    <figcaption><p class="h4 tile-title">Lighting</p></figcaption>
                 </center>
             </div>
 
-            <!-- Sieć -->
-            <div class="col-sm tile">
+            <!-- Network -->
+            <div class="tile">
                 <center>
                     <a href="http://192.168.0.250:3000/d/YRGtmDi4z/siec?orgId=1&kiosk&refresh=60s">
                         <img src="{% static 'images/cld-cloud-computer-network.svg' %}" class="tile-image"/>
                     </a>
-                    <figcaption><p class="h4">Sieć</p></figcaption>
+                    <figcaption><p class="h4 tile-title">Network</p></figcaption>
                 </center>
             </div>
 
         </div>
 
         <!-- Second row -->
-        <div class="row row-cols-2">
+        <div class="row g-0 row-cols-2">
 
             <!-- Monitoring -->
-            <div class="col-sm tile">
+            <div class="tile">
                 <center>
                     <a href="#">
                         <img src="{% static 'images/camera-two.svg' %}" class="tile-image"/>
                     </a>
-                    <figcaption><p class="h4">Monitoring</p></figcaption>
+                    <figcaption><p class="h4 tile-title">Monitoring</p></figcaption>
                 </center>
             </div>
 
-            <!-- Tryb 'poza domem' -->
-            <div class="col-sm tile">
+            <!-- Home Away -->
+            <div class="tile">
                 <center>
                     <a href="#">
                         <img src="{% static 'images/sign-out-alt-3.svg' %}" class="tile-image"/>
                     </a>
-                    <figcaption><p class="h4">Tryb "poza domem"</p></figcaption>
+                    <figcaption><p class="h4 tile-title">Home Away</p></figcaption>
                 </center>
             </div>
 
-            <!-- Wewnętrzne statystyki -->
-            <div class="col-sm tile">
+            <!-- Diagnostics -->
+            <div class="tile">
                 <center>
                     <a href="http://192.168.0.250:3000/d/e2edc076-5dd9-4609-863a-34bb97f70f07/wewnetrzne-statystyki?orgId=1&kiosk&refresh=60s">
                         <img src="{% static 'images/gen-heart-rate.svg' %}" class="tile-image"/>
                     </a>
-                    <figcaption><p class="h4">Wewnętrzne statystyki</p></figcaption>
+                    <figcaption><p class="h4 tile-title">Diagnostics</p></figcaption>
                 </center>
             </div>
 
-            <!-- Panel Administracyjny -->
-            <div class="col-sm tile">
+            <!-- Settings -->
+            <div class="tile">
                 <center>
                     <a href="/admin">
                         <img src="{% static 'images/settings.svg' %}" class="tile-image"/>
                     </a>
-                    <figcaption><p class="h4">Panel Administracyjny</p></figcaption>
+                    <figcaption><p class="h4 tile-title">Settings</p></figcaption>
                 </center>
             </div>
         
