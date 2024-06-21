@@ -41,7 +41,7 @@ class Backup:
             )
             output, errors = await process.communicate()
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"ARCHIVIST | BACKUP | INFLUX\n{traceback.format_exc()}")
             return False
         else:
             logging.info(
@@ -71,7 +71,7 @@ class Backup:
             )
             output, errors = await process.communicate()
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"ARCHIVIST | BACKUP | POSTGRESQL\n{traceback.format_exc()}")
             return False
         else:
             logging.info(
@@ -95,7 +95,7 @@ class Backup:
                 root_dir=backup_directory,
             )
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"ARCHIVIST\n{traceback.format_exc()}")
             return False
         else:
             # clear backup directory after successful backup
@@ -156,7 +156,7 @@ class Recovery:
             )
             output, errors = await process.communicate()
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"ARCHIVIST | RECOVERY | INFLUX\n{traceback.format_exc()}")
             return False
         else:
             logging.info(
@@ -188,7 +188,7 @@ class Recovery:
             )
             output, errors = await process.communicate()
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"ARCHIVIST | RECOVERY | POSTGRESQL\n{traceback.format_exc()}")
             return False
         else:
             logging.info(
@@ -213,7 +213,7 @@ class Recovery:
             for directory in directories_to_delete:
                 shutil.rmtree(os.path.join(config.BACKUPS["PATH"], directory))
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"ARCHIVIST | RECOVERY\n{traceback.format_exc()}")
             return False
         else:
             return True
@@ -237,7 +237,7 @@ class Recovery:
             )
             return False
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"ARCHIVIST | RECOVERY | INFLUX\n{traceback.format_exc()}")
             return False
         else:
             return True

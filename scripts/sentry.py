@@ -82,7 +82,7 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                     issues.add(("humidity", data.device.location))
 
     except Exception:
-        logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+        logging.error(f"SENTRY | AIR | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
     finally:
         return issues
 
@@ -144,7 +144,7 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
                         postgresql_database.add_unknown_device(address)
 
     except Exception:
-        logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+        logging.error(f"SENTRY | NETWORK | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
     finally:
         return issues
 
@@ -182,6 +182,6 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
                         issues.add((field, data.device.location))
 
     except Exception:
-        logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+        logging.error(f"SENTRY | DIAGNOSTIC | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
     finally:
         return issues

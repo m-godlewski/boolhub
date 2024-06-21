@@ -61,7 +61,7 @@ class MiAirPurifier3H(Device):
                 status"
             ).read()
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return ""
         else:
             return data
@@ -79,7 +79,7 @@ class MiAirPurifier3H(Device):
                 if key in [field.name for field in fields(MiAirPurifier3HData)]:
                     parsed_data[key] = value
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return {}
         else:
             return parsed_data
@@ -101,7 +101,7 @@ class MiAirPurifier3H(Device):
             # create dataclass instance
             processed_data = MiAirPurifier3HData(self.metadata, **parsed_data)
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return MiAirPurifier3HData(self.metadata)
         else:
             return processed_data
@@ -159,7 +159,7 @@ class MiMonitor2(Device):
             logging.error("Error occurred when trying connect to device!")
             return {}
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DEVICE | MiMonitor2 | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return {}
         else:
             return data
@@ -169,7 +169,7 @@ class MiMonitor2(Device):
         try:
             processed_data = MiMonitor2Data(self.metadata, **raw_data)
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DEVICE | MiMonitor2 | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return MiMonitor2Data(self.metadata)
         else:
             return processed_data
@@ -218,7 +218,7 @@ class OutsideVirtualThermometer(Device):
             # retrieving data in JSON format
             data = response.json()
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DEVICE | OutsideVirtualThermometer | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return {}
         else:
             return data
@@ -243,7 +243,7 @@ class OutsideVirtualThermometer(Device):
                         )
                     )
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DEVICE | OutsideVirtualThermometer | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return []
         else:
             return processed_data
@@ -272,7 +272,7 @@ class OutsideVirtualThermometer(Device):
             # retrieving data in JSON format
             data = response.json()
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DEVICE | OutsideVirtualThermometer | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return {}
         else:
             return data
@@ -289,7 +289,7 @@ class OutsideVirtualThermometer(Device):
             }
             processed_data = OutsideVirtualThermometerData(self.metadata, **data)
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DEVICE | OutsideVirtualThermometer | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return MiMonitor2Data(self.metadata)
         else:
             return processed_data

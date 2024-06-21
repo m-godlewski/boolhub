@@ -51,7 +51,7 @@ class Network(Gatherer):
                 destination["Ether"].src for source, destination in answered
             )
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"GATHERER | NETWORK\n{traceback.format_exc()}")
             return set()
         else:
             return mac_addresses
@@ -103,7 +103,7 @@ class Network(Gatherer):
                     f"VALUES = {number_of_devices} | "
                 )
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"GATHERER | NETWORK\n{traceback.format_exc()}")
             return False
         else:
             return True
@@ -133,7 +133,7 @@ class Air(Gatherer):
                         f"VALUES = {data.aqi}, {data.humidity}, {data.temperature} | "
                     )
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"GATHERER | AIR\n{traceback.format_exc()}")
             return False
         else:
             return True
@@ -157,7 +157,7 @@ class Air(Gatherer):
                 else:
                     logging.error(f"Device '{device_name}' is not supported!")
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"GATHERER | AIR\n{traceback.format_exc()}")
             return []
         else:
             # calls sentry script to verifies data
@@ -173,7 +173,7 @@ class Air(Gatherer):
             # retrieved data
             data = device.data
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"GATHERER | AIR\n{traceback.format_exc()}")
             return {}
         else:
             return data
@@ -186,7 +186,7 @@ class Air(Gatherer):
             # retrieved data
             data = device.data
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"GATHERER | AIR\n{traceback.format_exc()}")
             return {}
         else:
             return data
@@ -201,7 +201,7 @@ class Air(Gatherer):
             # retrieved data
             data = device.data
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"GATHERER | AIR\n{traceback.format_exc()}")
             return {}
         else:
             return data
@@ -225,7 +225,7 @@ class Forecast(Gatherer):
                     # prepares data for saving into influx database
                     influx_database.add_point_forecast(data)
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"GATHERER | FORECAST\n{traceback.format_exc()}")
             return False
         else:
             return True
@@ -244,7 +244,7 @@ class Forecast(Gatherer):
             # retrieved data
             forecast_data = forecast_device.data
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"GATHERER | FORECAST\n{traceback.format_exc()}")
             return []
         else:
             return forecast_data

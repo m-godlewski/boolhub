@@ -29,7 +29,7 @@ async def docker_compose_down(rmi: bool = False) -> bool:
         )
         _, output = await process.communicate()
     except Exception:
-        logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+        logging.error(f"UTILS | DOCKER\n{traceback.format_exc()}")
         return False
     else:
         logging.critical(f"{output.decode('utf-8')}All containers has been stopped")
@@ -49,7 +49,7 @@ async def docker_compose_up() -> bool:
         )
         _, output = await process.communicate()
     except Exception:
-        logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+        logging.error(f"UTILS | DOCKER\n{traceback.format_exc()}")
         return False
     else:
         logging.critical(f"{output.decode('utf-8')}All containers has been started")

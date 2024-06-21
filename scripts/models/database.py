@@ -68,7 +68,7 @@ class PostgreSQL(Database):
             )
             devices = [DeviceData(*row) for row in self.api.fetchall()]
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return []
         else:
             return devices
@@ -80,7 +80,7 @@ class PostgreSQL(Database):
             self.api.execute("SELECT * FROM unknown_devices;")
             unknown_devices = [UnknownDeviceData(*row) for row in self.api.fetchall()]
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return []
         else:
             return unknown_devices
@@ -112,7 +112,7 @@ class PostgreSQL(Database):
                     ),
                 )
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return False
         else:
             return True
@@ -132,7 +132,7 @@ class PostgreSQL(Database):
             )
             device = DeviceData(*self.api.fetchone())
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return None
         else:
             return device
@@ -144,7 +144,7 @@ class PostgreSQL(Database):
                 device for device in self.devices if device.category == device_type
             ]
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return []
         else:
             return devices_data
@@ -190,7 +190,7 @@ class InfluxDB(Database):
                 record=point,
             )
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return False
         else:
             return True
@@ -213,7 +213,7 @@ class InfluxDB(Database):
                 record=point,
             )
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return False
         else:
             return True
@@ -235,7 +235,7 @@ class InfluxDB(Database):
                 record=point,
             )
         except Exception:
-            logging.error(f"Unknown error occurred!\n{traceback.format_exc()}")
+            logging.error(f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return False
         else:
             return True
