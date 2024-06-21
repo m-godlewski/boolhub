@@ -34,6 +34,7 @@ def send_notification(text: str, title: str, priority: int = 3) -> int:
         logging.error(f"MESSENGER | HTTP TIMEOUT ERROR:\n{e}")
     except requests.exceptions.RequestException as e:
         logging.error(f"MESSENGER | HTTP UNKNOWN ERROR\n:{e}")
-    else:
+    except:
         logging.error(f"MESSENGER | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+    else:
         return response.status_code
