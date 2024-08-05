@@ -1,0 +1,11 @@
+# data gathering jobs
+# every 5 minutes triggers air data gathering
+*/5 * * * * /usr/bin/python3.8 /code/scripts/gatherer.py --data "network" >> /var/log/cron.log
+# every 5 minutes triggers network data gathering
+*/5 * * * * /usr/bin/python3.8 /code/scripts/gatherer.py --data "air" >> /var/log/cron.log
+# everyday at 11 P.M. triggers weather forecast
+11 0 * * * /usr/bin/python3.8 /code/scripts/gatherer.py --data "forecast" >> /var/log/cron.log
+
+# triggers data backup creation
+# currently disabled due to brainstone module creation
+# 01 23 * * * /usr/bin/python3.8 /code/scripts/archivist.py --mode backup >> /var/log/cron.log

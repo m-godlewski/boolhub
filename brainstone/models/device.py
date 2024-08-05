@@ -13,7 +13,7 @@ import bluepy
 import requests
 from lywsd03mmc import Lywsd03mmcClient
 
-from scripts.models.data import (
+from models.data import (
     DeviceData,
     MiAirPurifier3HData,
     MiMonitor2Data,
@@ -56,7 +56,7 @@ class MiAirPurifier3H(Device):
             # TODO - shell command fetching should be replaced by python library
             data = os.popen(
                 f"miiocli airpurifiermiot \
-                --ip \{self.metadata.ip_address} \
+                --ip {self.metadata.ip_address} \
                 --token {self.metadata.token} \
                 status"
             ).read()

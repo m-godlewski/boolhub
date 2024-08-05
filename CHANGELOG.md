@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.12.0
+- Created brainstone module that contains each script that previously was running on crontab.
+
 ## 0.11.1
 - Moved scripts configuration from config.py file to constance in django-admin.
 

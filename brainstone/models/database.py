@@ -15,7 +15,7 @@ import redis
 from influxdb_client import Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
-from scripts.models.data import DeviceData, UnknownDeviceData, AirData
+from models.data import DeviceData, UnknownDeviceData, AirData
 
 
 class Database:

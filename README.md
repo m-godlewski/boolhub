@@ -1,4 +1,4 @@
-# BoolHub [![version](https://img.shields.io/badge/version-0.11.1-blue.svg)](https://semver.org)
+# BoolHub [![version](https://img.shields.io/badge/version-0.12.0-blue.svg)](https://semver.org)
 Intelligent house hub.
 
 ## Technology Stack

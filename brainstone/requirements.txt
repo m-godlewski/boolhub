@@ -12,6 +12,7 @@ lywsd02==0.0.9
 lywsd03mmc==0.1.0
 psycopg2==2.9.6
 pycparser==2.21
+python-miio==0.5.12
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 randmac==0.1

@@ -15,8 +15,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from scapy.all import arping
 
-from scripts import sentry
-from scripts.models.data import (
+import sentry
+from models.data import (
     DeviceData,
     AirData,
     MiAirPurifier3HData,
@@ -24,8 +24,8 @@ from scripts.models.data import (
     OutsideVirtualThermometerData,
     ForecastData,
 )
-from scripts.models.database import PostgreSQL, InfluxDB
-from scripts.models.device import MiAirPurifier3H, MiMonitor2, OutsideVirtualThermometer
+from models.database import PostgreSQL, InfluxDB
+from models.device import MiAirPurifier3H, MiMonitor2, OutsideVirtualThermometer
 
 
 class Gatherer(ABC):

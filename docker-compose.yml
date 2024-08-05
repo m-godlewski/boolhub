@@ -99,6 +99,14 @@ services:
       REDIS_ARGS: "--requirepass ${REDIS_PASSWORD} --save 60 1"
     networks:
       - boolnet
+  brainstone:
+    container_name: brainstone
+    build:
+      context: ./
+      dockerfile: ${BOOLHUB_BRAINSTONE_PATH}/Dockerfile
+    restart: always
+    network_mode: host
+    privileged: true
 networks:
   boolnet:
     driver: bridge

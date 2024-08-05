@@ -89,8 +89,8 @@ DATABASES = {
         "NAME": os.environ.get("POSTGRE_NAME"),
         "USER": os.environ.get("POSTGRE_USER"),
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
-        "HOST": os.environ.get("POSTGRE_HOST"),
-        "PORT": os.environ.get("POSTGRE_PORT"),
+        "HOST": "postgresql",
+        "PORT": 5432,
     }
 }
 
@@ -144,10 +144,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CONSTANCE_BACKEND = "constance.backends.redisd.RedisBackend"
 
 CONSTANCE_REDIS_CONNECTION = {
-    "host": os.environ.get("REDIS_HOST"),
+    "host": "redis",
     "password": os.environ.get("REDIS_PASSWORD"),
-    "port": os.environ.get("REDIS_PORT"),
-    "db": os.environ.get("REDIS_DATABASE_ID"),
+    "port": 6379,
+    "db": 0,
 }
 
 CONSTANCE_CONFIG = {

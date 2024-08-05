@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import requests
 
-from scripts.models.database import Redis
+from models.database import Redis
 
 
 def send_notification(text: str, title: str, priority: int = 3) -> int:

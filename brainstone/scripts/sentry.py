@@ -15,8 +15,8 @@ import typing
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-from scripts import messenger
-from scripts.models.database import PostgreSQL, Redis
+import messenger
+from models.database import PostgreSQL, Redis
 
 
 # constant values
