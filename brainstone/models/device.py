@@ -3,13 +3,13 @@ This script contains dedicated classes for communication with IoT devices connec
 """
 
 import logging
-import os
 import traceback
 import typing
 from abc import ABC
 from dataclasses import fields
 
 import bluepy
+import miio
 import requests
 from lywsd03mmc import Lywsd03mmcClient
 
@@ -39,43 +39,40 @@ class MiAirPurifier3H(Device):
     def __init__(self, device_data: DeviceData) -> None:
         # calls super class constructor
         super().__init__(device_data)
-        # fetches raw data from device
-        raw_data = self.__fetch_data()
-        # processes raw data
-        self.__processed_data = self.__process_data(raw_data)
+        # fetches data object from device
+        device_status = self.__fetch_data()
+        # processes data retrieved from device to dataclass object
+        self.__processed_data = self.__process_data(device_status)
 
     @property
     def data(self) -> dict:
         """Returns device air data."""
         return self.__processed_data
 
-    def __fetch_data(self) -> MiAirPurifier3HData:
+    def __fetch_data(self) -> miio.DeviceStatus:
         """Connects to device and fetches data."""
         try:
-            # fetching data from device using miiocli shell command
-            # TODO - shell command fetching should be replaced by python library
-            data = os.popen(
-                f"miiocli airpurifiermiot \
-                --ip {self.metadata.ip_address} \
-                --token {self.metadata.token} \
-                status"
-            ).read()
+            # fetches data from device using miio library
+            device = miio.AirPurifierMiot(
+                ip=self.metadata.ip_address,
+                token=self.metadata.token,
+            )
+            # retrieving data from device
+            data = device.status()
         except Exception:
             logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
-            return ""
+            return miio.DeviceStatus()
         else:
-            return data
+            data
 
-    def __parse(self, data: str) -> dict:
-        """Parses raw dataset and returns it's processed form."""
+    def __parse(self, data) -> dict:
+        """Parses data received from device into dictionary."""
         try:
             # dictionary that will store parsed dataset
             parsed_data = {}
-            # iterates over dataset
-            for row in data:
-                # parse single row of data
-                key, value = self.__parse_row(row)
-                # if current key is an field in dataclass
+            # iterates over device data properties
+            for key, value in data.data.items():
+                # filters out only fields that are used in target dataclass
                 if key in [field.name for field in fields(MiAirPurifier3HData)]:
                     parsed_data[key] = value
         except Exception:
@@ -84,19 +81,10 @@ class MiAirPurifier3H(Device):
         else:
             return parsed_data
 
-    def __parse_row(self, data: str) -> typing.Union[str, typing.Any]:
-        """Parses single line of raw data from dataset and returns it's processed form."""
-        return (
-            data.split(":")[0].lower().replace(" ", "_"),
-            self.__type_conversion(data.split(":")[1].strip().split(" ")[0]),
-        )
-
     def __process_data(self, raw_data: str) -> MiAirPurifier3HData:
-        """Processes raw data and returns it as instance of dataclass."""
+        """Processes data from device and returns it as instance of dataclass."""
         try:
-            # splits received string by newline chars
-            raw_data = raw_data.strip().split("\n")
-            # prase dataset
+            # parses dataset
             parsed_data = self.__parse(raw_data)
             # create dataclass instance
             processed_data = MiAirPurifier3HData(self.metadata, **parsed_data)
@@ -105,31 +93,6 @@ class MiAirPurifier3H(Device):
             return MiAirPurifier3HData(self.metadata)
         else:
             return processed_data
-
-    def __type_conversion(self, value: str) -> typing.Any:
-        """Converts data from individual fields in a dataset."""
-        # integer
-        if value.isdigit():
-            return int(value)
-        # float
-        elif "." in value:
-            try:
-                return float(value)
-            except:
-                return value
-        # boolean
-        elif value == "False" or value == "True":
-            return bool(value)
-        # none
-        elif value == "None":
-            return None
-        # device on/off status
-        elif value == "on":
-            return True
-        elif value == "off":
-            return False
-        else:
-            return value
 
 
 class MiMonitor2(Device):
