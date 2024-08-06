@@ -63,7 +63,7 @@ class MiAirPurifier3H(Device):
             logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return miio.DeviceStatus()
         else:
-            data
+            return data
 
     def __parse(self, data) -> dict:
         """Parses data received from device into dictionary."""
