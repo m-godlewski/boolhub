@@ -46,3 +46,9 @@ When you are facing errors during bluepy installation. Follow installation guide
 ```
 $ sudo apt install bluez
 ```
+
+### 7. Setting static IP for server
+https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/
+
+### 8. Set up SSH key authorization.
+https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-20-04
