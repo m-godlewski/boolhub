@@ -1,6 +1,5 @@
 import os
 import logging
-from logging.handlers import TimedRotatingFileHandler
 
 from dotenv import load_dotenv
 
@@ -22,13 +21,13 @@ LOG_FILE = os.path.join(os.sep, "var", "log", "cron.log")
 LOG_RETENTION_DAYS = 1
 
 # logging configuration
-rtfh = TimedRotatingFileHandler(
-    filename=LOG_FILE, when="D", interval=1, backupCount=LOG_RETENTION_DAYS, delay=False
-)
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s | %(levelname)s | %(message)s",
-    handlers=[rtfh],
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler(LOG_FILE)
+    ],
 )
 
 # loading environmental variables
