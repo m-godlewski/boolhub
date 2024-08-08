@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.1
+- Replaced CLI command with miio library in communication with Xiaomi Purifier.
+- Logs from miio library has been limited.
+- Replaced unused TimedRotatingFileHandler with basic stream/file logging configuration.
+
 ## 0.12.0
 - Created brainstone module that contains each script that previously was running on crontab.
 

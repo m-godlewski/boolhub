@@ -7,7 +7,7 @@ import logging
 #############################
 
 # current system version
-VERSION = "0.12.0"
+VERSION = "0.12.1"
 
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
