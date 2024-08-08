@@ -10,6 +10,7 @@ from dataclasses import fields
 
 import bluepy
 import miio
+import miio.exceptions
 import requests
 from lywsd03mmc import Lywsd03mmcClient
 
@@ -59,6 +60,9 @@ class MiAirPurifier3H(Device):
             )
             # retrieving data from device
             data = device.status()
+        except miio.exceptions.DeviceException:
+            logging.error(f"DEVICE | MiAirPurifier3H | UNABLE TO DISCOVER DEVICE\n{traceback.format_exc()}")
+            return miio.DeviceStatus()
         except Exception:
             logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return miio.DeviceStatus()
