@@ -30,6 +30,9 @@ logging.basicConfig(
     ],
 )
 
+# imported libraries logging configuration
+logging.getLogger("miio").setLevel(logging.WARNING)
+
 # loading environmental variables
 load_dotenv(VARIABLES_PATH)
 
