@@ -1,10 +1,8 @@
 import os
 import logging
 
+from dotenv import load_dotenv
 
-#############################
-### GENERAL CONFIGURATION ###
-#############################
 
 # current system version
 VERSION = "0.12.1"
@@ -12,11 +10,11 @@ VERSION = "0.12.1"
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+# path to module variables
+VARIABLES_PATH = os.path.join(BASE_DIR, ".env")
+
 # absolute path to log file
 LOG_FILE = os.path.join(BASE_DIR, "scripts.log")
-
-# number of logs retention days
-LOG_RETENTION_DAYS = 1
 
 # logging configuration
 logging.basicConfig(
@@ -27,3 +25,31 @@ logging.basicConfig(
         logging.FileHandler(LOG_FILE)
     ],
 )
+
+# loading environmental variables
+load_dotenv(VARIABLES_PATH)
+
+# databases configuration
+DATABASE = {
+    "INFLUX": {
+        "URL": f"http://localhost:8086",
+        "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
+        "ORGANIZATION": "boolhub",
+    },
+    "POSTGRE": {
+        "NAME": os.environ.get("POSTGRE_NAME"),
+        "USER": os.environ.get("POSTGRE_USER"),
+        "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
+        "HOST": "localhost",
+        "PORT": 5432,
+    },
+    "REDIS": {
+        "PASSWORD": os.environ.get("REDIS_PASSWORD"),
+        "HOST": "localhost",
+        "PORT": 6379,
+        "DB_ID": 0,
+    },
+}
+
+# backups configuration
+BACKUPS = {"PATH": os.environ.get("BOOLHUB_BACKUPS_PATH")}

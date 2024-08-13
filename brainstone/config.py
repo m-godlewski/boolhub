@@ -4,10 +4,6 @@ import logging
 from dotenv import load_dotenv
 
 
-#############################
-### GENERAL CONFIGURATION ###
-#############################
-
 # absolute path to scripts directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -16,9 +12,6 @@ VARIABLES_PATH = os.path.join(BASE_DIR, ".env")
 
 # absolute path to log file
 LOG_FILE = os.path.join(os.sep, "var", "log", "cron.log")
-
-# number of logs retention days
-LOG_RETENTION_DAYS = 1
 
 # logging configuration
 logging.basicConfig(
@@ -35,11 +28,6 @@ logging.getLogger("miio").setLevel(logging.WARNING)
 
 # loading environmental variables
 load_dotenv(VARIABLES_PATH)
-
-
-#############################
-### SCRIPTS CONFIGURATION ###
-#############################
 
 # databases configuration
 DATABASE = {
@@ -62,6 +50,3 @@ DATABASE = {
         "DB_ID": 0,
     },
 }
-
-# backups configuration
-BACKUPS = {"PATH": os.environ.get("BOOLHUB_BACKUPS_PATH")}
