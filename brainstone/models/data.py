@@ -53,8 +53,12 @@ class AirData(Data):
 
     # fields
     temperature: float = None
-    humidity: float = None
-    aqi: float = None
+    humidity: int = None
+    aqi: int = None
+
+    def __post_init__(self) -> None:
+        """Post initialization rounding numerical values."""
+        self.temperature = round(self.temperature, ndigits=1) if self.temperature else None
 
 
 @dataclass
@@ -138,9 +142,12 @@ class ForecastData:
     """Dataclass of forecast data from virtual outside thermometer."""
 
     # fields
-    date: int
+    date: str
     temperature: float
-    humidity: float
+    humidity: int
 
+    def __post_init__(self) -> None:
+        """Post initialization rounding numerical values."""
+        self.temperature = round(self.temperature, ndigits=1) if self.temperature else None
 
 # endregion
