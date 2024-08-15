@@ -56,25 +56,13 @@ class AirData(Data):
     humidity: int = None
     aqi: int = None
 
+    # fields groups
+    AIR_DATA_FIELDS = {"aqi", "humidity", "temperature"}
+    HEALTH_DATA_FIELDS = {}
+
     def __post_init__(self) -> None:
         """Post initialization rounding numerical values."""
         self.temperature = round(self.temperature, ndigits=1) if self.temperature else None
-
-
-@dataclass
-class MiAirPurifier3HData(AirData):
-    """Dataclass of Xiaomi Air Purifier 3H device."""
-
-    # fields
-    filter_life_remaining: int = None
-    filter_hours_used: int = None
-    use_time: int = None
-
-    # fields groups
-    AIR_DATA_FIELDS = {"aqi", "humidity", "temperature"}
-    HEALTH_DATA_FIELDS = {
-        "filter_life_remaining",
-    }
 
     @property
     def air_data(self) -> dict:
@@ -87,6 +75,17 @@ class MiAirPurifier3HData(AirData):
         return dict(
             [(field, self.__getattribute__(field)) for field in self.HEALTH_DATA_FIELDS]
         )
+
+
+@dataclass
+class MiAirPurifier3HData(AirData):
+    """Dataclass of Xiaomi Air Purifier 3H device."""
+
+    # fields
+    filter_life_remaining: int = None
+
+    # fields groups
+    HEALTH_DATA_FIELDS = {"filter_life_remaining"}
 
 
 @dataclass
@@ -100,18 +99,6 @@ class MiMonitor2Data(AirData):
     AIR_DATA_FIELDS = {"temperature", "humidity"}
     HEALTH_DATA_FIELDS = {"battery"}
 
-    @property
-    def air_data(self) -> dict:
-        return dict(
-            [(field, self.__getattribute__(field)) for field in self.AIR_DATA_FIELDS]
-        )
-
-    @property
-    def health_data(self) -> dict:
-        return dict(
-            [(field, self.__getattribute__(field)) for field in self.HEALTH_DATA_FIELDS]
-        )
-
 
 @dataclass
 class OutsideVirtualThermometerData(AirData):
@@ -121,20 +108,7 @@ class OutsideVirtualThermometerData(AirData):
     battery: int = 100
 
     # fields groups
-    AIR_DATA_FIELDS = {"temperature", "humidity", "aqi"}
     HEALTH_DATA_FIELDS = {"battery"}
-
-    @property
-    def air_data(self) -> dict:
-        return dict(
-            [(field, self.__getattribute__(field)) for field in self.AIR_DATA_FIELDS]
-        )
-
-    @property
-    def health_data(self) -> dict:
-        return dict(
-            [(field, self.__getattribute__(field)) for field in self.HEALTH_DATA_FIELDS]
-        )
 
 
 @dataclass
