@@ -130,7 +130,7 @@ class Air(Gatherer):
                         f"GATHERER | "
                         f"LOCATION = {data.device.location} | "
                         f"DATA = air | "
-                        f"VALUES = {data.aqi}, {data.humidity}, {data.temperature} | "
+                        f"VALUES = AQI: {data.aqi}, HUMIDITY: {data.humidity}, TEMPERATURE: {data.temperature} | "
                     )
         except Exception:
             logging.error(f"GATHERER | AIR\n{traceback.format_exc()}")
