@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.0
+- Storing battery/filter (health) data info InfluxDB.
+- Properties and methods moved from AirData subclasses to AirData class itself.
+- Limit float values in dataclasses.
+- Change in configuration to make archivist script work.
+- Logging improved.
+
 ## 0.12.1
 - Replaced CLI command with miio library in communication with Xiaomi Purifier.
 - Logs from miio library has been limited.
