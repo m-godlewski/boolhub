@@ -53,6 +53,7 @@ class MiAirPurifier3H(Device):
     def __fetch_data(self) -> miio.DeviceStatus:
         """Connects to device and fetches data."""
         try:
+            logging.debug(f"Connecting to {self.metadata.ip_address}")
             # fetches data from device using miio library
             device = miio.AirPurifierMiot(
                 ip=self.metadata.ip_address,
@@ -67,6 +68,7 @@ class MiAirPurifier3H(Device):
             logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return miio.DeviceStatus()
         else:
+            logging.debug(f"Connected to {self.metadata.ip_address}")
             return data
 
     def __parse(self, data) -> dict:
@@ -129,6 +131,7 @@ class MiMonitor2(Device):
             logging.error(f"DEVICE | MiMonitor2 | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
             return {}
         else:
+            logging.debug(f"Connected to {self.metadata.mac_address}")
             return data
 
     def __process_data(self, raw_data: dict) -> MiMonitor2Data:

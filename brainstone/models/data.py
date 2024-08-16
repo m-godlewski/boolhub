@@ -87,6 +87,10 @@ class MiAirPurifier3HData(AirData):
     # fields groups
     HEALTH_DATA_FIELDS = {"filter_life_remaining"}
 
+    @property
+    def health_data_indicator(self) -> int:
+        return self.filter_life_remaining
+
 
 @dataclass
 class MiMonitor2Data(AirData):
@@ -99,6 +103,10 @@ class MiMonitor2Data(AirData):
     AIR_DATA_FIELDS = {"temperature", "humidity"}
     HEALTH_DATA_FIELDS = {"battery"}
 
+    @property
+    def health_data_indicator(self) -> int:
+        return self.battery
+
 
 @dataclass
 class OutsideVirtualThermometerData(AirData):
@@ -109,6 +117,10 @@ class OutsideVirtualThermometerData(AirData):
 
     # fields groups
     HEALTH_DATA_FIELDS = {"battery"}
+
+    @property
+    def health_data_indicator(self) -> int:
+        return self.battery
 
 
 @dataclass

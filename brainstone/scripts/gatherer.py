@@ -125,6 +125,13 @@ class Air(Gatherer):
                 # iterates over datasets
                 for data in air_data:
                     # prepares data for saving into influx database
+                    influx_database.add_point_health(data)
+                    logging.info(
+                        f"GATHERER | "
+                        f"LOCATION = {data.device.location} | "
+                        f"DATA = health | "
+                        f"VALUES = {data.health_data_indicator} | "
+                    )
                     influx_database.add_point_air(data)
                     logging.info(
                         f"GATHERER | "

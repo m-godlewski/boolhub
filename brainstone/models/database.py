@@ -218,6 +218,27 @@ class InfluxDB(Database):
         else:
             return True
 
+    def add_point_health(self, air_data: AirData) -> bool:
+        """Writes single health data entity to database.
+        Returns True, if operation succeed. Otherwise returns False.
+        """
+        try:
+            point = (
+                Point("health")
+                .tag("room", air_data.device.location)
+                .field("battery/filter", air_data.health_data_indicator)
+            )
+            self.api.write(
+                bucket="health",
+                org=config.DATABASE["INFLUX"]["ORGANIZATION"],
+                record=point,
+            )
+        except Exception:
+            logging.error(f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            return False
+        else:
+            return True
+
     def add_point_forecast(self, forecast_data) -> bool:
         """Writes single forecast data entity to database.
         Returns True, if operation succeed. Otherwise returns False.
