@@ -10,6 +10,10 @@ Solution has been developed and tested on Fujitsu Q920 8GB/256GB i5-4590T.
 ```
 $ sudo ./install.sh
 ```
+(Optionak)To make installation script executable run:
+```
+$ sudo chmod +x install.sh
+```
 3. Configure environmental variables by creating .env file (base on .env_template).
 4. Deploy docker containers.
 ```
