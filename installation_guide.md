@@ -10,7 +10,7 @@ Solution has been developed and tested on Fujitsu Q920 8GB/256GB i5-4590T.
 ```
 $ sudo ./install.sh
 ```
-(Optional)To make installation script executable run:
+(Optional) To make installation script executable run:
 ```
 $ sudo chmod +x install.sh
 ```
