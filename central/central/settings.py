@@ -14,6 +14,8 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
+from django.core.management.utils import get_random_secret_key  
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -25,12 +27,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.environ.get("VARIABLES_PATH"))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_KEY")
+SECRET_KEY = get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [os.environ.get("SERVER_IP"), "boolhub"]
+ALLOWED_HOSTS = [os.environ.get("SERVER_IP"), "localhost", "boolhub"]
 
 
 # Application definition
@@ -86,7 +88,7 @@ WSGI_APPLICATION = "central.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ.get("POSTGRE_NAME"),
+        "NAME": "central",
         "USER": os.environ.get("POSTGRE_USER"),
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
         "HOST": "postgresql",

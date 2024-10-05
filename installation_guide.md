@@ -5,14 +5,14 @@ Server machine should match minimum requirements of running Ubuntu Server 20.04.
 Solution has been developed and tested on Fujitsu Q920 8GB/256GB i5-4590T.
 
 ## Step-by-step installation guide
-1. Install Ubuntu Server 20.04.6 LTS using [official image](https://releases.ubuntu.com/focal/).
+0. Install Ubuntu Server 20.04.6 LTS using [official image](https://releases.ubuntu.com/focal/).
+1. Make installation script executable run:
+```
+$ sudo chmod +x install.sh
+```
 2. Run installation script.
 ```
 $ sudo ./install.sh
-```
-(Optional) To make installation script executable run:
-```
-$ sudo chmod +x install.sh
 ```
 3. Configure environmental variables by creating .env file (base on .env_template).
 4. Deploy docker containers.
