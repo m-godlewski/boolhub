@@ -15,6 +15,6 @@ try:
     )
     superuser.save()
 except IntegrityError:
-    print(f"Super User with username {env('SUPER_USER_NAME')} is already exit!")
+    print(f"Super User with username {os.environ.get('CENTRAL_USER')} is already exit!")
 except Exception as e:
     print(e)
