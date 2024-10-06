@@ -78,6 +78,14 @@ echo "- - PostgreSQL password: "
 read -s postgresql_password
 echo "POSTGRE_PASSWORD=${postgresql_password}" >> .env
 
+echo "- INFLUX"
+echo -n "- - Influx username: "
+read influx_user
+echo "INFLUX_USER=${influx_user}" >> .env
+echo "- - Influx password: "
+read -s influx_password
+echo "INFLUX_PASSWORD=${influx_password}" >> .env
+
 echo "- REDIS"
 echo "- - Redis password: "
 read -s redis_password

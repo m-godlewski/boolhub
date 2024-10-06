@@ -37,7 +37,7 @@ DATABASE = {
         "ORGANIZATION": "boolhub",
     },
     "POSTGRE": {
-        "NAME": "central"
+        "NAME": "central",
         "USER": os.environ.get("POSTGRE_USER"),
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
         "HOST": "localhost",
