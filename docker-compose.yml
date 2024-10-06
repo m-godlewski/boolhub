@@ -62,7 +62,11 @@ services:
       - .env
     depends_on:
       - postgresql
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      /bin/bash -c "python manage.py shell < createsuperuser.py && python manage.py makemigrations --noinput && python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - CENTRAL_USER=${CENTRAL_USER}
+      - CENTRAL_PASSWORD=${CENTRAL_PASSWORD}
     networks:
       - boolnet
   node_exporter:
