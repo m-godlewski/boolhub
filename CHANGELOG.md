@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.0
+- Whole installation process now can be performed usign install.sh script.
+- Requirements files has been updated due to vulnerabilities issues.
+
 ## 0.13.0
 - Storing battery/filter (health) data info InfluxDB.
 - Properties and methods moved from AirData subclasses to AirData class itself.
