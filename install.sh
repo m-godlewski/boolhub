@@ -85,6 +85,9 @@ echo "INFLUX_USER=${influx_user}" >> .env
 echo "- - Influx password: "
 read -s influx_password
 echo "INFLUX_PASSWORD=${influx_password}" >> .env
+echo "- - Influx token (https://it-tools.tech/token-generator): "
+read -s influx_token
+echo "INFLUX_TOKEN=${influx_token}" >> .env
 
 echo "- REDIS"
 echo "- - Redis password: "

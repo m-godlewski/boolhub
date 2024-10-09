@@ -23,6 +23,7 @@ services:
       DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD}
       DOCKER_INFLUXDB_INIT_ORG: boolhub
       DOCKER_INFLUXDB_INIT_BUCKET: boolhub
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN}
     volumes:
       - /data/influxdb:/var/lib/influxdb2
       - ${BOOLHUB_BACKUPS_PATH}:${BOOLHUB_BACKUPS_PATH}
