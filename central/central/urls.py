@@ -22,6 +22,8 @@ from django.urls import include, path
 urlpatterns = [
     # website app
     path("", include("website.urls")),
+    # rooms app
+    path("rooms/", include("rooms.urls")),
     # lighting app
     path("lighting/", include("lighting.urls")),
     # administration panel

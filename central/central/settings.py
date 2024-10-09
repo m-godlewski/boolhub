@@ -14,7 +14,7 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-from django.core.management.utils import get_random_secret_key  
+from django.core.management.utils import get_random_secret_key
 
 
 # Quick-start development settings - unsuitable for production
