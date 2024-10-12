@@ -3,5 +3,6 @@ COPY . /code
 WORKDIR /code
 RUN pip install --no-cache-dir -r requirements.txt
 ENV SERVER_IP=192.168.0.250
+ENV DJANGO_SETTINGS_MODULE=central.settings
 EXPOSE 8000
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
