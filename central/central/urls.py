@@ -24,6 +24,8 @@ urlpatterns = [
     path("", include("website.urls")),
     # rooms app
     path("rooms/", include("rooms.urls")),
+    # devices app
+    path("devices/", include("devices.urls")),
     # lighting app
     path("lighting/", include("lighting.urls")),
     # administration panel

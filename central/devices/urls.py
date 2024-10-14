@@ -4,4 +4,7 @@ from . import views
 
 
 # url patterns of devices app
-urlpatterns = [path("", view=views.index, name="devices_index")]
+urlpatterns = [
+    path("", view=views.index),
+    path("<str:device_id>", view=views.device),
+]
