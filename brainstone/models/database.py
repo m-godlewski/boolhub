@@ -47,7 +47,7 @@ class PostgreSQL(Database):
         """Closes database and api connection."""
         # log error if any exception ocurred during context process
         if any((exc_type, exc_value, exc_traceback)):
-            logging.error(exc_traceback)
+            logging.error(exc_value)
         # closes connection and api
         logging.debug(f"Closing {self.__class__.__name__} connection")
         self.api.close()
@@ -169,7 +169,7 @@ class InfluxDB(Database):
         # closes database connection
         # if any exception ocurred during context process
         if any((exc_type, exc_value, exc_traceback)):
-            logging.error(exc_traceback)
+            logging.error(exc_value)
         # closes database connection
         logging.debug(f"Closing {self.__class__.__name__} connection")
         self.api.close()
@@ -283,7 +283,7 @@ class Redis(Database):
         """Closes database and api connection."""
         # log error if any exception ocurred during context process
         if any((exc_type, exc_value, exc_traceback)):
-            logging.error(exc_traceback)
+            logging.error(exc_value)
         # closes connection and api
         logging.debug(f"Closing {self.__class__.__name__} connection")
         self.client.close()
