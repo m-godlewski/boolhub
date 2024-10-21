@@ -33,11 +33,11 @@ load_dotenv(VARIABLES_PATH)
 DATABASE = {
     "INFLUX": {
         "URL": f"http://localhost:8086",
-        "API_TOKEN": os.environ.get("INFLUXDB_TOKEN"),
+        "API_TOKEN": os.environ.get("INFLUX_TOKEN"),
         "ORGANIZATION": "boolhub",
     },
     "POSTGRE": {
-        "NAME": "central"
+        "NAME": "central",
         "USER": os.environ.get("POSTGRE_USER"),
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
         "HOST": "localhost",
