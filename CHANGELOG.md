@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.14.1
+- Major bugfixes in installation script.
+
 ## 0.14.0
 - Whole installation process now can be performed usign install.sh script.
 - Requirements files has been updated due to vulnerabilities issues.

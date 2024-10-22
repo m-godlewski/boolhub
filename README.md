@@ -1,8 +1,9 @@
-# BoolHub [![version](https://img.shields.io/badge/version-0.14.0-blue.svg)](https://semver.org)
+# BoolHub [![version](https://img.shields.io/badge/version-0.14.1-blue.svg)](https://semver.org)
 Intelligent house hub.
 
 ## Technology Stack
-- (Central module) Django 4.1
+- Central (Django 4.1)
+- Brainstone (Python 3.8)
 - PostgreSQL 15.3.0
 - InfluxDB 2.2.0
 - Grafana 10.1.0
