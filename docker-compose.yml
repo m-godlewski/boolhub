@@ -30,20 +30,6 @@ services:
       - ./docker/influx/create-buckets.sh:/docker-entrypoint-initdb.d/create-buckets.sh
     networks:
       - boolnet
-  grafana:
-    container_name: grafana
-    image: grafana/grafana:10.1.0-ubuntu
-    restart: always
-    ports:
-      - 3000:3000
-    volumes:
-      - /data/grafana:/var/lib/grafana
-    user: "472"
-    environment:
-      - GF_SECURITY_ALLOW_EMBEDDING=true
-      - GF_PLUGINS_ENABLE_ALPHA=true
-    networks:
-      - boolnet
   postgresql:
     container_name: postgresql
     image: postgres:15.3

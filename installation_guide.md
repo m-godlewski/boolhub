@@ -14,11 +14,3 @@ $ sudo chmod +x install.sh
 ```
 $ sudo ./install.sh
 ```
-3. Deploy docker containers:
-```
-$ docker compose up -d
-```
-4. Set admin password for Grafana.   
-To set password for Grafana admin user, just log in for the first time using admin/admin credentials.
-After successful login, Grafana will as you for new password.
-5. Configure connection between Grafana and Influx.  

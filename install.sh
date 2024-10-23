@@ -106,9 +106,3 @@ echo "CENTRAL_PASSWORD=${central_password}" >> .env
 
 printf "\n\nStep 7. Run docker containers\n"
 docker compose up -d
-
-
-
-printf "\n\nStep 8. Post installation steps\n"
-echo "Changing grafana ownership"
-chown 472:472 /data/grafana/
