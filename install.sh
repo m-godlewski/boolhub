@@ -64,6 +64,8 @@ echo "- Removing content of  old .env file"
 echo "- PATHS"
 echo "- - Setting 'BOOLHUB_CENTRAL_PATH' variable to '$PWD/central'"
 echo "BOOLHUB_CENTRAL_PATH=$PWD/central" >> .env
+echo "- - Setting 'BOOLHUB_CENTRAL_FRONTEND_PATH' variable to '$PWD/central_frontend'"
+echo "BOOLHUB_CENTRAL_FRONTEND_PATH=$PWD/central_frontend" >> .env
 echo "- - Setting 'BOOLHUB_BRAINSTONE_PATH' variable to '$PWD/brainstone'"
 echo "BOOLHUB_BRAINSTONE_PATH=$PWD/brainstone" >> .env
 echo -n "- - Enter location where backups should be stored: "

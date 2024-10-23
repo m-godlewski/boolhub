@@ -64,6 +64,16 @@ services:
       - CENTRAL_PASSWORD=${CENTRAL_PASSWORD}
     networks:
       - boolnet
+  central_frontend:
+    container_name: central_frontend
+    build: ${BOOLHUB_CENTRAL_FRONTEND_PATH}
+    restart: always
+    ports:
+      - 3000:3000
+    depends_on:
+      - central
+    networks:
+      - boolnet
   node_exporter:
     container_name: node_exporter
     image: prom/node-exporter
