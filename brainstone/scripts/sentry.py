@@ -43,8 +43,6 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                 if (
                     data.temperature
                     and redis.notify_temperatue
-                    # outside air devices data should not be verified
-                    and data.device.location != "zewnątrz"
                     and (
                         data.temperature >= redis.notify_temperatue_upper
                         or data.temperature <= redis.notify_temperatue_lower
@@ -68,7 +66,6 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                 if (
                     data.humidity
                     and redis.notify_humidity
-                    and data.device.location != "zewnątrz"
                     and (
                         data.humidity >= redis.notify_humidity_upper
                         or data.humidity <= redis.notify_humidity_lower

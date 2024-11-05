@@ -108,32 +108,4 @@ class MiMonitor2Data(AirData):
         return self.battery
 
 
-@dataclass
-class OutsideVirtualThermometerData(AirData):
-    """Dataclass of virtual outside thermometer."""
-
-    # fields
-    battery: int = 100
-
-    # fields groups
-    HEALTH_DATA_FIELDS = {"battery"}
-
-    @property
-    def health_data_indicator(self) -> int:
-        return self.battery
-
-
-@dataclass
-class ForecastData:
-    """Dataclass of forecast data from virtual outside thermometer."""
-
-    # fields
-    date: str
-    temperature: float
-    humidity: int
-
-    def __post_init__(self) -> None:
-        """Post initialization rounding numerical values."""
-        self.temperature = round(self.temperature, ndigits=1) if self.temperature else None
-
 # endregion

@@ -78,7 +78,4 @@ class TestGatherer(TestCase):
     def test_air_scan_monitor(self):
         pass
 
-    def test_air_outside_thermometer(self):
-        pass
-
     # endregion

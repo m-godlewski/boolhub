@@ -4,24 +4,19 @@ This script contains dedicated classes for communication with IoT devices connec
 
 import logging
 import traceback
-import typing
 from abc import ABC
 from dataclasses import fields
 
 import bluepy
 import miio
 import miio.exceptions
-import requests
 from lywsd03mmc import Lywsd03mmcClient
 
 from models.data import (
     DeviceData,
     MiAirPurifier3HData,
     MiMonitor2Data,
-    OutsideVirtualThermometerData,
-    ForecastData,
 )
-from .database import Redis
 
 
 class Device(ABC):
@@ -143,125 +138,3 @@ class MiMonitor2(Device):
             return MiMonitor2Data(self.metadata)
         else:
             return processed_data
-
-
-class OutsideVirtualThermometer(Device):
-    """Class used for communication with external API (https://weatherapi.com) to fetch weather data."""
-
-    def __init__(self, device_data: DeviceData, forecast: bool = False) -> None:
-        # calls super class constructor
-        super().__init__(device_data)
-        # fetches weather data, if flag was set to False
-        if not forecast:
-            raw_data = self.__fetch_weather_data()
-            self.__processed_data = self.__process_weather_data(raw_data)
-        # otherwise, fetches forecast data
-        else:
-            raw_data = self.__fetch_forecast_data()
-            self.__processed_data = self.__process_forecast_data(raw_data)
-
-    @property
-    def data(self) -> OutsideVirtualThermometerData:
-        """Returns processed data."""
-        return self.__processed_data
-
-    # region FORECAST
-
-    def __fetch_forecast_data(self) -> dict:
-        """Connects to device and fetches data."""
-        try:
-            # connect to redis
-            with Redis() as redis:
-                # sending request to weather api
-                response = requests.get(
-                    url=f"{redis.weather_api_url}/forecast.json",
-                    params={
-                        "key": self.metadata.token,
-                        "q": f"{redis.latitude}, {redis.longitude}",
-                        "aqi": "yes",
-                        "days": 3,
-                    },
-                )
-            # if returned status code indicates external server error
-            if response.status_code == 500:
-                raise Exception("External Server Error!")
-            # retrieving data in JSON format
-            data = response.json()
-        except Exception:
-            logging.error(f"DEVICE | OutsideVirtualThermometer | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
-            return {}
-        else:
-            return data
-
-    def __process_forecast_data(self, raw_data: dict) -> typing.List[ForecastData]:
-        """Processes raw data and returns it as instance of dataclass."""
-        try:
-            # empty list to store dataclass instances
-            processed_data = []
-            # list of daily forecasts
-            forecast_data = raw_data.get("forecast").get("forecastday")
-            # iterate over daily forecast
-            for daily_forecast in forecast_data:
-                # iterate over hourly forecast
-                for hourly_forecast in daily_forecast.get("hour"):
-                    # create forecast dataclass and append it to final list
-                    processed_data.append(
-                        ForecastData(
-                            date=hourly_forecast.get("time"),
-                            temperature=hourly_forecast.get("temp_c"),
-                            humidity=hourly_forecast.get("humidity"),
-                        )
-                    )
-        except Exception:
-            logging.error(f"DEVICE | OutsideVirtualThermometer | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
-            return []
-        else:
-            return processed_data
-
-    # endregion
-
-    # region WEATHER
-
-    def __fetch_weather_data(self) -> dict:
-        """Connects to device and fetches data."""
-        try:
-            # connect to redis
-            with Redis() as redis:
-                # sending request to weather api
-                response = requests.get(
-                    url=f"{redis.weather_api_url}/current.json",
-                    params={
-                        "key": self.metadata.token,
-                        "q": f"{redis.latitude}, {redis.longitude}",
-                        "aqi": "yes",
-                    },
-                )
-            # if returned status code indicates external server error
-            if response.status_code == 500:
-                raise Exception("External Server Error!")
-            # retrieving data in JSON format
-            data = response.json()
-        except Exception:
-            logging.error(f"DEVICE | OutsideVirtualThermometer | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
-            return {}
-        else:
-            return data
-
-    def __process_weather_data(self, raw_data: dict) -> OutsideVirtualThermometerData:
-        """Processes raw data and returns it as instance of dataclass."""
-        try:
-            data = {
-                "temperature": raw_data.get("current").get("temp_c"),
-                "humidity": raw_data.get("current").get("humidity"),
-                "aqi": max(
-                    round(raw_data.get("current").get("air_quality").get("pm2_5")), 1
-                ),
-            }
-            processed_data = OutsideVirtualThermometerData(self.metadata, **data)
-        except Exception:
-            logging.error(f"DEVICE | OutsideVirtualThermometer | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
-            return MiMonitor2Data(self.metadata)
-        else:
-            return processed_data
-
-    # endregion
