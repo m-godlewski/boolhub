@@ -1,7 +1,7 @@
-export default function NavigationMenuTile({ title, onClick }) {
+export default function NavigationMenuTile({ onClick, icon }) {
   return (
     <div className="navigation-menu-tile" onClick={onClick}>
-      {title}
+      {icon}
     </div>
   );
 }

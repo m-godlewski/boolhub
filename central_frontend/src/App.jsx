@@ -1,13 +1,15 @@
-import { useState } from "react";
-import LeftPanel from "./components/LeftPanel";
-import RightPanel from "./components/RightPanel";
+import { Routes, Route } from "react-router-dom";
+import Home from "./components/Home";
+import Creator from "./components/Creator";
 
 function App() {
   return (
-    <div id="main-panel">
-      <LeftPanel />
-      <RightPanel />
-    </div>
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/creator" element={<Creator />} />
+      </Routes>
+    </>
   );
 }
 
