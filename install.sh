@@ -108,3 +108,6 @@ echo "CENTRAL_PASSWORD=${central_password}" >> .env
 
 printf "\n\nStep 7. Run docker containers\n"
 docker compose up -d
+# to solve problem with superuser and settings initialization
+# central module container has to be restarted
+docker restart central

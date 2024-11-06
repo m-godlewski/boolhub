@@ -43,6 +43,11 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRE_PASSWORD}
       - POSTGRES_USER=${POSTGRE_USER}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - boolnet
   central:
@@ -56,7 +61,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - postgresql
+      postgresql:
+        condition: service_healthy
     command: >
       /bin/bash -c "python manage.py shell < createsuperuser.py && python manage.py makemigrations --noinput && python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     environment:

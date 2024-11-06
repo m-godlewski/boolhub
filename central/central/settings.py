@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "constance",
     "corsheaders",
+    "settings.apps.SettingsConfig",
     "devices.apps.DevicesConfig",
     "rooms.apps.RoomsConfig",
     "lighting.apps.LightingConfig",

@@ -4,7 +4,7 @@ from rooms.models import Room
 
 
 class Device(models.Model):
-    """Class representation of single device that has access to internet."""
+    """Class representation of single device in local network."""
 
     # list of available device categories
     DEVICE_CATEGORY = [
