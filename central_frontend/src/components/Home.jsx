@@ -30,7 +30,7 @@ export default function Home() {
         <HouseHolders />
       </div>
       <div id="right-panel">
-        <RenderPattern>{content}</RenderPattern>
+        <RenderPattern selectedButton={selectedNavigation} />
         <NavigationMenu
           onButtonClick={onButtonClick}
           selectedButton={selectedNavigation}
