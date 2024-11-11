@@ -1,9 +1,5 @@
 from django.urls import path
 
-from . import views
+from .views import SettingsView
 
-
-# url patterns of devices app
-urlpatterns = [
-    path("", view=views.index),
-]
+urlpatterns = [path("", SettingsView.as_view())]

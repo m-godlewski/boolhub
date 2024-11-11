@@ -29,6 +29,9 @@ __Solution:__
 ```
 sudo apt-get install libpq-dev
 ```
+```
+sudo apt-get install python3.8-dev
+```
 ### Error during bluepy installation.
 When you are facing errors during bluepy installation. Follow installation guide on [official github repository](https://github.com/IanHarvey/bluepy).
 ### Gatherer.py cannot read data from Xiaomi Monitor 2

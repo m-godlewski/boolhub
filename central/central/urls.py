@@ -27,5 +27,5 @@ urlpatterns = [
     # devices app
     path("api/devices/", include("devices.urls")),
     # administration panel
-    path("api/admin/", admin.site.urls),
+    path("admin/", admin.site.urls),
 ]

@@ -1,47 +1,30 @@
-from django.http import JsonResponse
+from django.http.response import Http404
+from django.http.response import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from .models import Settings
+from .serializers import SettingsSerializer
 
 
-def index(request) -> JsonResponse:
-    """Returns current settings values."""
-    # queries database for settings object
-    query_results = Settings.objects.filter(id=1).values()
-    # converts QuerySet to dictionary
-    settings = list(query_results)[0]
-    # response dictionary
-    response = {
-        "data": {
-            "temperature": {
-                "min": settings.get("temperature_min"),
-                "max": settings.get("temperature_max"),
-                "notify": settings.get("notify_temperature"),
-            },
-            "humidity": {
-                "min": settings.get("humidity_min"),
-                "max": settings.get("humidity_max"),
-                "notify": settings.get("notify_humidity"),
-            },
-            "aqi": {
-                "threshold": settings.get("aqi_threshold"),
-                "notify": settings.get("notify_aqi"),
-            },
-            "network": {
-                "overload_threshold": settings.get(
-                    "network_overload_threshold"
-                ),
-                "notify_overload": settings.get("notify_network_overload"),
-                "notify_unknown_device": settings.get("notify_unknown_device"),
-            },
-            "health": {
-                "threshold": settings.get("health_threshold"),
-                "notify": settings.get("notify_health"),
-            },
-            "weather": {
-                "url": settings.get("weather_api_url"),
-                "latitude": settings.get("weather_api_latitude"),
-                "longitude": settings.get("weather_api_longitude"),
-            },
-        }
-    }
-    return JsonResponse(response)
+class SettingsView(APIView):
+
+    def get(self, request, pk=1):
+        """Returns one and only instance of Settings model from database."""
+        try:
+            data = Settings.objects.get(id=pk)
+            serializer = SettingsSerializer(data)
+        except Settings.DoesNotExist:
+            raise Http404("Settings has not been initialized during installation process!")
+        return Response(serializer.data)
+
+    def put(self, request, pk=1):
+        """Updates one and only instance of Settings model."""
+        settings_to_update = Settings.objects.get(id=pk)
+        serializer = SettingsSerializer(
+            instance=settings_to_update, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse("Settings updated", safe=False)
+        return JsonResponse("Failed to update settings")

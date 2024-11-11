@@ -43,8 +43,10 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.staticfiles",
     "constance",
     "corsheaders",
+    "rest_framework",
     "settings.apps.SettingsConfig",
     "devices.apps.DevicesConfig",
     "rooms.apps.RoomsConfig",
@@ -131,6 +133,13 @@ TIME_ZONE = "CET"
 USE_I18N = True
 
 USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.1/howto/static-files/
+
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
 # Default primary key field type
