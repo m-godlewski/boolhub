@@ -3,7 +3,6 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #242424;
   color: white;
   overflow: hidden;
   font-family: "Ubuntu", sans-serif;
@@ -28,7 +27,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid white;
+  background-color: #252526;
 }
 
 #clock {
@@ -38,7 +37,6 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid white;
   line-height: 0.5;
 }
 
@@ -46,27 +44,19 @@ body {
   width: 90%;
   height: 20%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid white;
 }
 
 #notifications {
   width: 90%;
-  height: 50%;
+  height: 40%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid white;
 }
 
 #householders {
   display: flex;
   width: 90%;
-  height: 10%;
+  height: 20%;
   display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* Right Panel */
@@ -78,6 +68,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background-color: #2d2d30;
 }
 
 #render-pattern {
@@ -86,7 +77,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid white;
 }
 
 #navigation-menu {
@@ -95,6 +85,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+  background-color: #252526;
 }
 
 #navigation-menu li {

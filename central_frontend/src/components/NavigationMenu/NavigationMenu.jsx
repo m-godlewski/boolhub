@@ -10,23 +10,23 @@ export default function NavigationMenu({ onButtonClick, selectedButton }) {
     <div id="navigation-menu">
       <NavigationMenuTile
         onClick={() => onButtonClick("air")}
-        icon={<DeviceThermostatTwoToneIcon sx={{ fontSize: "6vh" }} />}
+        icon={<DeviceThermostatTwoToneIcon sx={{ fontSize: "5.5vh" }} />}
       />
       <NavigationMenuTile
         onClick={() => onButtonClick("monitoring")}
-        icon={<CameraIndoorTwoToneIcon sx={{ fontSize: "6vh" }} />}
+        icon={<CameraIndoorTwoToneIcon sx={{ fontSize: "5.5vh" }} />}
       />
       <NavigationMenuTile
         onClick={() => onButtonClick("cleaning")}
-        icon={<CleaningServicesTwoToneIcon sx={{ fontSize: "6vh" }} />}
+        icon={<CleaningServicesTwoToneIcon sx={{ fontSize: "5.5vh" }} />}
       />
       <NavigationMenuTile
         onClick={() => onButtonClick("plants")}
-        icon={<LocalFloristTwoToneIcon sx={{ fontSize: "6vh" }} />}
+        icon={<LocalFloristTwoToneIcon sx={{ fontSize: "5.5vh" }} />}
       />
       <NavigationMenuTile
         onClick={() => onButtonClick("settings")}
-        icon={<SettingsTwoToneIcon sx={{ fontSize: "6vh" }} />}
+        icon={<SettingsTwoToneIcon sx={{ fontSize: "5.5vh" }} />}
       />
     </div>
   );
