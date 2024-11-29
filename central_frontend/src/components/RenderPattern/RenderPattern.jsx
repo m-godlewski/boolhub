@@ -2,7 +2,7 @@ import Air from "./Air.jsx";
 import Monitoring from "./Monitoring.jsx";
 import Cleaning from "./Cleaning.jsx";
 import Plants from "./Plants.jsx";
-import Settings from "./Settings";
+import Settings from "./Settings/Settings.jsx";
 
 export default function RenderPattern({ selectedButton }) {
   switch (selectedButton) {

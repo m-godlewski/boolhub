@@ -9,14 +9,21 @@ from django.contrib.auth.models import User
 from settings.models import Settings
 
 
+# create superuser model
 try:
-    # create superuser model
     superuser = User.objects.create_superuser(
         username=os.environ.get("CENTRAL_USER"),
         password=os.environ.get("CENTRAL_PASSWORD"),
     )
     superuser.save()
-    # create superuser initial settings
+except IntegrityError:
+    print(f"Super User with username {os.environ.get('CENTRAL_USER')} is already exit!")
+except Exception as e:
+    print(e)
+
+
+# create superuser initial settings
+try:
     superuser_settings = Settings(
         id=1,
         temperature_min=19.0,
@@ -34,10 +41,9 @@ try:
         notify_health=True,
         weather_api_url="",
         weather_api_latitude="",
-        weather_api_longitude=""
+        weather_api_longitude="",
+        weather_api_token=""
     )
     superuser_settings.save()
-except IntegrityError:
-    print(f"Super User with username {os.environ.get('CENTRAL_USER')} is already exit!")
 except Exception as e:
     print(e)

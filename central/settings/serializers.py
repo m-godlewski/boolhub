@@ -23,4 +23,5 @@ class SettingsSerializer(serializers.ModelSerializer):
             "weather_api_url",
             "weather_api_latitude",
             "weather_api_longitude",
+            "weather_api_token",
         )

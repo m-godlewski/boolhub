@@ -31,6 +31,7 @@ class Settings(models.Model):
     weather_api_url = models.CharField(max_length=250, blank=True, null=True)
     weather_api_latitude = models.CharField(max_length=250, blank=True, null=True)
     weather_api_longitude = models.CharField(max_length=250, blank=True, null=True)
+    weather_api_token = models.CharField(max_length=250, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         """Override save method to avoid existence of many servings models."""
