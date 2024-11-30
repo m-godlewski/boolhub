@@ -5,8 +5,8 @@ class Settings(models.Model):
     """Class representation of system settings."""
 
     # temperature
-    temperature_min = models.FloatField(default=19.0)
-    temperature_max = models.FloatField(default=27.0)
+    temperature_min = models.IntegerField(default=19)
+    temperature_max = models.IntegerField(default=27)
     notify_temperature = models.BooleanField(default=True)
 
     # humidity
