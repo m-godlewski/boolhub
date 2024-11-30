@@ -3,7 +3,7 @@ import axios from "axios";
 export function getSettings() {
   // fetches current settings from backend
   return axios
-    .get("http://localhost:8080/api/settings")
+    .get("http://localhost/api/settings")
     .then((response) => response.data);
 }
 
@@ -22,7 +22,7 @@ export function putSettings(settings) {
     }
   }
   return axios
-    .put("http://localhost:8080/api/settings/", {
+    .put("http://localhost/api/settings/", {
       ...updatedData,
     })
     .then((response) => response.data);
