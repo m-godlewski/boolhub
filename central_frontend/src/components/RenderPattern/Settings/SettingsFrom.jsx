@@ -1,10 +1,21 @@
 import { useState } from "react";
-import { Button, Switch, TextField, FormHelperText } from "@mui/material";
+import {
+  Button,
+  Switch,
+  TextField,
+  FormHelperText,
+  FormControl,
+} from "@mui/material";
 import { putSettings } from "./SettingsService";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Box from "@mui/material/Box";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
 import Grid from "@mui/material/Grid2";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import Box from "@mui/material/Box";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Typography from "@mui/material/Typography";
 
 // panel of selected tab
 function TabPanel(props) {
@@ -71,19 +82,27 @@ export default function SettingsForm({ settings, setSettings }) {
   };
 
   return (
-    // form
     <form onSubmit={handleSubmit}>
       <Box
         sx={{
-          minHeight: "68vh",
           ".MuiFormHelperText-root": {
             color: "white",
             fontWeight: "bold",
-            paddingTop: "10%",
-            paddingBottom: "2%",
+            paddingBottom: "0.5em",
           },
           ".MuiOutlinedInput-input": { color: "white", size: "small" },
           ".Mui-selected": { fontWeight: "bold", color: "#1976d2" },
+          ".MuiAccordion-root": {
+            background: "#252526",
+          },
+          ".MuiTypography-root": {
+            color: "white",
+            fontWeight: "bold",
+          },
+          ".MuiAccordionDetails-root": {
+            display: "flex",
+            justifyContent: "space-between",
+          },
         }}
       >
         <Box>
@@ -95,166 +114,261 @@ export default function SettingsForm({ settings, setSettings }) {
           >
             <Tab label="Powietrze" {...tabProps(0)} />
             <Tab label="Urządzenia" {...tabProps(1)} />
-            <Tab label="Pogoda" {...tabProps(2)} />
+            <Tab label="System" {...tabProps(2)} />
           </Tabs>
         </Box>
         {/* air */}
         <TabPanel value={selectedTab} index={0}>
-          <Grid container spacing={10}>
-            <Grid size={4}>
-              <FormHelperText>Minimalna temperatura</FormHelperText>
-              <TextField
-                type="number"
-                name="temperature_min"
-                required
-                value={settings.temperature_min}
-                onChange={handleChange}
-              />
-              <FormHelperText>Maksymalna temperatura</FormHelperText>
-              <TextField
-                type="number"
-                name="temperature_max"
-                required
-                value={settings.temperature_max}
-                onChange={handleChange}
-              />
-              <FormHelperText>Powiadomienia o temperaturze</FormHelperText>
-              <Switch
-                name="notify_temperature"
-                value={settings.notify_temperature ? true : false}
-                checked={settings.notify_temperature ? true : false}
-                onClick={handleClick}
-              />
-            </Grid>
-            <Grid size={4}>
-              <FormHelperText>Minimalna wilgotność</FormHelperText>
-              <TextField
-                type="number"
-                name="humidity_min"
-                required
-                value={settings.humidity_min}
-                onChange={handleChange}
-              />
-              <FormHelperText>Maksymalna wilgotność</FormHelperText>
-              <TextField
-                type="number"
-                name="humidity_max"
-                required
-                value={settings.humidity_max}
-                onChange={handleChange}
-              />
-              <FormHelperText>Powiadomienia o wiglnotności</FormHelperText>
-              <Switch
-                name="notify_humidity"
-                value={settings.notify_humidity ? true : false}
-                checked={settings.notify_humidity ? true : false}
-                onClick={handleClick}
-              />
-            </Grid>
-            <Grid size={4}>
-              <FormHelperText>Próg zanieczyszczenia</FormHelperText>
-              <TextField
-                type="number"
-                name="aqi_threshold"
-                required
-                value={settings.aqi_threshold}
-                onChange={handleChange}
-              />
-              <FormHelperText>Powiadomienia o zanieczyszczeniu</FormHelperText>
-              <Switch
-                name="notify_aqi"
-                value={settings.notify_aqi ? true : false}
-                checked={settings.notify_aqi ? true : false}
-                onClick={handleClick}
-              />
-            </Grid>
-          </Grid>
+          {/* temperature */}
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+              <Typography>Temperatura</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControl>
+                <FormHelperText>Minimalna</FormHelperText>
+                <TextField
+                  type="number"
+                  name="temperature_min"
+                  required
+                  value={settings.temperature_min}
+                  onChange={handleChange}
+                />
+              </FormControl>
+              <FormControl>
+                <FormHelperText>Maksymalna</FormHelperText>
+                <TextField
+                  type="number"
+                  name="temperature_max"
+                  required
+                  value={settings.temperature_max}
+                  onChange={handleChange}
+                />
+              </FormControl>
+              <FormControl>
+                <FormHelperText>Powiadomienia</FormHelperText>
+                <Switch
+                  name="notify_temperature"
+                  value={settings.notify_temperature ? true : false}
+                  checked={settings.notify_temperature ? true : false}
+                  onClick={handleClick}
+                />
+              </FormControl>
+            </AccordionDetails>
+          </Accordion>
+          {/* humidity */}
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+              <Typography>Wilgotność</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControl>
+                <FormHelperText>Minimum</FormHelperText>
+                <TextField
+                  type="number"
+                  name="humidity_min"
+                  required
+                  value={settings.humidity_min}
+                  onChange={handleChange}
+                />
+              </FormControl>
+              <FormControl>
+                <FormHelperText>Maksimum</FormHelperText>
+                <TextField
+                  type="number"
+                  name="humidity_max"
+                  required
+                  value={settings.humidity_max}
+                  onChange={handleChange}
+                />
+              </FormControl>
+              <FormControl>
+                <FormHelperText>Powiadomienia</FormHelperText>
+                <Switch
+                  name="notify_humidity"
+                  value={settings.notify_humidity ? true : false}
+                  checked={settings.notify_humidity ? true : false}
+                  onClick={handleClick}
+                />
+              </FormControl>
+            </AccordionDetails>
+          </Accordion>
+          {/* aqi */}
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+              <Typography>Zanieczyszczenie</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControl>
+                <FormHelperText>Wartość progowa</FormHelperText>
+                <TextField
+                  type="number"
+                  name="aqi_threshold"
+                  required
+                  value={settings.aqi_threshold}
+                  onChange={handleChange}
+                />
+              </FormControl>
+              <FormControl>
+                <FormHelperText>Powiadomienia</FormHelperText>
+                <Switch
+                  name="notify_aqi"
+                  value={settings.notify_aqi ? true : false}
+                  checked={settings.notify_aqi ? true : false}
+                  onClick={handleClick}
+                />
+              </FormControl>
+            </AccordionDetails>
+          </Accordion>
         </TabPanel>
         {/* devices */}
         <TabPanel value={selectedTab} index={1}>
-          <Grid container spacing={10}>
-            <Grid size={6}>
-              <FormHelperText>Próg obciążenia sieci</FormHelperText>
-              <TextField
-                type="number"
-                name="network_overload_threshold"
-                required
-                value={settings.network_overload_threshold}
-                onChange={handleChange}
-              />
-              <FormHelperText>Powiadamiaj o obciążeniu sieci</FormHelperText>
-              <Switch
-                name="notify_network_overload"
-                value={settings.notify_network_overload ? true : false}
-                checked={settings.notify_network_overload ? true : false}
-                onClick={handleClick}
-              />
-              <FormHelperText>
-                Powiadamiaj o nieznanym urządzeniu w sieci
-              </FormHelperText>
-              <Switch
-                name="notify_unknown_device"
-                value={settings.notify_unknown_device ? true : false}
-                checked={settings.notify_unknown_device ? true : false}
-                onClick={handleClick}
-              />
-            </Grid>
-            <Grid size={6}>
-              <FormHelperText>Poziom baterii/filtra</FormHelperText>
-              <TextField
-                type="number"
-                name="health_threshold"
-                required
-                value={settings.health_threshold}
-                onChange={handleChange}
-              />
-              <FormHelperText>Powiadomienia diagnostyczne</FormHelperText>
-              <Switch
-                name="notify_health"
-                value={settings.notify_health ? true : false}
-                checked={settings.notify_health ? true : false}
-                onClick={handleClick}
-              />
-            </Grid>
-          </Grid>
+          {/* diagnostics */}
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+              <Typography>Diagnostyka</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControl>
+                <FormHelperText>Minimalny poziom baterii</FormHelperText>
+                <TextField
+                  type="number"
+                  name="health_threshold"
+                  required
+                  value={settings.health_threshold}
+                  onChange={handleChange}
+                />
+              </FormControl>
+              <FormControl>
+                <FormHelperText>Powiadomienia</FormHelperText>
+                <Switch
+                  name="notify_health"
+                  value={settings.notify_health ? true : false}
+                  checked={settings.notify_health ? true : false}
+                  onClick={handleClick}
+                />
+              </FormControl>
+            </AccordionDetails>
+          </Accordion>
         </TabPanel>
-        {/* weather */}
+        {/* system */}
         <TabPanel value={selectedTab} index={2}>
-          <Grid container spacing={10}>
-            <Grid size={6}>
-              <FormHelperText>API systemu pogodowego</FormHelperText>
-              <TextField
-                type="text"
-                name="weather_api_url"
-                value={settings.weather_api_url}
-                onChange={handleChange}
-              />
-              <FormHelperText>Szerokość Geograficzna</FormHelperText>
-              <TextField
-                type="text"
-                name="weather_api_latitude"
-                value={settings.weather_api_latitude}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid size={6}>
-              <FormHelperText>API Token</FormHelperText>
-              <TextField
-                type="text"
-                name="weather_api_token"
-                value={settings.weather_api_token}
-                onChange={handleChange}
-              />
-              <FormHelperText>Długość Geograficzna</FormHelperText>
-              <TextField
-                type="text"
-                name="weather_api_longitude"
-                value={settings.weather_api_longitude}
-                onChange={handleChange}
-              />
-            </Grid>
-          </Grid>
+          {/* network */}
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+              <Typography>Sieć</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControl>
+                <FormHelperText>Próg obciążenia sieci</FormHelperText>
+                <TextField
+                  type="number"
+                  name="network_overload_threshold"
+                  required
+                  value={settings.network_overload_threshold}
+                  onChange={handleChange}
+                />
+              </FormControl>
+              <FormControl>
+                <FormHelperText>Powiadamiaj o obciążeniu</FormHelperText>
+                <Switch
+                  name="notify_network_overload"
+                  value={settings.notify_network_overload ? true : false}
+                  checked={settings.notify_network_overload ? true : false}
+                  onClick={handleClick}
+                />
+              </FormControl>
+              <FormControl>
+                <FormHelperText>
+                  Powiadamiaj o nieznanym urządzeniu
+                </FormHelperText>
+                <Switch
+                  name="notify_unknown_device"
+                  value={settings.notify_unknown_device ? true : false}
+                  checked={settings.notify_unknown_device ? true : false}
+                  onClick={handleClick}
+                />
+              </FormControl>
+            </AccordionDetails>
+          </Accordion>
+          {/* weather API */}
+          <Accordion sx={{ ".MuiFormControl-root": { width: "100%" } }}>
+            <AccordionSummary
+              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+              <Typography>API pogodowe</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid container rowSpacing={3} columnSpacing={3}>
+                <Grid size={6}>
+                  <FormControl>
+                    <FormHelperText>API URL</FormHelperText>
+                    <TextField
+                      type="text"
+                      name="weather_api_url"
+                      value={settings.weather_api_url}
+                      onChange={handleChange}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid size={6}>
+                  <FormControl>
+                    <FormHelperText>API Token</FormHelperText>
+                    <TextField
+                      type="text"
+                      name="weather_api_token"
+                      value={settings.weather_api_token}
+                      onChange={handleChange}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid size={6}>
+                  <FormControl>
+                    <FormHelperText>Szerokość Geograficzna</FormHelperText>
+                    <TextField
+                      type="text"
+                      name="weather_api_latitude"
+                      value={settings.weather_api_latitude}
+                      onChange={handleChange}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid size={6}>
+                  <FormControl>
+                    <FormHelperText>Długość Geograficzna</FormHelperText>
+                    <TextField
+                      type="text"
+                      name="weather_api_longitude"
+                      value={settings.weather_api_longitude}
+                      onChange={handleChange}
+                    />
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
         </TabPanel>
       </Box>
       <Button variant="contained" type="submit">
