@@ -16,7 +16,7 @@ import typing
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import messenger
-from models.database import PostgreSQL, Redis
+from models.database import PostgreSQL
 
 
 # constant values
@@ -32,8 +32,12 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
     issues, empty set will be returned.
     """
     try:
-        # establish connection to Redis
-        with Redis() as redis:
+        # establish connection to settings database
+        with PostgreSQL(settings=True) as postgresql_database:
+
+            # current settings
+            settings = postgresql_database.settings
+
             # empty set of issues
             issues = set()
 
@@ -42,10 +46,10 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                 # checks if air temperature exceeds threshold
                 if (
                     data.temperature
-                    and redis.notify_temperatue
+                    and settings.get("notify_temperature")
                     and (
-                        data.temperature >= redis.notify_temperatue_upper
-                        or data.temperature <= redis.notify_temperatue_lower
+                        data.temperature >= settings.get("temperature_max")
+                        or data.temperature <= settings.get("temperature_min")
                     )
                 ):
                     messenger.send_notification(
@@ -55,7 +59,11 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                     )
                     issues.add(("temperature", data.device.location))
                 # checks if air quality exceeds threshold
-                if data.aqi and redis.notify_aqi and data.aqi >= redis.notify_aqi_max:
+                if (
+                    data.aqi
+                    and settings.get("notify_aqi")
+                    and data.aqi >= settings.get("aqi_threshold")
+                ):
                     messenger.send_notification(
                         text=f"Jakość powietrza wynosi {data.aqi}μg/m³",
                         title=data.device.location.capitalize(),
@@ -65,10 +73,10 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
                 # checks if air humidity exceeds threshold
                 if (
                     data.humidity
-                    and redis.notify_humidity
+                    and settings.get("notify_humidity")
                     and (
-                        data.humidity >= redis.notify_humidity_upper
-                        or data.humidity <= redis.notify_humidity_lower
+                        data.humidity >= settings.get("humidity_max")
+                        or data.humidity <= settings.get("humidity_min")
                     )
                 ):
                     messenger.send_notification(
@@ -92,8 +100,12 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
     If there is no issues, empty set will be returned.
     """
     try:
-        # establish connection to Redis
-        with Redis() as redis:
+        # establish connection to settings database
+        with PostgreSQL(settings=True) as postgresql_database:
+
+            # current settings
+            settings = postgresql_database.settings
+
             # empty set of issues
             issues = set()
 
@@ -101,10 +113,9 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
             # number of active devices in local network
             number_of_devices = len(mac_addresses)
             # if number of active devices is equal or higher than predefined value
-            if (
-                redis.notify_network_overload
-                and number_of_devices >= redis.notify_network_overload_level
-            ):
+            if settings.get(
+                "notify_network_overload"
+            ) and number_of_devices >= settings.get("network_overload_threshold"):
                 logging.warning(
                     f"SENTRY | Network overload! Number of active devices = {number_of_devices}"
                 )
@@ -126,7 +137,7 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
                 # if above set contains any address
                 if unknown_devices:
                     # if notification flag is set to true
-                    if redis.notify_network_unknown_device:
+                    if settings.get("notify_unknown_device"):
                         messenger.send_notification(
                             text="Nieznane urządzenie połączyło się z siecią lokalną!",
                             title="Sieć",
@@ -141,7 +152,9 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
                         postgresql_database.add_unknown_device(address)
 
     except Exception:
-        logging.error(f"SENTRY | NETWORK | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+        logging.error(
+            f"SENTRY | NETWORK | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+        )
     finally:
         return issues
 
@@ -153,8 +166,12 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
     If there is no issues, empty set will be returned.
     """
     try:
-        # establish connection to Redis
-        with Redis() as redis:
+        # establish connection to settings database
+        with PostgreSQL(settings=True) as postgresql_database:
+
+            # current settings
+            settings = postgresql_database.settings
+
             # empty set of issues
             issues = set()
 
@@ -164,9 +181,9 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
                 for field, value in data.health_data.items():
                     # if consumable part level exceeds predefined level
                     if (
-                        redis.notify_devices_diagnostics
+                        settings.get("notify_health")
                         and value
-                        and value <= redis.notify_devices_diagnostics_level
+                        and value <= settings.get("health_threshold")
                     ):
                         logging.warning(
                             f"SENTRY | Level of {field} in device {data.device.name} in location {data.device.location} is {value}"
@@ -179,6 +196,8 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
                         issues.add((field, data.device.location))
 
     except Exception:
-        logging.error(f"SENTRY | DIAGNOSTIC | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+        logging.error(
+            f"SENTRY | DIAGNOSTIC | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+        )
     finally:
         return issues

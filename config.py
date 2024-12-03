@@ -42,13 +42,7 @@ DATABASE = {
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
         "HOST": "localhost",
         "PORT": 5432,
-    },
-    "REDIS": {
-        "PASSWORD": os.environ.get("REDIS_PASSWORD"),
-        "HOST": "localhost",
-        "PORT": 6379,
-        "DB_ID": 0,
-    },
+    }
 }
 
 # backups configuration

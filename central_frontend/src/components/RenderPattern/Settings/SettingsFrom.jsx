@@ -369,6 +369,26 @@ export default function SettingsForm({ settings, setSettings }) {
               </Grid>
             </AccordionDetails>
           </Accordion>
+          <Accordion sx={{ ".MuiFormControl-root": { width: "100%" } }}>
+            <AccordionSummary
+              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+              <Typography>API powiadomień</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControl>
+                <FormHelperText>NTFY token</FormHelperText>
+                <TextField
+                  type="text"
+                  name="ntfy_token"
+                  value={settings.ntfy_token}
+                  onChange={handleChange}
+                />
+              </FormControl>
+            </AccordionDetails>
+          </Accordion>
         </TabPanel>
       </Box>
       <Button variant="contained" type="submit">

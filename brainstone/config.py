@@ -17,10 +17,7 @@ LOG_FILE = os.path.join(os.sep, "var", "log", "cron.log")
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s | %(levelname)s | %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(LOG_FILE)
-    ],
+    handlers=[logging.StreamHandler(), logging.FileHandler(LOG_FILE)],
 )
 
 # imported libraries logging configuration
@@ -42,11 +39,5 @@ DATABASE = {
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
         "HOST": "localhost",
         "PORT": 5432,
-    },
-    "REDIS": {
-        "PASSWORD": os.environ.get("REDIS_PASSWORD"),
-        "HOST": "localhost",
-        "PORT": 6379,
-        "DB_ID": 0,
     },
 }

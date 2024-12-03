@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 import requests
 
-from models.database import Redis
+from models.database import PostgreSQL
 
 
 def send_notification(text: str, title: str, priority: int = 3) -> int:
@@ -19,9 +19,10 @@ def send_notification(text: str, title: str, priority: int = 3) -> int:
     and string received by argument as notification content. Returns HTTP status code.
     """
     try:
-        with Redis() as redis:
+        with PostgreSQL(settings=True) as postgresql_database:
+            # current settings
             response = requests.post(
-                url=redis.ntfy_url,
+                url=f"https://ntfy.sh/{postgresql_database.settings.get('ntfy_token')}",
                 data=text.encode("utf-8"),
                 headers={"Title": title.encode("utf-8"), "Priority": str(priority)},
             )

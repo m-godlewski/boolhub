@@ -91,11 +91,6 @@ echo "- - Influx token (https://it-tools.tech/token-generator): "
 read -s influx_token
 echo "INFLUX_TOKEN=${influx_token}" >> .env
 
-echo "- REDIS"
-echo "- - Redis password: "
-read -s redis_password
-echo "REDIS_PASSWORD=${redis_password}" >> .env
-
 echo "- CENTRAL"
 echo -n "- - Central username: "
 read central_user

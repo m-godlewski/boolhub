@@ -9,9 +9,8 @@ import typing
 from datetime import datetime
 
 import influxdb_client
-import pickle
 import psycopg2
-import redis
+import psycopg2.extras
 from influxdb_client import Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -27,7 +26,7 @@ class Database:
 class PostgreSQL(Database):
     """Class responsible for PostgreSQL database communication."""
 
-    def __init__(self) -> None:
+    def __init__(self, settings: bool = False) -> None:
         """Initializes database and api connection."""
         logging.debug(f"Connecting to {self.__class__.__name__}")
         self.client = psycopg2.connect(
@@ -37,7 +36,11 @@ class PostgreSQL(Database):
             password=config.DATABASE["POSTGRE"]["PASSWORD"],
         )
         self.client.autocommit = True
-        self.api = self.client.cursor()
+        # in case connection with settings flag set to true
+        if settings:
+            self.api = self.client.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        else:
+            self.api = self.client.cursor()
         logging.debug(f"Connected to {self.__class__.__name__}")
 
     def __enter__(self) -> object:
@@ -68,10 +71,27 @@ class PostgreSQL(Database):
             )
             devices = [DeviceData(*row) for row in self.api.fetchall()]
         except Exception:
-            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return []
         else:
             return devices
+
+    @property
+    def settings(self) -> typing.Dict:
+        """Returns current system settings."""
+        try:
+            self.api.execute("SELECT * FROM settings;")
+            result = self.api.fetchone()
+            settings = dict(result)
+        except Exception:
+            logging.error(
+                f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
+            return {}
+        else:
+            return settings
 
     @property
     def unknown_devices(self) -> typing.List[UnknownDeviceData]:
@@ -80,7 +100,9 @@ class PostgreSQL(Database):
             self.api.execute("SELECT * FROM unknown_devices;")
             unknown_devices = [UnknownDeviceData(*row) for row in self.api.fetchall()]
         except Exception:
-            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return []
         else:
             return unknown_devices
@@ -112,7 +134,9 @@ class PostgreSQL(Database):
                     ),
                 )
         except Exception:
-            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return False
         else:
             return True
@@ -132,7 +156,9 @@ class PostgreSQL(Database):
             )
             device = DeviceData(*self.api.fetchone())
         except Exception:
-            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return None
         else:
             return device
@@ -144,7 +170,9 @@ class PostgreSQL(Database):
                 device for device in self.devices if device.category == device_type
             ]
         except Exception:
-            logging.error(f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return []
         else:
             return devices_data
@@ -190,7 +218,9 @@ class InfluxDB(Database):
                 record=point,
             )
         except Exception:
-            logging.error(f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return False
         else:
             return True
@@ -213,7 +243,9 @@ class InfluxDB(Database):
                 record=point,
             )
         except Exception:
-            logging.error(f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return False
         else:
             return True
@@ -234,7 +266,9 @@ class InfluxDB(Database):
                 record=point,
             )
         except Exception:
-            logging.error(f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return False
         else:
             return True
@@ -256,127 +290,9 @@ class InfluxDB(Database):
                 record=point,
             )
         except Exception:
-            logging.error(f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return False
         else:
             return True
-
-
-class Redis(Database):
-    """Class responsible for Redis database communication."""
-
-    def __init__(self) -> None:
-        """Initializes database and api connection."""
-        logging.debug(f"Connecting to {self.__class__.__name__}")
-        # creates connection pool
-        self.client = redis.Redis(
-            host=config.DATABASE["REDIS"]["HOST"],
-            password=config.DATABASE["REDIS"]["PASSWORD"],
-            port=config.DATABASE["REDIS"]["PORT"],
-        )
-        logging.debug(f"Connected to {self.__class__.__name__}")
-
-    def __enter__(self) -> object:
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        """Closes database and api connection."""
-        # log error if any exception ocurred during context process
-        if any((exc_type, exc_value, exc_traceback)):
-            logging.error(exc_value)
-        # closes connection and api
-        logging.debug(f"Closing {self.__class__.__name__} connection")
-        self.client.close()
-        logging.debug(f"{self.__class__.__name__} connection has been closed")
-
-    # region NOTIFICATION FLAGS
-
-    @property
-    def notify_temperatue(self) -> bool:
-        return pickle.loads(self.client.get("constance:Powiadamiaj o temperaturze"))
-
-    @property
-    def notify_humidity(self) -> bool:
-        return pickle.loads(self.client.get("constance:Powiadamiaj o wilgotności"))
-
-    @property
-    def notify_aqi(self) -> bool:
-        return pickle.loads(self.client.get("constance:Powiadamiaj o zanieczyszczeniu"))
-
-    @property
-    def notify_devices_diagnostics(self) -> bool:
-        return pickle.loads(
-            self.client.get("constance:Powiadamiaj o diagnostyce urządzeń")
-        )
-
-    @property
-    def notify_network_overload(self) -> bool:
-        return pickle.loads(
-            self.client.get("constance:Powiadamiaj o przeciążeniu sieci")
-        )
-
-    @property
-    def notify_network_unknown_device(self) -> bool:
-        return pickle.loads(
-            self.client.get("constance:Powiadamiaj o nieznanym urządzeniu w sieci")
-        )
-
-    # endregion
-
-    # region THRESHOLD VALUES
-
-    @property
-    def notify_temperatue_upper(self) -> float:
-        return pickle.loads(self.client.get("constance:Maksymalna temperatura"))
-
-    @property
-    def notify_temperatue_lower(self) -> float:
-        return pickle.loads(self.client.get("constance:Minimalna temperatura"))
-
-    @property
-    def notify_humidity_upper(self) -> int:
-        return pickle.loads(self.client.get("constance:Maksymalna wilgotność"))
-
-    @property
-    def notify_humidity_lower(self) -> int:
-        return pickle.loads(self.client.get("constance:Minimalna wilgotność"))
-
-    @property
-    def notify_aqi_max(self) -> int:
-        return pickle.loads(self.client.get("constance:Próg zanieczyszczenia"))
-
-    @property
-    def notify_devices_diagnostics_level(self) -> int:
-        return pickle.loads(
-            self.client.get("constance:Minimalny poziom baterii/filtra")
-        )
-
-    @property
-    def notify_network_overload_level(self) -> int:
-        return pickle.loads(self.client.get("constance:Próg przeciążenia sieci"))
-
-    # endregion
-
-    # region NTFY
-
-    @property
-    def ntfy_url(self) -> int:
-        return pickle.loads(self.client.get("constance:NTFY URL"))
-
-    # endregion
-
-    # region WEATHER API
-
-    @property
-    def weather_api_url(self) -> int:
-        return pickle.loads(self.client.get("constance:WEATHER API URL"))
-
-    @property
-    def longitude(self) -> int:
-        return pickle.loads(self.client.get("constance:LONGITUDE"))
-
-    @property
-    def latitude(self) -> int:
-        return pickle.loads(self.client.get("constance:LATITUDE"))
-
-    # endregion

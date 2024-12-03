@@ -18,7 +18,6 @@ python-dateutil==2.8.2
 python-dotenv==1.0.0
 randmac==0.1
 reactivex==4.0.4
-redis==5.0.1
 requests==2.31.0
 scapy==2.5.0
 six==1.16.0
