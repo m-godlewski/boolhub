@@ -1,7 +1,9 @@
 # BoolHub [![version](https://img.shields.io/badge/version-0.14.1-blue.svg)](https://semver.org)
+
 Intelligent house hub.
 
 ## Technology Stack
+
 - Central (Django 4.1)
 - Brainstone (Python 3.8)
 - PostgreSQL 15.3.0

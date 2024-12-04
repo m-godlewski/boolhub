@@ -62,7 +62,9 @@ class AirData(Data):
 
     def __post_init__(self) -> None:
         """Post initialization rounding numerical values."""
-        self.temperature = round(self.temperature, ndigits=1) if self.temperature else None
+        self.temperature = (
+            round(self.temperature, ndigits=1) if self.temperature else None
+        )
 
     @property
     def air_data(self) -> dict:

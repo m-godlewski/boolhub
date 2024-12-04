@@ -20,10 +20,7 @@ LOG_FILE = os.path.join(BASE_DIR, "scripts.log")
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s | %(levelname)s | %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(LOG_FILE)
-    ],
+    handlers=[logging.StreamHandler(), logging.FileHandler(LOG_FILE)],
 )
 
 # loading environmental variables
@@ -42,7 +39,7 @@ DATABASE = {
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
         "HOST": "localhost",
         "PORT": 5432,
-    }
+    },
 }
 
 # backups configuration

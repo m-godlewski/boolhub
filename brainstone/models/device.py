@@ -60,7 +60,9 @@ class MiAirPurifier3H(Device):
             logging.error(f"DEVICE | MiAirPurifier3H | UNABLE TO DISCOVER DEVICE")
             return miio.DeviceStatus()
         except Exception:
-            logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return miio.DeviceStatus()
         else:
             logging.debug(f"Connected to {self.metadata.ip_address}")
@@ -77,7 +79,9 @@ class MiAirPurifier3H(Device):
                 if key in [field.name for field in fields(MiAirPurifier3HData)]:
                     parsed_data[key] = value
         except Exception:
-            logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return {}
         else:
             return parsed_data
@@ -90,7 +94,9 @@ class MiAirPurifier3H(Device):
             # create dataclass instance
             processed_data = MiAirPurifier3HData(self.metadata, **parsed_data)
         except Exception:
-            logging.error(f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return MiAirPurifier3HData(self.metadata)
         else:
             return processed_data
@@ -123,7 +129,9 @@ class MiMonitor2(Device):
             logging.error("Error occurred when trying connect to device!")
             return {}
         except Exception:
-            logging.error(f"DEVICE | MiMonitor2 | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DEVICE | MiMonitor2 | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return {}
         else:
             logging.debug(f"Connected to {self.metadata.mac_address}")
@@ -134,7 +142,9 @@ class MiMonitor2(Device):
         try:
             processed_data = MiMonitor2Data(self.metadata, **raw_data)
         except Exception:
-            logging.error(f"DEVICE | MiMonitor2 | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
+            logging.error(
+                f"DEVICE | MiMonitor2 | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
             return MiMonitor2Data(self.metadata)
         else:
             return processed_data

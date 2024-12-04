@@ -43,7 +43,7 @@ try:
         weather_api_latitude="",
         weather_api_longitude="",
         weather_api_token="",
-        ntfy_token=""
+        ntfy_token="",
     )
     superuser_settings.save()
 except Exception as e:

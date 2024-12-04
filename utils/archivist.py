@@ -188,7 +188,9 @@ class Recovery:
             )
             output, errors = await process.communicate()
         except Exception:
-            logging.error(f"ARCHIVIST | RECOVERY | POSTGRESQL\n{traceback.format_exc()}")
+            logging.error(
+                f"ARCHIVIST | RECOVERY | POSTGRESQL\n{traceback.format_exc()}"
+            )
             return False
         else:
             logging.info(

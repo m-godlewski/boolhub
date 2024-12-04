@@ -1,5 +1,7 @@
 # Troubleshooting
+
 ### Extending operating system usage to 100% of disk space.
+
 ```
 root@util:~# vgdisplay
 <snip>
@@ -8,7 +10,9 @@ root@util:~# lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv
 root@util:~# resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
 <snip>
 ```
+
 ### Error using miiocli.
+
 ```
 Traceback (most recent call last):
   File "/usr/local/bin/miiocli", line 5, in <module>
@@ -19,28 +23,40 @@ Traceback (most recent call last):
     @dg.resultcallback()
 AttributeError: 'DeviceGroup' object has no attribute 'resultcallback'
 ```
-__Solution:__   
+
+**Solution:**  
 Remove @resultcallback decorator from line pointed in error message.
+
 ### Error during psycopg2 installation.
+
 ```
 Error: pg_config executable not found.
 ```
-__Solution:__   
+
+**Solution:**
+
 ```
 sudo apt-get install libpq-dev
 ```
+
 ```
 sudo apt-get install python3.8-dev
 ```
+
 ### Error during bluepy installation.
+
 When you are facing errors during bluepy installation. Follow installation guide on [official github repository](https://github.com/IanHarvey/bluepy).
+
 ### Gatherer.py cannot read data from Xiaomi Monitor 2
+
 ```
 $ sudo apt install bluez
 ```
 
 ### Setting static IP for server
+
 https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/
 
 ### Set up SSH key authorization.
+
 https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-20-04

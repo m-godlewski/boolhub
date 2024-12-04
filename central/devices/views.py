@@ -10,9 +10,7 @@ def index(request) -> JsonResponse:
     # converts QuerySet to list
     devices = list(query_results)
     # response dictionary
-    response = {
-        "data": devices
-    }
+    response = {"data": devices}
     return JsonResponse(response)
 
 

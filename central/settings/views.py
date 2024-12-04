@@ -15,7 +15,9 @@ class SettingsView(APIView):
             data = Settings.objects.get(id=pk)
             serializer = SettingsSerializer(data)
         except Settings.DoesNotExist:
-            raise Http404("Settings has not been initialized during installation process!")
+            raise Http404(
+                "Settings has not been initialized during installation process!"
+            )
         return Response(serializer.data)
 
     def put(self, request, pk=1):

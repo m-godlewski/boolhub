@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     "settings.apps.SettingsConfig",
     "devices.apps.DevicesConfig",
     "rooms.apps.RoomsConfig",
-    "lighting.apps.LightingConfig",
 ]
 
 MIDDLEWARE = [
