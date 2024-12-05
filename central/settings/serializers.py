@@ -4,6 +4,8 @@ from .models import Settings
 
 
 class SettingsSerializer(serializers.ModelSerializer):
+    """Class used for serialization of Settings model."""
+
     class Meta:
         model = Settings
         fields = (

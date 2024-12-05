@@ -1,25 +1,21 @@
-from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Device
+from .serializer import DeviceSerializer
 
 
-def index(request) -> JsonResponse:
+@api_view(["GET"])
+def devices(request) -> Response:
     """Returns list of Room objects"""
-    # queries database for list of all Device objects
-    query_results = Device.objects.values()
-    # converts QuerySet to list
-    devices = list(query_results)
-    # response dictionary
-    response = {"data": devices}
-    return JsonResponse(response)
+    query_result = Device.objects.all()
+    serializer = DeviceSerializer(query_result, many=True)
+    return Response(serializer.data)
 
 
-def device(request, device_id: str) -> JsonResponse:
+@api_view(["GET"])
+def device(request, device_id: str) -> Response:
     """Returns selected Device object."""
-    # queries database for list of all Device objects
-    query_results = Device.objects.filter(id=device_id).values()
-    # converts QuerySet to list
-    device = list(query_results)
-    # response dictionary
-    response = {"data": device}
-    return JsonResponse(response)
+    query_result = Device.objects.get(pk=device_id)
+    serializer = DeviceSerializer(query_result)
+    return Response(serializer.data)

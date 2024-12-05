@@ -39,7 +39,7 @@ class Settings(models.Model):
     def save(self, *args, **kwargs):
         """Override save method to avoid existence of many servings models."""
         if not self.pk and Settings.objects.exists():
-            raise Exception("There can be only one Setting object in database.")
+            raise Exception("There can be only one Settings instance in database.")
         return super(Settings, self).save(*args, **kwargs)
 
     class Meta:

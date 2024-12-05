@@ -1,37 +1,31 @@
-from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Room
+from .serializer import RoomSerializer
 from devices.models import Device
+from devices.serializer import DeviceSerializer
 
 
-def index(request) -> JsonResponse:
-    """Returns list of Room objects."""
-    # queries database for list of all Room objects
-    query_results = Room.objects.all().values()
-    # converts QuerySet to list
-    rooms = list(query_results)
-    # response dictionary
-    response = {"data": rooms}
-    return JsonResponse(response)
+@api_view(["GET"])
+def rooms(request) -> Response:
+    """Returns list of all Room object."""
+    query_result = Room.objects.all()
+    serializer = RoomSerializer(query_result, many=True)
+    return Response(serializer.data)
 
 
-def room(request, room_id: str) -> JsonResponse:
+@api_view(["GET"])
+def room(request, room_id: str) -> Response:
     """Returns selected Room object."""
-    # queries database for list of all Device objects
-    query_results = Room.objects.filter(id=room_id).values()
-    # converts QuerySet to list
-    room = list(query_results)
-    # response dictionary
-    response = {"data": room}
-    return JsonResponse(response)
+    query_result = Room.objects.get(pk=room_id)
+    serializer = RoomSerializer(query_result)
+    return Response(serializer.data)
 
 
-def room_devices(request, room_id: str) -> JsonResponse:
+@api_view(["GET"])
+def room_devices(request, room_id: str) -> Response:
     """Returns list of Device objects assigned to selected Room object."""
-    # queries database for list of all Device objects
-    query_results = Device.objects.filter(location_id=room_id).values()
-    # converts QuerySet to list
-    room_devices = list(query_results)
-    # response dictionary
-    response = {"data": room_devices}
-    return JsonResponse(response)
+    query_results = Device.objects.filter(location_id=room_id)
+    serializer = DeviceSerializer(query_results, many=True)
+    return Response(serializer.data)

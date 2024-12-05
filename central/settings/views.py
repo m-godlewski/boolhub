@@ -8,24 +8,30 @@ from .serializers import SettingsSerializer
 
 
 class SettingsView(APIView):
+    """Class responsible for CRUD operation on Settings object."""
 
-    def get(self, request, pk=1):
+    def get(self, request) -> JsonResponse:
         """Returns one and only instance of Settings model from database."""
         try:
-            data = Settings.objects.get(id=pk)
-            serializer = SettingsSerializer(data)
+            # database query
+            query_result = Settings.objects.get(id=1)
+            # serialization
+            serializer = SettingsSerializer(query_result)
         except Settings.DoesNotExist:
             raise Http404(
                 "Settings has not been initialized during installation process!"
             )
         return Response(serializer.data)
 
-    def put(self, request, pk=1):
+    def put(self, request) -> JsonResponse:
         """Updates one and only instance of Settings model."""
-        settings_to_update = Settings.objects.get(id=pk)
+        # database query
+        query_result = Settings.objects.get(id=1)
+        # serialization
         serializer = SettingsSerializer(
-            instance=settings_to_update, data=request.data, partial=True
+            instance=query_result, data=request.data, partial=True
         )
+        # validation
         if serializer.is_valid():
             serializer.save()
             return JsonResponse("Settings updated", safe=False)
