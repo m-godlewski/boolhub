@@ -11,7 +11,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Grid from "@mui/material/Grid2";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
@@ -122,7 +122,7 @@ export default function SettingsForm({ settings, setSettings }) {
           {/* temperature */}
           <Accordion>
             <AccordionSummary
-              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
               aria-controls="panel1-content"
               id="panel1-header"
             >
@@ -163,7 +163,7 @@ export default function SettingsForm({ settings, setSettings }) {
           {/* humidity */}
           <Accordion>
             <AccordionSummary
-              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
               aria-controls="panel1-content"
               id="panel1-header"
             >
@@ -204,7 +204,7 @@ export default function SettingsForm({ settings, setSettings }) {
           {/* aqi */}
           <Accordion>
             <AccordionSummary
-              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
               aria-controls="panel1-content"
               id="panel1-header"
             >
@@ -238,7 +238,7 @@ export default function SettingsForm({ settings, setSettings }) {
           {/* diagnostics */}
           <Accordion>
             <AccordionSummary
-              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
               aria-controls="panel1-content"
               id="panel1-header"
             >
@@ -272,7 +272,7 @@ export default function SettingsForm({ settings, setSettings }) {
           {/* network */}
           <Accordion>
             <AccordionSummary
-              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
               aria-controls="panel1-content"
               id="panel1-header"
             >
@@ -314,7 +314,7 @@ export default function SettingsForm({ settings, setSettings }) {
           {/* weather API */}
           <Accordion sx={{ ".MuiFormControl-root": { width: "100%" } }}>
             <AccordionSummary
-              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
               aria-controls="panel1-content"
               id="panel1-header"
             >
@@ -371,7 +371,7 @@ export default function SettingsForm({ settings, setSettings }) {
           </Accordion>
           <Accordion sx={{ ".MuiFormControl-root": { width: "100%" } }}>
             <AccordionSummary
-              expandIcon={<KeyboardArrowUpIcon sx={{ color: "white" }} />}
+              expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
               aria-controls="panel1-content"
               id="panel1-header"
             >
