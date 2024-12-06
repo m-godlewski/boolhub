@@ -1,4 +1,4 @@
-# BoolHub [![version](https://img.shields.io/badge/version-0.14.1-blue.svg)](https://semver.org)
+# BoolHub [![version](https://img.shields.io/badge/version-0.20.0-blue.svg)](https://semver.org)
 
 Intelligent house hub.
 
@@ -10,4 +10,21 @@ Intelligent house hub.
 - InfluxDB 2.2.0
 - Portainer 2.9.3
 
-![boolhub_landing_tablet](https://github.com/m-godlewski/boolhub/assets/26858783/39a072d9-11b4-420c-8326-ac9cbcba6e84)
+## Prerequisites
+
+Server machine should match minimum requirements of running Ubuntu Server 20.04.6 LTS.  
+Solution has been developed and tested on Fujitsu Q920 8GB/256GB i5-4590T.
+
+## Installation
+
+Make installation script executable by running:
+
+```
+$ sudo chmod +x install.sh
+```
+
+Run installation script:
+
+```
+$ sudo ./install.sh
+```
