@@ -1,12 +1,12 @@
 #!/bin/bash
 
-echo '##################################################'
-echo '###                                            ###'
-echo '###                                            ###'
-echo '###             BoolHub Installation           ###'
-echo '###                                            ###'
-echo '###                                            ###'
-echo '##################################################'
+echo "  ____                    _   _    _           _     "
+echo " |  _ \                  | | | |  | |         | |    "
+echo " | |_) |   ___     ___   | | | |__| |  _   _  | |__  "
+echo " |  _ <   / _ \   / _ \  | | |  __  | | | | | | '_ \ "
+echo " | |_) | | (_) | | (_) | | | | |  | | | |_| | | |_) |"
+echo " |____/   \___/   \___/  |_| |_|  |_|  \__,_| |_.__/ "
+echo "                                                     "
 
 
 
@@ -101,7 +101,64 @@ echo "CENTRAL_PASSWORD=${central_password}" >> .env
 
 
 
-printf "\n\nStep 7. Run docker containers\n"
+printf "\n\nStep 7. Generating binary shell script\n"
+
+# binary script name
+BINARY_SCRIPT="bh"
+
+# remove file if existing
+if [ -f "$BINARY_SCRIPT" ]; then
+  rm "$BINARY_SCRIPT"
+fi
+
+# create file
+touch "$BINARY_SCRIPT"
+
+# fill command file with content
+cat > "$BINARY_SCRIPT" <<EOF1
+#!/bin/bash
+
+DOCKERFILE_PATH=$PWD/docker-compose.yml
+
+case \$1 in
+  "stop")
+    docker compose -f \$DOCKERFILE_PATH stop
+  ;;
+  "start")
+    docker compose -f \$DOCKERFILE_PATH start
+  ;;
+  "restart")
+    docker compose -f \$DOCKERFILE_PATH restart
+  ;;
+  "rebuild")
+    docker compose -f \$DOCKERFILE_PATH down --rmi local
+    docker compose -f \$DOCKERFILE_PATH up -d
+  ;;
+  "logs")
+    docker compose -f \$DOCKERFILE_PATH logs -f 
+  ;;
+  "uninstall")
+    docker compose -f \$DOCKERFILE_PATH down --rmi local
+    rm -rf /data/central
+    rm -rf /data/influxdb
+    rm -rf /data/portainer_data
+    rm -rf /data/postgres
+    rm -rf /data/central
+  ;;
+esac
+
+EOF1
+# make binary script executable
+chmod +x $BINARY_SCRIPT
+
+# move script to /usr/bin
+mv $BINARY_SCRIPT /usr/bin/$BINARY_SCRIPT
+
+echo "Script has been generated"
+
+
+
+printf "\n\nStep 8. Build and run docker containers\n"
 docker compose up -d
 # to solve problem with superuser and settings initialization
 # central module container has to be restarted
