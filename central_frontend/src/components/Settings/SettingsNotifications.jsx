@@ -70,11 +70,12 @@ export default function SettingsNotifications() {
       <form onSubmit={handleSubmit}>
         <Fab
           variant="extended"
-          // type="submit"
+          type="submit"
           color="primary"
           sx={{ bottom: "3em", right: "3em", position: "fixed" }}
         >
-          <SaveAltOutlinedIcon />
+          Zapisz
+          <SaveAltOutlinedIcon sx={{ m: 1 }} />
         </Fab>
         {/* air */}
         <Accordion>
@@ -208,7 +209,7 @@ export default function SettingsNotifications() {
                 />
               </FormControl>
               <FormControl>
-                <FormHelperText>Powiadomienia</FormHelperText>
+                <FormHelperText>Powiadomienia diagnostyczne</FormHelperText>
                 <Switch
                   name="notify_health"
                   value={settings.notify_health ? true : false}
