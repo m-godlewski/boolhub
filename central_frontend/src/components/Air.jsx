@@ -1,3 +1,3 @@
 export default function Air() {
-  return <h1>Air</h1>;
+  return <>Air</>;
 }
