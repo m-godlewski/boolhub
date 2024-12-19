@@ -39,10 +39,10 @@ class UnknownDeviceData:
     last_time: str
 
     def __hash__(self):
-        return hash(self.device.mac_address)
+        return hash(self.mac_address)
 
     def __eq__(self, other):
-        return self.device.mac_address == other.device.mac_address
+        return self.mac_address == other.mac_address
 
 
 # endregion
