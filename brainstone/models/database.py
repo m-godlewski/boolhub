@@ -17,18 +17,12 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from models.data import DeviceData, UnknownDeviceData, AirData
 
 
-class Database:
-    """Base class of each other classes in this script."""
-
-    pass
-
-
-class PostgreSQL(Database):
+class PostgreSQL:
     """Class responsible for PostgreSQL database communication."""
 
     def __init__(self, settings: bool = False) -> None:
         """Initializes database and api connection."""
-        logging.debug(f"Connecting to {self.__class__.__name__}")
+        logging.debug(f"DATABASE | {self.__class__.__name__} | Connecting")
         self.client = psycopg2.connect(
             host=config.DATABASE["POSTGRE"]["HOST"],
             database=config.DATABASE["POSTGRE"]["NAME"],
@@ -41,7 +35,7 @@ class PostgreSQL(Database):
             self.api = self.client.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         else:
             self.api = self.client.cursor()
-        logging.debug(f"Connected to {self.__class__.__name__}")
+        logging.debug(f"DATABASE | {self.__class__.__name__} | Connected")
 
     def __enter__(self) -> object:
         return self
@@ -52,14 +46,13 @@ class PostgreSQL(Database):
         if any((exc_type, exc_value, exc_traceback)):
             logging.error(exc_value)
         # closes connection and api
-        logging.debug(f"Closing {self.__class__.__name__} connection")
         self.api.close()
         self.client.close()
-        logging.debug(f"{self.__class__.__name__} connection has been closed")
+        logging.debug(f"DATABASE | {self.__class__.__name__} | Connection closed")
 
     @property
-    def devices(self) -> typing.List[DeviceData]:
-        """Returns list of registered devices."""
+    def devices(self) -> typing.Set[DeviceData]:
+        """Returns set of registered devices."""
         try:
             self.api.execute(
                 """
@@ -69,12 +62,12 @@ class PostgreSQL(Database):
                 ON r.id = d.location_id;
                 """
             )
-            devices = [DeviceData(*row) for row in self.api.fetchall()]
+            devices = set(DeviceData(*row) for row in self.api.fetchall())
         except Exception:
             logging.error(
                 f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
             )
-            return []
+            return set()
         else:
             return devices
 
@@ -94,16 +87,18 @@ class PostgreSQL(Database):
             return settings
 
     @property
-    def unknown_devices(self) -> typing.List[UnknownDeviceData]:
-        """Returns list of unregistered devices."""
+    def unknown_devices(self) -> typing.Set[UnknownDeviceData]:
+        """Returns set of unregistered devices."""
         try:
             self.api.execute("SELECT * FROM unknown_devices;")
-            unknown_devices = [UnknownDeviceData(*row) for row in self.api.fetchall()]
+            unknown_devices = set(
+                UnknownDeviceData(**row) for row in self.api.fetchall()
+            )
         except Exception:
             logging.error(
                 f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
             )
-            return []
+            return set()
         else:
             return unknown_devices
 
@@ -142,7 +137,7 @@ class PostgreSQL(Database):
             return True
 
     def get_device_by_name(self, device_name: str = "") -> DeviceData:
-        """Returns list of DeviceData objects of given device name."""
+        """Returns set of DeviceData objects of given device name."""
         try:
             self.api.execute(
                 """
@@ -163,34 +158,34 @@ class PostgreSQL(Database):
         else:
             return device
 
-    def get_device_by_type(self, device_type: str = "") -> typing.List[DeviceData]:
-        """Returns list of DeviceData objects of given device type."""
+    def get_device_by_type(self, device_type: str = "") -> typing.Set[DeviceData]:
+        """Returns set of DeviceData objects of given device type."""
         try:
-            devices_data = [
+            devices_data = set(
                 device for device in self.devices if device.category == device_type
-            ]
+            )
         except Exception:
             logging.error(
                 f"DATABASE | POSTGRESQL | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
             )
-            return []
+            return set()
         else:
             return devices_data
 
 
-class InfluxDB(Database):
+class InfluxDB:
     """Class responsible for Influx database connection."""
 
     def __enter__(self) -> object:
         # initializes database connection
-        logging.debug("Connecting to InfluxDB")
+        logging.debug(f"DATABASE | {self.__class__.__name__} | Connecting")
         self.client = influxdb_client.InfluxDBClient(
             url=config.DATABASE["INFLUX"]["URL"],
             token=config.DATABASE["INFLUX"]["API_TOKEN"],
             org=config.DATABASE["INFLUX"]["ORGANIZATION"],
         )
         self.api = self.client.write_api(write_options=SYNCHRONOUS)
-        logging.debug("Connected to InfluxDB")
+        logging.debug(f"DATABASE | {self.__class__.__name__} | Connected")
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
@@ -199,10 +194,9 @@ class InfluxDB(Database):
         if any((exc_type, exc_value, exc_traceback)):
             logging.error(exc_value)
         # closes database connection
-        logging.debug(f"Closing {self.__class__.__name__} connection")
         self.api.close()
         self.client.close()
-        logging.debug(f"{self.__class__.__name__} connection has been closed")
+        logging.debug(f"DATABASE | {self.__class__.__name__} | Connection closed")
 
     def add_point_network(
         self, measurement: str, metric: str, field: str, value: typing.Any

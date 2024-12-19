@@ -32,15 +32,16 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
     issues, empty set will be returned.
     """
     try:
+
+        logging.debug(f"DATABASE | SENTRY | Air data verification")
+
+        # empty set of issues
+        issues = set()
+
         # establish connection to settings database
         with PostgreSQL(settings=True) as postgresql_database:
-
             # current settings
             settings = postgresql_database.settings
-
-            # empty set of issues
-            issues = set()
-
             # iterate over air devices data
             for data in air_data:
                 # checks if air temperature exceeds threshold
@@ -89,6 +90,7 @@ def check_air(air_data: typing.List[typing.Any]) -> typing.Set[str]:
     except Exception:
         logging.error(f"SENTRY | AIR | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
     finally:
+        logging.debug(f"DATABASE | SENTRY | Air data verified")
         return issues
 
 
@@ -100,16 +102,19 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
     If there is no issues, empty set will be returned.
     """
     try:
+
+        logging.debug(f"DATABASE | SENTRY | Network data verification")
+
+        # empty set of issues
+        issues = set()
+
         # establish connection to settings database
         with PostgreSQL(settings=True) as postgresql_database:
 
             # current settings
             settings = postgresql_database.settings
 
-            # empty set of issues
-            issues = set()
-
-            # CHECKS IF NUMBER OF CONNECTED DEVICES TO LOCAL NETWORK IS MORE THAN PREDEFINED VALUE.
+            # checks if number of connected devices to local network is more than predefined value
             # number of active devices in local network
             number_of_devices = len(mac_addresses)
             # if number of active devices is equal or higher than predefined value
@@ -126,36 +131,36 @@ def check_network(mac_addresses: typing.Set = {}) -> typing.Set[str]:
                 )
                 issues.add("overload")
 
-            # CHECKS IF UNKNOWN DEVICE HAS CONNECTED TO LOCAL NETWORK.
+            # checks if unknown device has connected to local network
             # set of registered devices MAC addresses
-            with PostgreSQL() as postgresql_database:
-                known_devices = {
-                    device.mac_address for device in postgresql_database.devices
-                }
-                # set that contains unregistered devices MAC addresses
-                unknown_devices = mac_addresses - known_devices
-                # if above set contains any address
-                if unknown_devices:
-                    # if notification flag is set to true
-                    if settings.get("notify_unknown_device"):
-                        messenger.send_notification(
-                            text="Nieznane urządzenie połączyło się z siecią lokalną!",
-                            title="Sieć",
-                            priority=4,
-                        )
-                        issues.add("unknown_device")
-                    logging.warning(
-                        "SENTRY | Unknown device has connected to local network!"
+            known_devices = {
+                device.mac_address for device in postgresql_database.devices
+            }
+            # set that contains unregistered devices MAC addresses
+            unknown_devices = mac_addresses - known_devices
+            # if above set contains any address
+            if unknown_devices:
+                # if notification flag is set to true
+                if settings.get("notify_unknown_device"):
+                    messenger.send_notification(
+                        text="Nieznane urządzenie jest podłączone do sieci lokalnej",
+                        title="Sieć",
+                        priority=4,
                     )
-                    # adds unknown device to database
-                    for address in unknown_devices:
-                        postgresql_database.add_unknown_device(address)
+                    issues.add("unknown_device")
+                logging.warning(
+                    "SENTRY | Unknown device is connected to local network!"
+                )
+                # adds unknown device to database
+                for address in unknown_devices:
+                    postgresql_database.add_unknown_device(address)
 
     except Exception:
         logging.error(
             f"SENTRY | NETWORK | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
         )
     finally:
+        logging.debug(f"DATABASE | SENTRY | Network data verified")
         return issues
 
 
@@ -166,15 +171,16 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
     If there is no issues, empty set will be returned.
     """
     try:
+
+        logging.debug(f"DATABASE | SENTRY | Diagnostic data verification")
+
+        # empty set of issues
+        issues = set()
+
         # establish connection to settings database
         with PostgreSQL(settings=True) as postgresql_database:
-
             # current settings
             settings = postgresql_database.settings
-
-            # empty set of issues
-            issues = set()
-
             # iteration over diagnostic data
             for data in diagnostic_data:
                 # iterate over health fields
@@ -200,4 +206,5 @@ def check_diagnostic(diagnostic_data: typing.List[typing.Any]) -> typing.Set[str
             f"SENTRY | DIAGNOSTIC | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
         )
     finally:
+        logging.debug(f"DATABASE | SENTRY | Diagnostic data verified")
         return issues

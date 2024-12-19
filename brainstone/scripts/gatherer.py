@@ -9,7 +9,7 @@ import os
 import sys
 import traceback
 import typing
-from abc import ABC
+from abc import ABC, abstractmethod
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
@@ -29,19 +29,30 @@ from models.device import MiAirPurifier3H, MiMonitor2
 class Gatherer(ABC):
     """Base class of each other classes in this script."""
 
-    pass
+    def __init__(self) -> None:
+        """Initializes object by calling save method that takes the result of scan method as an argument."""
+        self.save(self.scan())
+
+    @abstractmethod
+    def save(self, data: typing.Set[str]) -> bool:
+        """Should implements the logic of saving data to databases.
+        Also, should call Sentry module for verifying data.
+        """
+        return
+
+    @abstractmethod
+    def scan(self) -> typing.Any:
+        """Should implements the logic of fetching data from devices."""
+        return
 
 
 class Network(Gatherer):
-    """Gathers network data from devices connected to local network."""
+    """Gathers network data from devices connected to a local network."""
 
-    def __init__(self) -> None:
-        # saves gathered and processed data from arp scan to database
-        self.__gather_network_data(data=self.__arp_scan())
-
-    def __arp_scan(self) -> typing.Set[str]:
+    def scan(self) -> typing.Set[str]:
         """Performs arp scan of local network and returns set of MAC addresses."""
         try:
+            logging.debug("GATHERER | NETWORK | Scan started")
             # performs arp scan
             answered, unanswered = arping("192.168.0.0/24", verbose=0)
             # set of MAC addresses
@@ -52,18 +63,20 @@ class Network(Gatherer):
             logging.error(f"GATHERER | NETWORK\n{traceback.format_exc()}")
             return set()
         else:
+            logging.debug("GATHERER | NETWORK | Scan completed")
             return mac_addresses
 
-    def __gather_network_data(self, data: typing.Set[str]) -> bool:
+    def save(self, data: typing.Set[str]) -> bool:
         """Saves MAC addresses and number of active devices to database.
         Before data are written to database, sentry.py script is used to verify
         if there are unknown MAC addresses in received 'data' set or
         number of connected devices exceed threshold.
         Returns True, if saving process succeed, otherwise False."""
         try:
+            logging.debug("GATHERER | NETWORK | Data saving")
             # copying received data
             mac_addresses = copy.deepcopy(data)
-            # verifies if there is a new MAC address in received list
+            # verifies if there is a new MAC address in received set
             # or number of connected devices exceed threshold
             sentry.check_network(mac_addresses=mac_addresses)
             # connects to influx database
@@ -104,20 +117,46 @@ class Network(Gatherer):
             logging.error(f"GATHERER | NETWORK\n{traceback.format_exc()}")
             return False
         else:
+            logging.debug("GATHERER | NETWORK | Data saved")
             return True
 
 
 class Air(Gatherer):
     """Gathers information from air devices connected to local network."""
 
-    def __init__(self) -> None:
-        # retrieves data from each 'air' device and saves it to database
-        self.gather_air_data(self.__air_scan())
+    def scan(self) -> typing.Set[AirData]:
+        """Gathers air data from each device tagged as "air"."""
+        try:
+            logging.debug("GATHERER | AIR | Scan started")
+            # set that stores air data from each device
+            results = set()
+            with PostgreSQL() as postgresql:
+                # iterates over air devices data
+                for device_data in postgresql.get_device_by_type("air"):
+                    # name of device
+                    device_name = device_data.name.lower()
+                    # calls specific method depending on device type
+                    if "purifier" in device_name:
+                        results.add(self.__scan_purifier(device_data))
+                    elif "monitor" in device_name:
+                        results.add(self.__scan_monitor(device_data))
+                    else:
+                        logging.error(f"Device '{device_name}' is not supported!")
+        except Exception:
+            logging.error(f"GATHERER | AIR\n{traceback.format_exc()}")
+            return results
+        else:
+            # calls sentry script to verifies data
+            sentry.check_air(results)
+            sentry.check_diagnostic(results)
+            logging.debug("GATHERER | AIR | Scan completed")
+            return results
 
-    def gather_air_data(self, air_data: typing.List[AirData]) -> bool:
+    def save(self, air_data: typing.Set[AirData]) -> bool:
         """Saves retrieved data from each air devices to database.
         Returns True, if saving process succeed, otherwise False."""
         try:
+            logging.debug("GATHERER | AIR | Data saving")
             # connects to influx database
             with InfluxDB() as influx_database:
                 # iterates over datasets
@@ -141,34 +180,10 @@ class Air(Gatherer):
             logging.error(f"GATHERER | AIR\n{traceback.format_exc()}")
             return False
         else:
+            logging.debug("GATHERER | AIR | Data saved")
             return True
 
-    def __air_scan(self) -> typing.List[AirData]:
-        """Gathers air data from each device tagged as "air" in local network."""
-        try:
-            # list that stores air data from each device
-            results = []
-            # iterates over air devices data
-            for device_data in PostgreSQL().get_device_by_type(device_type="air"):
-                # name of device
-                device_name = device_data.name.lower()
-                # calls specific method depending on device type
-                if "purifier" in device_name:
-                    results.append(self.__air_scan_purifier(device_data))
-                elif "monitor" in device_name:
-                    results.append(self.__air_scan_monitor(device_data))
-                else:
-                    logging.error(f"Device '{device_name}' is not supported!")
-        except Exception:
-            logging.error(f"GATHERER | AIR\n{traceback.format_exc()}")
-            return []
-        else:
-            # calls sentry script to verifies data
-            sentry.check_air(results)
-            sentry.check_diagnostic(results)
-            return results
-
-    def __air_scan_purifier(self, device_data: DeviceData) -> MiAirPurifier3HData:
+    def __scan_purifier(self, device_data: DeviceData) -> MiAirPurifier3HData:
         """Gathers data from Xiaomi Purifier device."""
         try:
             # fetches data from device
@@ -181,7 +196,7 @@ class Air(Gatherer):
         else:
             return data
 
-    def __air_scan_monitor(self, device_data: DeviceData) -> MiMonitor2Data:
+    def __scan_monitor(self, device_data: DeviceData) -> MiMonitor2Data:
         """Gathers data from Xiaomi Monitor 2 device."""
         try:
             # fetches data from device

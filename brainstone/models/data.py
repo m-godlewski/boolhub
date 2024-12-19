@@ -19,8 +19,14 @@ class DeviceData:
     category: str
     brand: str
     mac_address: str
-    ip_address: str
-    token: str
+    ip_address: str = ""
+    token: str = ""
+
+    def __hash__(self):
+        return hash(self.mac_address)
+
+    def __eq__(self, other):
+        return self.mac_address == other.mac_address
 
 
 @dataclass
@@ -31,6 +37,12 @@ class UnknownDeviceData:
     # fields
     mac_address: str
     last_time: str
+
+    def __hash__(self):
+        return hash(self.device.mac_address)
+
+    def __eq__(self, other):
+        return self.device.mac_address == other.device.mac_address
 
 
 # endregion
@@ -60,6 +72,12 @@ class AirData(Data):
     AIR_DATA_FIELDS = {"aqi", "humidity", "temperature"}
     HEALTH_DATA_FIELDS = {}
 
+    def __hash__(self):
+        return hash(self.device.mac_address)
+
+    def __eq__(self, other):
+        return self.device.mac_address == other.device.mac_address
+
     def __post_init__(self) -> None:
         """Post initialization rounding numerical values."""
         self.temperature = (
@@ -79,7 +97,7 @@ class AirData(Data):
         )
 
 
-@dataclass
+@dataclass(eq=False)
 class MiAirPurifier3HData(AirData):
     """Dataclass of Xiaomi Air Purifier 3H device."""
 
@@ -94,7 +112,7 @@ class MiAirPurifier3HData(AirData):
         return self.filter_life_remaining
 
 
-@dataclass
+@dataclass(eq=False)
 class MiMonitor2Data(AirData):
     """Dataclass of Xiaomi Monitor 2 device."""
 

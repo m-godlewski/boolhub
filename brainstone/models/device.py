@@ -4,7 +4,8 @@ This script contains dedicated classes for communication with IoT devices connec
 
 import logging
 import traceback
-from abc import ABC
+import typing
+from abc import ABC, abstractmethod
 from dataclasses import fields
 
 import bluepy
@@ -25,6 +26,25 @@ class Device(ABC):
     def __init__(self, device_data: DeviceData) -> None:
         # device metadata
         self.metadata = device_data
+        # fetching raw data from device
+        self.raw_data = self.fetch()
+        # processing raw data
+        self.processed_data = self.process_data()
+
+    @property
+    def data(self) -> DeviceData:
+        """Returns processed data."""
+        return self.processed_data
+
+    @abstractmethod
+    def fetch(self) -> typing.Any:
+        """Should implements the logic of fetching data from device."""
+        pass
+
+    @abstractmethod
+    def process_data(self) -> DeviceData:
+        """Should implements the logic of processing raw data from the device into structured one."""
+        pass
 
 
 class MiAirPurifier3H(Device):
@@ -32,23 +52,12 @@ class MiAirPurifier3H(Device):
     https://mi-home.pl/products/mi-air-purifier-3h
     """
 
-    def __init__(self, device_data: DeviceData) -> None:
-        # calls super class constructor
-        super().__init__(device_data)
-        # fetches data object from device
-        device_status = self.__fetch_data()
-        # processes data retrieved from device to dataclass object
-        self.__processed_data = self.__process_data(device_status)
-
-    @property
-    def data(self) -> dict:
-        """Returns device air data."""
-        return self.__processed_data
-
-    def __fetch_data(self) -> miio.DeviceStatus:
+    def fetch(self) -> miio.DeviceStatus:
         """Connects to device and fetches data."""
         try:
-            logging.debug(f"Connecting to {self.metadata.ip_address}")
+            logging.debug(
+                f"DEVICE | MiAirPurifier3H | Connecting to {self.metadata.ip_address}"
+            )
             # fetches data from device using miio library
             device = miio.AirPurifierMiot(
                 ip=self.metadata.ip_address,
@@ -65,8 +74,25 @@ class MiAirPurifier3H(Device):
             )
             return miio.DeviceStatus()
         else:
-            logging.debug(f"Connected to {self.metadata.ip_address}")
+            logging.debug(
+                f"DEVICE | MiAirPurifier3H | Connected to {self.metadata.ip_address}"
+            )
             return data
+
+    def process_data(self) -> MiAirPurifier3HData:
+        """Processes data from device and returns it as instance of dataclass."""
+        try:
+            # parses dataset
+            parsed_data = self.__parse(self.raw_data)
+            # create dataclass instance
+            processed_data = MiAirPurifier3HData(self.metadata, **parsed_data)
+        except Exception:
+            logging.error(
+                f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
+            )
+            return MiAirPurifier3HData(self.metadata)
+        else:
+            return processed_data
 
     def __parse(self, data) -> dict:
         """Parses data received from device into dictionary."""
@@ -86,41 +112,18 @@ class MiAirPurifier3H(Device):
         else:
             return parsed_data
 
-    def __process_data(self, raw_data: str) -> MiAirPurifier3HData:
-        """Processes data from device and returns it as instance of dataclass."""
-        try:
-            # parses dataset
-            parsed_data = self.__parse(raw_data)
-            # create dataclass instance
-            processed_data = MiAirPurifier3HData(self.metadata, **parsed_data)
-        except Exception:
-            logging.error(
-                f"DEVICE | MiAirPurifier3H | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
-            )
-            return MiAirPurifier3HData(self.metadata)
-        else:
-            return processed_data
-
 
 class MiMonitor2(Device):
     """Class used for communication with Xiaomi Mi Monitor 2.
     https://mi-home.pl/products/mi-temperature-humidity-monitor-2
     """
 
-    def __init__(self, device_data: DeviceData) -> None:
-        # calls super class constructor
-        super().__init__(device_data)
-        raw_data = self.__fetch_data()
-        self.__processed_data = self.__process_data(raw_data)
-
-    @property
-    def data(self) -> MiMonitor2Data:
-        """Returns processed data."""
-        return self.__processed_data
-
-    def __fetch_data(self) -> dict:
+    def fetch(self) -> dict:
         """Connects to device and fetches data."""
         try:
+            logging.debug(
+                f"DEVICE | MiMonitor2 | Connecting to {self.metadata.ip_address}"
+            )
             # fetches data from device using external library
             client = Lywsd03mmcClient(self.metadata.mac_address)
             # converts data to dictionary
@@ -134,13 +137,15 @@ class MiMonitor2(Device):
             )
             return {}
         else:
-            logging.debug(f"Connected to {self.metadata.mac_address}")
+            logging.debug(
+                f"DEVICE | MiMonitor2 | Connected to {self.metadata.ip_address}"
+            )
             return data
 
-    def __process_data(self, raw_data: dict) -> MiMonitor2Data:
+    def process_data(self) -> MiMonitor2Data:
         """Processes raw data and returns it as instance of dataclass."""
         try:
-            processed_data = MiMonitor2Data(self.metadata, **raw_data)
+            processed_data = MiMonitor2Data(self.metadata, **self.raw_data)
         except Exception:
             logging.error(
                 f"DEVICE | MiMonitor2 | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"

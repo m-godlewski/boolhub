@@ -28,13 +28,13 @@ def send_notification(text: str, title: str, priority: int = 3) -> int:
             )
             response.raise_for_status()
     except requests.exceptions.HTTPError as e:
-        logging.error(f"MESSENGER | HTTP ERROR:\n{e}")
+        logging.error(f"MESSENGER | HTTP ERROR: {e}")
     except requests.exceptions.ConnectionError as e:
-        logging.error(f"MESSENGER | HTTP CONNECTION ERROR:\n{e}")
+        logging.error(f"MESSENGER | HTTP CONNECTION ERROR: {e}")
     except requests.exceptions.Timeout as e:
-        logging.error(f"MESSENGER | HTTP TIMEOUT ERROR:\n{e}")
+        logging.error(f"MESSENGER | HTTP TIMEOUT ERROR: {e}")
     except requests.exceptions.RequestException as e:
-        logging.error(f"MESSENGER | HTTP UNKNOWN ERROR\n:{e}")
+        logging.error(f"MESSENGER | HTTP UNKNOWN ERROR: {e}")
     except:
         logging.error(f"MESSENGER | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}")
     else:

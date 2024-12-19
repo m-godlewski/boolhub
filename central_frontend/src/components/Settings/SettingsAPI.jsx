@@ -49,14 +49,6 @@ export default function SettingsAPI() {
     }));
   };
 
-  // method that handle modifying of switch fields
-  const handleClick = (e) => {
-    const { name, checked } = e.target;
-    setSettings((prevState) => ({
-      ...prevState,
-      [name]: checked,
-    }));
-  };
   // renders settings form
   return (
     <Box

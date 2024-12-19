@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.20.1
+- Minor improvements in brainstone module code.
+
+## 0.20.0
+- UI has been reimplemented to React.
+- Grafana, Redis and constance has been removed from project
+- System settings are now stored in PostgreSQL database.
+- Removed fetching and saving weather data into database.
+- Improvement of install script.
+
 ## 0.14.1
 
 - Major bugfixes in installation script.
