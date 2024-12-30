@@ -266,27 +266,3 @@ class InfluxDB:
             return False
         else:
             return True
-
-    def add_point_forecast(self, forecast_data) -> bool:
-        """Writes single forecast data entity to database.
-        Returns True, if operation succeed. Otherwise returns False.
-        """
-        try:
-            point = (
-                Point("forecast")
-                .field("temperature", forecast_data.temperature)
-                .field("humidity", forecast_data.humidity)
-                .time(forecast_data.date)
-            )
-            self.api.write(
-                bucket="forecast",
-                org=config.DATABASE["INFLUX"]["ORGANIZATION"],
-                record=point,
-            )
-        except Exception:
-            logging.error(
-                f"DATABASE | INFLUXDB | UNKNOWN ERROR OCURRED\n{traceback.format_exc()}"
-            )
-            return False
-        else:
-            return True

@@ -1,5 +1,8 @@
+// react
 import { useEffect, useState } from "react";
-import { getSettings, putSettings } from "./Service";
+// service
+import SettingsService from "./Service.jsx";
+// material ui
 import { Switch, TextField, FormHelperText, FormControl } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -20,7 +23,7 @@ export default function SettingsNotifications() {
   // fetching current settings from backend API
   useEffect(() => {
     let mounted = true;
-    getSettings().then((data) => {
+    SettingsService.get().then((data) => {
       if (mounted) {
         setSettings(data);
       }
@@ -31,7 +34,7 @@ export default function SettingsNotifications() {
   // method that handle form submitting
   const handleSubmit = (e) => {
     e.preventDefault();
-    putSettings(e.target.getElementsByTagName("input")).then(
+    SettingsService.update(e.target.getElementsByTagName("input")).then(
       (result) => {
         alert(result);
       },

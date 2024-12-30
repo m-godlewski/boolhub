@@ -1,3 +1,4 @@
+// material ui
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import { AppProvider } from "@toolpad/core/AppProvider";
@@ -14,7 +15,7 @@ import ApiIcon from "@mui/icons-material/Api";
 import SettingsSystemDaydreamIcon from "@mui/icons-material/SettingsSystemDaydream";
 // components
 import Dashboard from "./Dashboard.jsx";
-import Air from "./Air.jsx";
+import Air from "./Air/Air.jsx";
 import Monitoring from "./Monitoring.jsx";
 import SettingsNotifications from "./Settings/SettingsNotifications.jsx";
 import SettingsDevices from "./Settings/SettingsDevices.jsx";
