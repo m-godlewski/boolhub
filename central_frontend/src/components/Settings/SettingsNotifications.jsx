@@ -14,7 +14,6 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 // icons
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import SaveAltOutlinedIcon from "@mui/icons-material/SaveAltOutlined";
 
 export default function SettingsNotifications() {
   // current settings state
@@ -64,12 +63,7 @@ export default function SettingsNotifications() {
 
   // renders settings form
   return (
-    <Box
-      sx={{
-        padding: "2em",
-        "& > :not(style)": { m: 1 },
-      }}
-    >
+    <Box sx={{ padding: "2em" }}>
       <form onSubmit={handleSubmit}>
         <Fab
           variant="extended"
@@ -78,21 +72,24 @@ export default function SettingsNotifications() {
           sx={{ bottom: "3em", right: "3em", position: "fixed" }}
         >
           Zapisz
-          <SaveAltOutlinedIcon sx={{ m: 1 }} />
         </Fab>
         {/* air */}
         <Accordion>
-          <AccordionSummary
-            expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
-            aria-controls="panel1-content"
-            id="panel1-header"
-          >
-            <Typography sx={{ fontWeight: "bold" }}>Powietrze</Typography>
+          <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
+            <Typography gutterBottom sx={{ fontWeight: "bold" }}>
+              Powietrze
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Stack orientation="column" spacing={3}>
+            <Stack orientation="column" spacing={5}>
               {/* air - temperature */}
-              <Stack direction="row" spacing={2}>
+              <Stack
+                direction="row"
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <FormControl>
                   <FormHelperText>Temperatura minimalna</FormHelperText>
                   <TextField
@@ -114,7 +111,7 @@ export default function SettingsNotifications() {
                   />
                 </FormControl>
                 <FormControl>
-                  <FormHelperText>Powiadomienia o temperaturze</FormHelperText>
+                  <FormHelperText>Powiadomienia</FormHelperText>
                   <Switch
                     name="notify_temperature"
                     value={settings.notify_temperature ? true : false}
@@ -127,7 +124,13 @@ export default function SettingsNotifications() {
               <Divider />
 
               {/* air - humidity */}
-              <Stack direction="row" spacing={2}>
+              <Stack
+                direction="row"
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <FormControl>
                   <FormHelperText>Wilgotność minimalna</FormHelperText>
                   <TextField
@@ -149,7 +152,7 @@ export default function SettingsNotifications() {
                   />
                 </FormControl>
                 <FormControl>
-                  <FormHelperText>Powiadomienia o wilgotności</FormHelperText>
+                  <FormHelperText>Powiadomienia</FormHelperText>
                   <Switch
                     name="notify_humidity"
                     value={settings.notify_humidity ? true : false}
@@ -162,7 +165,14 @@ export default function SettingsNotifications() {
               <Divider />
 
               {/* air - aqi */}
-              <Stack direction="row" spacing={2}>
+              <Stack
+                direction="row"
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingBottom: "1.5em",
+                }}
+              >
                 <FormControl>
                   <FormHelperText>
                     Maksymalna wartość zanieczyszczenia
@@ -176,9 +186,7 @@ export default function SettingsNotifications() {
                   />
                 </FormControl>
                 <FormControl>
-                  <FormHelperText>
-                    Powiadomienia o zanieczyszczeniu
-                  </FormHelperText>
+                  <FormHelperText>Powiadomienia</FormHelperText>
                   <Switch
                     name="notify_aqi"
                     value={settings.notify_aqi ? true : false}
@@ -192,17 +200,24 @@ export default function SettingsNotifications() {
         </Accordion>
         {/* diagnostic */}
         <Accordion>
-          <AccordionSummary
-            expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
-            aria-controls="panel1-content"
-            id="panel1-header"
-          >
-            <Typography sx={{ fontWeight: "bold" }}>Diagnostyka</Typography>
+          <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
+            <Typography gutterBottom sx={{ fontWeight: "bold" }}>
+              Diagnostyka
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Stack direction="row" spacing={2}>
+            <Stack
+              direction="row"
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingBottom: "1.5em",
+              }}
+            >
               <FormControl>
-                <FormHelperText>Minimalny poziom baterii</FormHelperText>
+                <FormHelperText>
+                  Minimalny poziom baterii lub filtra
+                </FormHelperText>
                 <TextField
                   type="number"
                   name="health_threshold"
@@ -212,7 +227,7 @@ export default function SettingsNotifications() {
                 />
               </FormControl>
               <FormControl>
-                <FormHelperText>Powiadomienia diagnostyczne</FormHelperText>
+                <FormHelperText>Powiadomienia</FormHelperText>
                 <Switch
                   name="notify_health"
                   value={settings.notify_health ? true : false}
@@ -225,15 +240,20 @@ export default function SettingsNotifications() {
         </Accordion>
         {/* network */}
         <Accordion>
-          <AccordionSummary
-            expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
-            aria-controls="panel1-content"
-            id="panel1-header"
-          >
-            <Typography sx={{ fontWeight: "bold" }}>Sieć</Typography>
+          <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
+            <Typography gutterBottom sx={{ fontWeight: "bold" }}>
+              Sieć
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Stack direction="row" spacing={2}>
+            <Stack
+              direction="row"
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingBottom: "1.5em",
+              }}
+            >
               <FormControl>
                 <FormHelperText>Próg obciążenia sieci</FormHelperText>
                 <TextField

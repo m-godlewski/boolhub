@@ -38,11 +38,11 @@ def rooms_air(request) -> Response:
             # initializes dictionary that should store air data of current iteration room
             air_data = {"aqi": None, "temperature": None, "humidity": None}
             # queries influxdb for most recent air data from current iteration room
-            # query asks for data from last 15 minutes in case air device has problem with fetching air data
+            # query asks for data from last 1 hour in case air device has problem with fetching air data
             air_query_result = influx_query_api.query_stream(
                 query=f"""
                 from(bucket: "air")
-                |> range(start: -15m)
+                |> range(start: -1h)
                 |> filter(fn: (r) => r["_measurement"] == "air")
                 |> filter(fn: (r) => r["_field"] == "aqi" or r["_field"] == "humidity" or r["_field"] == "temperature")
                 |> filter(fn: (r) => r["room"] == "{room.get("name")}")

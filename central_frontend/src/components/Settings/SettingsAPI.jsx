@@ -13,7 +13,6 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 // icons
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import SaveAltOutlinedIcon from "@mui/icons-material/SaveAltOutlined";
 
 export default function SettingsAPI() {
   // current settings state
@@ -33,7 +32,7 @@ export default function SettingsAPI() {
   // method that handle form submitting
   const handleSubmit = (e) => {
     e.preventDefault();
-    SeSettingsServicervice.update(e.target.getElementsByTagName("input")).then(
+    SettingsService.update(e.target.getElementsByTagName("input")).then(
       (result) => {
         alert(result);
       },
@@ -54,12 +53,7 @@ export default function SettingsAPI() {
 
   // renders settings form
   return (
-    <Box
-      sx={{
-        padding: "2em",
-        "& > :not(style)": { m: 1 },
-      }}
-    >
+    <Box sx={{ padding: "2em" }}>
       <form onSubmit={handleSubmit}>
         <Fab
           variant="extended"
@@ -68,19 +62,24 @@ export default function SettingsAPI() {
           sx={{ bottom: "3em", right: "3em", position: "fixed" }}
         >
           Zapisz
-          <SaveAltOutlinedIcon sx={{ m: 1 }} />
         </Fab>
         {/* Weather API */}
         <Accordion>
-          <AccordionSummary
-            expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
-            aria-controls="panel1-content"
-            id="panel1-header"
-          >
-            <Typography sx={{ fontWeight: "bold" }}>Weather API</Typography>
+          <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
+            <Typography gutterBottom sx={{ fontWeight: "bold" }}>
+              Weather API
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Stack direction="row" spacing={2}>
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingBottom: "1.5em",
+              }}
+            >
               <FormControl>
                 <FormHelperText>API URL</FormHelperText>
                 <TextField
@@ -122,15 +121,20 @@ export default function SettingsAPI() {
         </Accordion>
         {/* NTFY API */}
         <Accordion>
-          <AccordionSummary
-            expandIcon={<KeyboardArrowDownIcon sx={{ color: "white" }} />}
-            aria-controls="panel1-content"
-            id="panel1-header"
-          >
-            <Typography sx={{ fontWeight: "bold" }}>NTFY API</Typography>
+          <AccordionSummary expandIcon={<KeyboardArrowDownIcon />}>
+            <Typography gutterBottom sx={{ fontWeight: "bold" }}>
+              NTFY API
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Stack direction="row" spacing={2}>
+            <Stack
+              direction="row"
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingBottom: "1.5em",
+              }}
+            >
               <FormControl>
                 <FormHelperText>NTFY token</FormHelperText>
                 <TextField

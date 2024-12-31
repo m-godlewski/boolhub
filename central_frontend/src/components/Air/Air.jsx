@@ -26,9 +26,8 @@ export default function Air() {
   return (
     <Grid
       container
-      rowSpacing={1}
-      columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-      sx={{ width: "100%", p: "3%" }}
+      columnSpacing="3em"
+      sx={{ width: "100%", height: "100%", p:"2em"}}
     >
       {rooms.map((roomData) => (
         <Grid size={6}>
