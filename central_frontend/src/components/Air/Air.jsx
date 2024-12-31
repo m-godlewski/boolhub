@@ -5,7 +5,7 @@ import AirService from "./Service.jsx";
 // material ui
 import Grid from "@mui/material/Grid2";
 // components
-import AirRoomCard from "./AirRoomCard.jsx";
+import AirRoom from "./AirRoom.jsx";
 
 export default function Air() {
   // current rooms state
@@ -14,7 +14,7 @@ export default function Air() {
   // fetching rooms data from backend
   useEffect(() => {
     let mounted = true;
-    AirService.getRooms().then((data) => {
+    AirService.getRoomsAir().then((data) => {
       if (mounted) {
         setRooms(data);
       }
@@ -22,6 +22,7 @@ export default function Air() {
     return () => (mounted = false);
   }, []);
 
+  // renders grid of rooms with air data
   return (
     <Grid
       container
@@ -29,9 +30,9 @@ export default function Air() {
       columnSpacing={{ xs: 1, sm: 2, md: 3 }}
       sx={{ width: "100%", p: "3%" }}
     >
-      {rooms.map((room) => (
+      {rooms.map((roomData) => (
         <Grid size={6}>
-          <AirRoomCard roomName={room.name} />
+          <AirRoom roomData={roomData} />
         </Grid>
       ))}
     </Grid>

@@ -98,7 +98,12 @@ DATABASES = {
         "PASSWORD": os.environ.get("POSTGRE_PASSWORD"),
         "HOST": "postgresql",
         "PORT": 5432,
-    }
+    },
+    "influxdb": {
+        "URL": f"http://localhost:8086",
+        "API_TOKEN": os.environ.get("INFLUX_TOKEN"),
+        "ORGANIZATION": "boolhub",
+    },
 }
 
 
