@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.21.0
+- Basic 'air' view implemented.
+
 ## 0.20.1
 - Minor improvements in brainstone module code.
 
