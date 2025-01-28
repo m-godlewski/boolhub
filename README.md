@@ -1,5 +1,7 @@
 # BoolHub [![version](https://img.shields.io/badge/version-0.21.0-blue.svg)](https://semver.org)
 
+# This project won't be further developed. I will keep this repo public, maybe someone will find something from this project usefull.
+
 Intelligent house hub.
 
 ## Technology Stack
